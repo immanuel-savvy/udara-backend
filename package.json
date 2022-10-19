@@ -1,0 +1,28 @@
+{
+  "name": "udara",
+  "version": "1.0.0",
+  "description": "Udara backend",
+  "main": "Udara.js",
+  "scripts": {
+    "build": "babel Udara.js routes.js io_stuff.js -d build",
+    "start": "nodemon -r esm Udara.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Savvy",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.27.2",
+    "body-parser": "^1.20.0",
+    "express": "^4.18.1",
+    "formidable": "^2.0.1",
+    "generalised-datastore": "^1.7.0",
+    "multer": "^1.4.5-lts.1",
+    "paga-collect": "^1.1.6"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.18.10",
+    "@babel/core": "^7.19.1",
+    "babel-preset-env": "^1.7.0",
+    "esm": "^3.2.25"
+  }
+}
