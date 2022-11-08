@@ -242,7 +242,7 @@ const make_payment = async ({ bank, account_number }, amount) => {
         credentials: password,
         hash: sha512(
           referenceNumber +
-            amount +
+            Number(amount).toFixed(2) +
             destinationBankUUID +
             destinationBankAccountNumber +
             hash
@@ -250,7 +250,7 @@ const make_payment = async ({ bank, account_number }, amount) => {
       },
       data: {
         referenceNumber,
-        amount,
+        amount: Number(amount).toFixed(2),
         currency: "NGN",
         destinationBankUUID,
         destinationBankAccountNumber,
@@ -258,6 +258,8 @@ const make_payment = async ({ bank, account_number }, amount) => {
       },
     });
     response = response.data;
+
+    LOGS.write({ response, amount, bank, account_number });
   } catch (e) {
     console.log(e);
   }
