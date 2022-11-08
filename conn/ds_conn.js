@@ -13,6 +13,7 @@ let USERS,
   PAYMENT_ACCOUNTS,
   FIAT_ACCOUNTS,
   DISPUTES,
+  BANK_ACCOUNTS,
   gds;
 
 let ds_conn = () => {
@@ -30,6 +31,7 @@ let ds_conn = () => {
   OFFERS = gds.folder("offers", "onsale", "user");
   DISPUTES = gds.folder("disputes", "offer", "offer");
   PAYMENT_ACCOUNTS = gds.folder("payment_accounts");
+  BANK_ACCOUNTS = gds.folder("bank_account", "user");
   FIAT_ACCOUNTS = gds.folder("fiat_accounts", "user");
   UTILS = gds.folder("utils", "util");
 
@@ -53,4 +55,5 @@ export {
   OFFERS,
   PAYMENT_ACCOUNTS,
   FIAT_ACCOUNTS,
+  BANK_ACCOUNTS,
 };

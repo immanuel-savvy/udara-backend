@@ -5,7 +5,7 @@ const conversion_rates = new Object();
 
 const refresh_conversion_rates = async () => {};
 
-const create_platform_wallet = () => {
+const create_platform_wallet = async () => {
   WALLETS.write({
     _id: platform_wallet,
     naira: 0,
@@ -14,12 +14,15 @@ const create_platform_wallet = () => {
   });
   USERS.write({
     username: "admin",
-    phone: "+2341122334455",
+    firstname: "admin",
+    lastname: "udara",
+    phone: "2348060324082",
     country: "nigeria",
     country_code: "+234",
     _id: platform_user,
     wallet: platform_wallet,
   });
+
   HASHES.write({ user: platform_user, hash: "admin3000" });
 
   refresh_conversion_rates();

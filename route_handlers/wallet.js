@@ -1,4 +1,6 @@
+import axios from "axios";
 import {
+  BANK_ACCOUNTS,
   CHATS,
   DISPUTES,
   FIAT_ACCOUNTS,
@@ -10,12 +12,95 @@ import {
   UTILS,
   WALLETS,
 } from "../conn/ds_conn";
-import { operating_currencies } from "./entry";
+import { api_key, client_id, paga_collection_client, password } from "../Udara";
+import { generate_reference_number, operating_currencies } from "./entry";
+
+import sha512 from "js-sha512";
+import { generate_random_string } from "../utils/functions";
 
 const COMMISSION = 0.995;
 
 const platform_wallet = `wallets~platform_wallet~3000`;
 const platform_user = `users~platform_user~3000`;
+
+let acceptable_payment_method = "BANK_TRANSFER";
+let referenceNumber = `${generate_random_string(14, "alnum")}${Date.now()}`,
+  amount = "10",
+  destinationBankUUID = "3E94C4BC-6F9A-442F-8F1A-8214478D5D86",
+  destinationBankAccountNumber = "0273658996",
+  hash =
+    "8e9e7ae8368c444a875bbeba0f5f84b52aecc1500d624329b9ff572de7c1d86d618241f0b2834fb39a0e5c49906f1557ec464ddbe3c042119615a192f7a1c263";
+
+// axios({
+//   url: "https://beta.mypaga.com/paga-webservices/business-rest/secured/depositToBank",
+//   method: "post",
+//   headers: {
+//     "Content-Type": "application/json",
+//     principal: "7E0F3D99-58D3-4347-88B0-8A99ADC343FE",
+//     credentials: "udaralinks4all",
+//     hash: sha512(
+//       referenceNumber +
+//         amount +
+//         destinationBankUUID +
+//         destinationBankAccountNumber +
+//         hash
+//     ),
+//   },
+//   data: {
+//     referenceNumber,
+//     amount,
+//     currency: "NGN",
+//     destinationBankUUID,
+//     destinationBankAccountNumber,
+//     remarks: "Show this at Bank",
+//   },
+// })
+//   .then((res) => console.log(res.data, res.status))
+//   .catch((err) => console.log(err));
+
+const request_account_details = async (req, res) => {
+  let { user, amount } = req.body;
+
+  user = USERS.readone(user);
+
+  let response = await paga_collection_client.paymentRequest({
+    referenceNumber: generate_reference_number(),
+    amount,
+    callBackUrl: `https://mobile.udaralinksapp.com/paga_deposit/${user._id}`,
+    currency: "NGN",
+    isAllowPartialPayments: false,
+    isSuppressMessages: true,
+    payee: { name: "Admin" },
+    payer: {
+      name: `${user._id}`,
+      phoneNumber: `${user.phone.slice(1)}`,
+    },
+    payerCollectionFeeShare: 1.0,
+    recipientCollectionFeeShare: 0.0,
+    paymentMethods: [acceptable_payment_method],
+  });
+  let account_details;
+
+  if (!response.error) {
+    response = response.response;
+    account_details = response.paymentMethods.find(
+      (method) => method.name === acceptable_payment_method
+    );
+    account_details = {
+      account_number: account_details.properties.AccountNumber,
+      bank: "paga",
+    };
+    res.json({
+      ok: true,
+      message: "account details generated",
+      data: account_details,
+    });
+  } else
+    res.json({
+      ok: false,
+      data: { message: "could not generate account details at this time" },
+    });
+};
 
 const create_transaction = ({
   title,
@@ -83,17 +168,17 @@ const onsale = (req, res) => {
 };
 
 const paga_deposit = async (req, res) => {
-  let { accountNumber, amount, statusCode } = req.body;
+  let { user } = req.params;
+  let { amount, statusCode } = req.body;
 
   if (statusCode === "0" && Number(amount) > 0) {
-    let user = USERS.readone({ account_number: accountNumber });
+    user = USERS.readone(user);
 
-    topup(
-      { body: { value: amount, user: user._id, wallet: user.wallet } },
-      { json: () => {} }
-    );
-
-    // await post_request("wallet_topup", { user, amount });
+    user &&
+      topup(
+        { body: { value: amount, user: user._id, wallet: user.wallet } },
+        { json: () => {} }
+      );
   }
 
   res.end();
@@ -129,23 +214,55 @@ const add_fiat_account = (req, res) => {
   res.json({ ok: true, message: "bank account appended", data: user });
 };
 
+const make_payment = async ({ bank, account_number }, amount) => {
+  let referenceNumber = `${generate_random_string(14, "alnum")}${Date.now()}`,
+    destinationBankUUID = bank,
+    destinationBankAccountNumber = account_number,
+    hash = api_key;
+
+  let response = await axios({
+    url: "https://www.mypaga.com/paga-webservices/business-rest/secured/depositToBank",
+    method: "post",
+    headers: {
+      "Content-Type": "application/json",
+      principal: client_id,
+      credentials: password,
+      hash: sha512(
+        referenceNumber +
+          amount +
+          destinationBankUUID +
+          destinationBankAccountNumber +
+          hash
+      ),
+    },
+    data: {
+      referenceNumber,
+      amount,
+      currency: "NGN",
+      destinationBankUUID,
+      destinationBankAccountNumber,
+      remarks: `Udara wallet withdrawal ${amount}`,
+    },
+  });
+
+  return { response, reference_number: referenceNumber };
+};
+
 const withdraw = async (req, res) => {
-  let { user, value, wallet, fiat_account } = req.body;
-  if (!Number(value))
-    return res.json({ ok: false, message: "invalid transaction value" });
+  let { user, amount, bank_account, wallet } = req.body;
+  if (!Number(amount))
+    return res.json({ ok: false, message: "invalid transaction amount" });
 
-  WALLETS.update(wallet, { naira: { $dec: value } });
-  // let fiat_account_ = FIAT_ACCOUNTS.readone({ _id: fiat_account, user });
+  wallet = WALLETS.readone(wallet);
 
-  // await axios({
-  //   url: "https://beta.mypaga.com/paga-webservices/business-rest/secured/depositToBank",
-  //   method: "POST",
-  //   headers: {
-  //     'Content-Type':'application/json',
-  //     Accept:'application/json',
-  //     Authorization: ''
-  //   },
-  // });
+  let user_obj = USERS.readone(user);
+  if (!user_obj || !wallet) return res.end();
+
+  let { response, reference_number } = await make_payment(bank_account, amount);
+
+  if (response.responseCode) return res.end();
+
+  WALLETS.update(wallet, { naira: { $dec: amount } });
 
   res.json({
     ok: true,
@@ -156,9 +273,10 @@ const withdraw = async (req, res) => {
       transaction: create_transaction({
         wallet,
         user,
-        from_value: value,
+        from_value: amount,
         title: "withdrawal",
         debit: true,
+        reference_number,
       }),
     },
   });
@@ -660,12 +778,74 @@ const refund_buyer = (req, res) => {
   });
 };
 
+const get_banks = async (req, res) => {
+  let banks;
+  try {
+    banks = await paga_collection_client.getBanks({
+      referenceNumber: generate_reference_number(),
+    });
+  } catch (e) {}
+
+  banks && !banks.error
+    ? res.json({
+        ok: true,
+        message: "get banks endpoint",
+        data: banks.response.banks,
+      })
+    : res.json({ ok: false, message: "cannot get banks", data: new Array() });
+};
+
+const bank_accounts = (req, res) => {
+  let { user } = req.params;
+
+  let accounts = BANK_ACCOUNTS.read({ user });
+
+  res.json({ ok: true, message: "user bank accounts", data: accounts });
+};
+
+const add_bank_account = (req, res) => {
+  let { bank, bank_name, user, wallet, account_number } = req.body;
+
+  let result = BANK_ACCOUNTS.write({ bank, bank_name, user, account_number });
+  WALLETS.update(wallet, { bank_accounts: { $inc: 1 } });
+
+  res.json({
+    ok: true,
+    message: "bank account saved",
+    data: { _id: result._id, created: result.created },
+  });
+};
+
+const remove_bank_account = (req, res) => {
+  let { user, account, wallet } = req.body;
+
+  BANK_ACCOUNTS.remove({ user, _id: account });
+  WALLETS.update(wallet, { bank_accounts: { $dec: 1 } });
+
+  res.end();
+};
+
+const refresh_wallet = (req, res) => {
+  let { wallet } = req.params;
+
+  res.json({
+    ok: true,
+    message: "wallet refreshed",
+    data: WALLETS.readone(wallet),
+  });
+};
+
 export {
+  get_banks,
+  bank_accounts,
+  add_bank_account,
+  remove_bank_account,
   transactions,
   place_sale,
   my_sales,
   onsale,
   topup,
+  refresh_wallet,
   withdraw,
   onsale_currency,
   remove_sale,
@@ -694,4 +874,5 @@ export {
   refund_buyer,
   paga_deposit,
   add_fiat_account,
+  request_account_details,
 };

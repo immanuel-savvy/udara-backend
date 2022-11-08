@@ -62,13 +62,13 @@ const load_operating_currencies = () => {
           icon: "onboarding_1.png",
           main_text: "best rates",
           sub_text:
-            "Take advantage of our seamless peer to peer system to get Forex and make International Payments at best rates",
+            "Take advantage of our seamless peer to peer system to get and make International Payments at best rates",
         },
         {
           icon: "onboarding_2.png",
           main_text: "Make International Payments",
           sub_text:
-            "Easy way to find Forex to meet study, tourist and business payments.",
+            "Easy way to find International Payments to meet study, tourist and business payments.",
         },
         {
           icon: "onboarding_3.png",
@@ -78,39 +78,6 @@ const load_operating_currencies = () => {
       )
     );
 
-  if (!list_of_banks) list_of_banks = UTILS.read({ util: "banks" });
-  if (!list_of_banks.length) {
-    let list_of_banks = new Array(
-      { util: "banks", name: "Access Bank", code: "044" },
-      { util: "banks", name: "Citibank", code: "023" },
-      { util: "banks", name: "Diamond Bank", code: "063" },
-      { util: "banks", name: "Dynamic Standard Bank", code: "" },
-      { util: "banks", name: "Ecobank Nigeria", code: "050" },
-      { util: "banks", name: "Fidelity Bank Nigeria", code: "070" },
-      { util: "banks", name: "First Bank of Nigeria", code: "011" },
-      { util: "banks", name: "First City Monument Bank", code: "214" },
-      { util: "banks", name: "Guaranty Trust Bank", code: "058" },
-      { util: "banks", name: "Heritage Bank Plc", code: "030" },
-      { util: "banks", name: "Jaiz Bank", code: "301" },
-      { util: "banks", name: "Keystone Bank Limited", code: "082" },
-      { util: "banks", name: "Providus Bank Plc", code: "101" },
-      { util: "banks", name: "Polaris Bank", code: "076" },
-      {
-        util: "banks",
-        name: "Stanbic IBTC Bank Nigeria Limited",
-        code: "221",
-      },
-      { util: "banks", name: "Standard Chartered Bank", code: "068" },
-      { util: "banks", name: "Sterling Bank", code: "232" },
-      { util: "banks", name: "Suntrust Bank Nigeria Limited", code: "100" },
-      { util: "banks", name: "Union Bank of Nigeria", code: "032" },
-      { util: "banks", name: "United Bank for Africa", code: "033" },
-      { util: "banks", name: "Unity Bank Plc", code: "215" },
-      { util: "banks", name: "Wema Bank", code: "035" },
-      { util: "banks", name: "Zenith Bank", code: "057" }
-    );
-    UTILS.write(list_of_banks);
-  }
   !UTILS.readone({ util: "purposes" }) &&
     UTILS.write_several(
       new Array(
@@ -230,51 +197,44 @@ const update_phone = (req, res) => {
   }
 };
 
-const register_persistent_payment_reference = async (user) => {
-  let user_obj = USERS.readone(user);
+const generate_reference_number = () =>
+  `${generate_random_string(14, "alnum")}${Date.now()}`;
 
-  let data = {
-    referenceNumber: generate_random_string(14),
-    phoneNumber: user_obj.phone,
-    firstName: user.firstname,
-    lastName: user.lastname,
-    accountName: `${user_obj.firstname} ${user.lastname}`,
-    accountReference: generate_random_string(12),
-    callBackUrl: "https://mobile.udaralinksapp.com/paga_deposit",
-  };
+// const register_persistent_payment_reference = async (user) => {
+//   let user_obj = USERS.readone(user);
 
-  let response = await paga_collection_client.registerPersistentPaymentAccount(
-    data
-  );
-  let result = PAYMENT_ACCOUNTS.write({
-    user,
-    account_number: response.accountNumber,
-    reference_number: data.referenceNumber,
-    account_reference: data.accountReference,
-    account_number: response.accountNumber,
-  });
-  USERS.update(user_obj._id, {
-    payment_account: result._id,
-    account_number: response.accountNumber,
-  });
+//   let data = {
+//     referenceNumber: generate_reference_number(),
+//     phoneNumber: user_obj.phone,
+//     firstName: user_obj.firstname,
+//     lastName: user_obj.lastname,
+//     accountName: `${user_obj.firstname} ${user_obj.lastname}`,
+//     accountReference: `${generate_random_string(12)}${generate_random_string(
+//       6
+//     )}`,
+//     callBackUrl: `https://mobile.udaralinksapp.com/paga_deposit/${user}`,
+//   };
 
-  console.log(response);
-};
+//   let { response, error } =
+//     await paga_collection_client.registerPersistentPaymentAccount(data);
+//   let result = PAYMENT_ACCOUNTS.write({
+//     user,
+//     reference_number: data.referenceNumber,
+//     account_reference: data.accountReference,
+//     account_number: response.accountNumber,
+//   });
+//   USERS.update(user_obj._id, {
+//     payment_account: result._id,
+//     account_number: response.accountNumber,
+//   });
+
+//   return response;
+// };
 
 const update_password = async (req, res) => {
   let { user, key, new_user } = req.body;
   if (!user || !key)
     return res.json({ ok: false, message: "invalid credentials", data: user });
-
-  if (new_user) {
-    let response = await register_persistent_payment_reference(user);
-    if (response.statusMessage !== "success")
-      return res.json({
-        ok: false,
-        message: "cannot create persistent payment request",
-        data: user,
-      });
-  }
 
   HASHES.update_several({ user }, { hash: key });
   let result = HASHES.write({ user, hash: key });
@@ -314,4 +274,5 @@ export {
   logging_in,
   load_operating_currencies,
   operating_currencies,
+  generate_reference_number,
 };

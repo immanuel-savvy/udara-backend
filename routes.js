@@ -60,6 +60,12 @@ import {
   refund_buyer,
   paga_deposit,
   add_fiat_account,
+  request_account_details,
+  add_bank_account,
+  remove_bank_account,
+  bank_accounts,
+  get_banks,
+  refresh_wallet,
 } from "./route_handlers/wallet";
 
 const routes = (app) => {
@@ -70,12 +76,17 @@ const routes = (app) => {
   app.get("/country_codes", country_codes);
   app.get("/currencies", currencies);
   app.get("/purposes", purposes);
+  app.get("/refresh_wallet", refresh_wallet);
   app.get("/dispute/:offer", dispute);
+  app.get("/bank_accounts/:user", bank_accounts);
   app.get("/onsale_offers/:onsale/:status", onsale_offers);
   app.get("/conversion_rates", get_conversion_rates);
+  app.get("/get_banks", get_banks);
   app.get("/get_code_by_country/:country", get_code_by_country);
 
   /* POST */
+  app.post("/add_bank_account", add_bank_account);
+  app.post("/remove_bank_account", remove_bank_account);
   app.post("/request_otp", request_otp);
   app.post("/verify_otp", verify_otp);
   app.post("/update_phone", update_phone);
@@ -117,7 +128,8 @@ const routes = (app) => {
   app.post("/new_message", new_message);
 
   // Paga Web hook
-  app.post("/paga_deposit", paga_deposit);
+  app.post("/paga_deposit/:user", paga_deposit);
+  app.post("/request_account_details", request_account_details);
 
   // Socket webpoints
   app.post("/on_chat", on_chat);

@@ -4,7 +4,7 @@
   "description": "Udara backend",
   "main": "Udara.js",
   "scripts": {
-    "build": "babel Udara.js routes.js io_stuff.js -d build",
+    "build": "babel Udara.js -d build",
     "start": "nodemon -r esm Udara.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -16,8 +16,11 @@
     "express": "^4.18.1",
     "formidable": "^2.0.1",
     "generalised-datastore": "^1.7.0",
+    "js-sha512": "^0.8.0",
     "multer": "^1.4.5-lts.1",
-    "paga-collect": "^1.1.6"
+    "paga-collect": "^1.1.6",
+    "paga-connect": "^1.0.4",
+    "sha512": "^0.0.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.18.10",
