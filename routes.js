@@ -76,7 +76,7 @@ const routes = (app) => {
   app.get("/country_codes", country_codes);
   app.get("/currencies", currencies);
   app.get("/purposes", purposes);
-  app.get("/refresh_wallet", refresh_wallet);
+  app.get("/refresh_wallet/:wallet", refresh_wallet);
   app.get("/dispute/:offer", dispute);
   app.get("/bank_accounts/:user", bank_accounts);
   app.get("/onsale_offers/:onsale/:status", onsale_offers);

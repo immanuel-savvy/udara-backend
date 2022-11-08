@@ -231,32 +231,36 @@ const make_payment = async ({ bank, account_number }, amount) => {
     destinationBankAccountNumber = account_number,
     hash = api_key;
 
-  let response = await axios({
-    url: "https://www.mypaga.com/paga-webservices/business-rest/secured/depositToBank",
-    method: "post",
-    headers: {
-      "Content-Type": "application/json",
-      principal: client_id,
-      credentials: password,
-      hash: sha512(
-        referenceNumber +
-          amount +
-          destinationBankUUID +
-          destinationBankAccountNumber +
-          hash
-      ),
-    },
-    data: {
-      referenceNumber,
-      amount,
-      currency: "NGN",
-      destinationBankUUID,
-      destinationBankAccountNumber,
-      remarks: `Udara wallet withdrawal ${amount}`,
-    },
-  });
-
-  LOGS.write({ data: response, bank, account_number });
+  let response;
+  try {
+    response = await axios({
+      url: "https://beta.mypaga.com/paga-webservices/business-rest/secured/depositToBank",
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+        principal: client_id,
+        credentials: password,
+        hash: sha512(
+          referenceNumber +
+            amount +
+            destinationBankUUID +
+            destinationBankAccountNumber +
+            hash
+        ),
+      },
+      data: {
+        referenceNumber,
+        amount,
+        currency: "NGN",
+        destinationBankUUID,
+        destinationBankAccountNumber,
+        remarks: `Udara wallet withdrawal ${amount}`,
+      },
+    });
+    response = response.data;
+  } catch (e) {
+    console.log(e);
+  }
 
   return { response, reference_number: referenceNumber };
 };
@@ -273,9 +277,14 @@ const withdraw = async (req, res) => {
 
   let { response, reference_number } = await make_payment(bank_account, amount);
 
-  if (response.responseCode) return res.end();
+  if ((response && response.responseCode) || !response)
+    return res.json({
+      ok: false,
+      message: "withdrawal failed",
+      data: { ok: false },
+    });
 
-  WALLETS.update(wallet, { naira: { $dec: amount } });
+  WALLETS.update(wallet, { naira: { $dec: Number(amount) } });
 
   res.json({
     ok: true,
@@ -286,7 +295,7 @@ const withdraw = async (req, res) => {
       transaction: create_transaction({
         wallet,
         user,
-        from_value: amount,
+        from_value: Number(amount),
         title: "withdrawal",
         debit: true,
         reference_number,
