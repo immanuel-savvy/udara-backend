@@ -10,8 +10,11 @@ import { load_operating_currencies } from "./route_handlers/entry";
 import PagaCollectClient from "paga-collect";
 
 let api_key =
+    "8e9e7ae8368c444a875bbeba0f5f84b52aecc1500d624329b9ff572de7c1d86d618241f0b2834fb39a0e5c49906f1557ec464ddbe3c042119615a192f7a1c263" ||
     "966b452619b24f108ac18b70cc1d84dbe9742dd5863d42fdb3473dea299b1b97ee1d3979ee154895af8d32e376c1cb6de50d3d7dd36f44328e626c15ef6ae4b4",
-  client_id = "D2444376-15A8-4160-A4D6-F36C4792E12A",
+  client_id =
+    "7E0F3D99-58D3-4347-88B0-8A99ADC343FE" ||
+    "D2444376-15A8-4160-A4D6-F36C4792E12A",
   password = "udaralinks4all";
 
 const app = express();
@@ -20,6 +23,7 @@ const paga_collection_client = new PagaCollectClient()
   .setClientId(client_id)
   .setPassword(password)
   .setApiKey(api_key)
+  .setTest(true)
   .build();
 
 app.use(express.static(__dirname + "/Assets"));

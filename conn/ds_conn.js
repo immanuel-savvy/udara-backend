@@ -13,6 +13,7 @@ let USERS,
   PAYMENT_ACCOUNTS,
   FIAT_ACCOUNTS,
   DISPUTES,
+  LOGS,
   BANK_ACCOUNTS,
   gds;
 
@@ -24,6 +25,7 @@ let ds_conn = () => {
   WALLETS = gds.folder("wallets");
   TRANSACTIONS = gds.folder("transactions", "wallet");
   CHATS = gds.folder("chats", "offer");
+  LOGS = gds.folder("logs");
   MESSAGES = gds.folder("messages", "chat", "attachment");
   HASHES = gds.folder("hashes", "user");
   ONBOARDINGS = gds.folder("onboardings");
@@ -52,6 +54,7 @@ export {
   ONSALE,
   UTILS,
   DISPUTES,
+  LOGS,
   OFFERS,
   PAYMENT_ACCOUNTS,
   FIAT_ACCOUNTS,

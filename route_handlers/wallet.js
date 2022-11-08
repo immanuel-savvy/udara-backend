@@ -4,6 +4,7 @@ import {
   CHATS,
   DISPUTES,
   FIAT_ACCOUNTS,
+  LOGS,
   MESSAGES,
   OFFERS,
   ONSALE,
@@ -62,23 +63,29 @@ const request_account_details = async (req, res) => {
   let { user, amount } = req.body;
 
   user = USERS.readone(user);
+  let { phone, _id } = user;
+  if (phone.startsWith("+234")) {
+    phone = phone.slice(4);
+    if (phone[0] !== "0") phone = `0${phone}`;
+  }
 
   let response = await paga_collection_client.paymentRequest({
     referenceNumber: generate_reference_number(),
     amount,
-    callBackUrl: `https://mobile.udaralinksapp.com/paga_deposit/${user._id}`,
+    callBackUrl: `https://mobile.udaralinksapp.com/paga_deposit/${_id}`,
     currency: "NGN",
     isAllowPartialPayments: false,
     isSuppressMessages: true,
     payee: { name: "Admin" },
     payer: {
-      name: `${user._id}`,
-      phoneNumber: `${user.phone.slice(1)}`,
+      name: `${_id}`,
+      phoneNumber: phone,
     },
     payerCollectionFeeShare: 1.0,
     recipientCollectionFeeShare: 0.0,
     paymentMethods: [acceptable_payment_method],
   });
+
   let account_details;
 
   if (!response.error) {
@@ -164,14 +171,18 @@ const onsale = (req, res) => {
     purposes,
     minimum_sell_value: { $lte: value },
   });
+
   res.json({ ok: true, data: onsale });
 };
 
 const paga_deposit = async (req, res) => {
   let { user } = req.params;
-  let { amount, statusCode } = req.body;
+  let { paymentAmount, collectionFee, event, statusCode } = req.body;
 
-  if (statusCode === "0" && Number(amount) > 0) {
+  LOGS.write({ data: req.body, user, route: "paga deposit" });
+
+  if (statusCode === "0" && event === "PAYMENT_COMPLETE") {
+    let amount = paymentAmount - collectionFee;
     user = USERS.readone(user);
 
     user &&
@@ -244,6 +255,8 @@ const make_payment = async ({ bank, account_number }, amount) => {
       remarks: `Udara wallet withdrawal ${amount}`,
     },
   });
+
+  LOGS.write({ data: response, bank, account_number });
 
   return { response, reference_number: referenceNumber };
 };
