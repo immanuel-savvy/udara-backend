@@ -66,6 +66,7 @@ import {
   bank_accounts,
   get_banks,
   refresh_wallet,
+  buyer_offers,
 } from "./route_handlers/wallet";
 
 const routes = (app) => {
@@ -89,6 +90,7 @@ const routes = (app) => {
   app.post("/remove_bank_account", remove_bank_account);
   app.post("/request_otp", request_otp);
   app.post("/verify_otp", verify_otp);
+  app.post("/buyer_offers", buyer_offers);
   app.post("/update_phone", update_phone);
   app.post("/update_password", update_password);
   app.post("/logging_in", logging_in);

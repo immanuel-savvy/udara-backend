@@ -1,4 +1,6 @@
 import { CHATS, MESSAGES, OFFERS } from "../conn/ds_conn";
+import fs from "fs";
+import { generate_reference_number } from "./entry";
 
 const new_chat = (req, res) => {
   let { offer, from, to } = req.body;
@@ -17,8 +19,19 @@ const new_chat = (req, res) => {
 const new_message = (req, res) => {
   let { message } = req.body;
 
+  if (message.attachment) {
+    let filename = `${generate_reference_number()}.jpg`;
+    fs.writeFileSync(
+      `${__dirname
+        .split("/")
+        .slice(0, -1)
+        .join("/")}/Assets/Images/${filename}`,
+      Buffer.from(message.attachment[0]),
+      "base64"
+    );
+    message.attachment[0] = filename;
+  }
   let result = MESSAGES.write(message, { subfolder: message.chat });
-  console.log(result);
   message._id = result._id;
   message.created = result.created;
   message.updated = result.updated;

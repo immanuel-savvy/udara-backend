@@ -6,6 +6,7 @@ import {
   FIAT_ACCOUNTS,
   LOGS,
   MESSAGES,
+  MY_OFFERS,
   OFFERS,
   ONSALE,
   TRANSACTIONS,
@@ -258,8 +259,6 @@ const make_payment = async ({ bank, account_number }, amount) => {
       },
     });
     response = response.data;
-
-    LOGS.write({ response, amount, bank, account_number });
   } catch (e) {
     console.log(e);
   }
@@ -381,11 +380,7 @@ const remove_sale = (req, res) => {
   onsale = ONSALE.readone({ _id: onsale, currency });
   if (!onsale) return res.json({ ok: false, message: "data not found" });
 
-  let response = ONSALE.remove(
-    onsale._id,
-    // { _id: onsale._id, currency },
-    { subfolder: currency }
-  );
+  let response = ONSALE.remove(onsale._id, { subfolder: currency });
   if (!response) return res.json({ ok: false, message: "data not found" });
 
   res.json({
@@ -426,9 +421,37 @@ const make_offer = (req, res) => {
   offer.created = result.created;
   offer.updated = result.updated;
 
+  MY_OFFERS.write({ user, currency, offer: offer._id, onsale });
+
   ONSALE.update({ _id: onsale, currency }, { pending: { $inc: 1 } });
 
   res.json({ ok: true, message: "offer placed", data: offer });
+};
+
+const buyer_offers = (req, res) => {
+  let { buyer, skip, limit } = req.body;
+
+  let offers = MY_OFFERS.read({ user: buyer }, { skip, limit });
+
+  let offers_id = new Array(),
+    onsale_ids = new Array(),
+    currencies = new Array();
+
+  offers.map((offer) => {
+    offers_id.push(offer.offer);
+    onsale_ids.push(offer.onsale);
+    currencies.push(offer.currency || "dollar");
+  });
+
+  offers_id = OFFERS.read(offers_id, { subfolder: onsale_ids });
+  onsale_ids = ONSALE.read(onsale_ids, { subfolder: currencies });
+
+  offers.map((offer) => {
+    offer.offer = offers_id.find((off) => off._id === offer.offer);
+    offer.onsale = onsale_ids.find((ons) => ons._id === offer.onsale);
+  });
+
+  res.json({ ok: true, message: "buyer offers", data: offers });
 };
 
 const offer = (req, res) => {
@@ -896,6 +919,7 @@ export {
   dispute,
   disputes,
   refund_buyer,
+  buyer_offers,
   paga_deposit,
   add_fiat_account,
   request_account_details,

@@ -2,7 +2,7 @@ import "core-js/stable";
 import "regenerator-runtime/runtime";
 
 import express from "express";
-import ds_conn from "./conn/ds_conn";
+import ds_conn, { MY_OFFERS } from "./conn/ds_conn";
 import routes from "./routes";
 import bodyParser from "body-parser";
 import { create_platform_wallet } from "./route_handlers/starter";
