@@ -12,15 +12,15 @@ const on_message_write = (req, res) => {
   let { message } = req.body;
 
   try {
-    if (message.attachment) {
+    if (message.attachment && message.attachment.length) {
       let filename = `${generate_reference_number()}.jpg`;
+
       fs.writeFileSync(
         `${__dirname
           .split("/")
           .slice(0, -1)
           .join("/")}/Assets/Images/${filename}`,
-        Buffer.from(message.attachment[0]),
-        "base64"
+        Buffer.from(message.attachment[0], "base64")
       );
       message.attachment[0] = filename;
     }

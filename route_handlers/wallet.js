@@ -26,39 +26,6 @@ const platform_wallet = `wallets~platform_wallet~3000`;
 const platform_user = `users~platform_user~3000`;
 
 let acceptable_payment_method = "BANK_TRANSFER";
-let referenceNumber = `${generate_random_string(14, "alnum")}${Date.now()}`,
-  amount = "10",
-  destinationBankUUID = "3E94C4BC-6F9A-442F-8F1A-8214478D5D86",
-  destinationBankAccountNumber = "0273658996",
-  hash =
-    "8e9e7ae8368c444a875bbeba0f5f84b52aecc1500d624329b9ff572de7c1d86d618241f0b2834fb39a0e5c49906f1557ec464ddbe3c042119615a192f7a1c263";
-
-// axios({
-//   url: "https://beta.mypaga.com/paga-webservices/business-rest/secured/depositToBank",
-//   method: "post",
-//   headers: {
-//     "Content-Type": "application/json",
-//     principal: "7E0F3D99-58D3-4347-88B0-8A99ADC343FE",
-//     credentials: "udaralinks4all",
-//     hash: sha512(
-//       referenceNumber +
-//         amount +
-//         destinationBankUUID +
-//         destinationBankAccountNumber +
-//         hash
-//     ),
-//   },
-//   data: {
-//     referenceNumber,
-//     amount,
-//     currency: "NGN",
-//     destinationBankUUID,
-//     destinationBankAccountNumber,
-//     remarks: "Show this at Bank",
-//   },
-// })
-//   .then((res) => console.log(res.data, res.status))
-//   .catch((err) => console.log(err));
 
 const request_account_details = async (req, res) => {
   let { user, amount } = req.body;
@@ -164,12 +131,11 @@ const update_fav_currency = (req, res) => {
 };
 
 const onsale = (req, res) => {
-  let { currency, value, purposes } = req.body;
+  let { currency, value } = req.body;
 
   let onsale = ONSALE.read({
     currency,
     value: { $gte: value },
-    purposes,
     minimum_sell_value: { $lte: value },
   });
 
@@ -267,7 +233,7 @@ const make_payment = async ({ bank, account_number }, amount) => {
 };
 
 const withdraw = async (req, res) => {
-  let { user, amount, bank_account, wallet } = req.body;
+  let { user, amount, bank_account, paycheck, wallet } = req.body;
   if (!Number(amount))
     return res.json({ ok: false, message: "invalid transaction amount" });
 
@@ -275,6 +241,10 @@ const withdraw = async (req, res) => {
 
   let user_obj = USERS.readone(user);
   if (!user_obj || !wallet) return res.end();
+
+  if (paycheck) {
+    if (wallet.profits < Number(amount)) return res.end();
+  } else if (wallet.naira < Number(amount)) return res.end();
 
   let { response, reference_number } = await make_payment(bank_account, amount);
 
@@ -285,7 +255,12 @@ const withdraw = async (req, res) => {
       data: { ok: false },
     });
 
-  WALLETS.update(wallet, { naira: { $dec: Number(amount) } });
+  WALLETS.update(
+    wallet,
+    paycheck
+      ? { profits: { $dec: Number(amount) } }
+      : { naira: { $dec: Number(amount) } }
+  );
 
   res.json({
     ok: true,
@@ -310,7 +285,6 @@ const place_sale = (req, res) => {
     currency,
     value,
     rate,
-    purposes,
     offer_terms,
     icon,
     alphabetic_name,
@@ -323,7 +297,6 @@ const place_sale = (req, res) => {
     currency,
     offer_terms,
     rate,
-    purposes,
     seller,
     icon,
     value,
@@ -516,7 +489,9 @@ const decline_offer = (req, res) => {
 const remove_offer = (req, res) => {
   let { offer, onsale } = req.body;
 
-  OFFERS.remove({ _id: offer, onsale });
+  let result = OFFERS.remove({ _id: offer, onsale });
+  result && MY_OFFERS.remove({ offer, buyer: result.user });
+
   res.json({ ok: true, message: "offer removed", data: offer });
 };
 
