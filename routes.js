@@ -6,14 +6,22 @@ import {
   new_message,
 } from "./route_handlers/chats";
 import {
+  account_verification,
+  get_verification_detail,
   logging_in,
   onboardings,
   request_otp,
+  unverified_details,
   update_password,
   update_phone,
   user_refresh,
+  verify_account,
   verify_otp,
 } from "./route_handlers/entry";
+import {
+  notifications,
+  notifications_seen,
+} from "./route_handlers/notifications";
 import {
   username_updated,
   change_password,
@@ -67,6 +75,7 @@ import {
   get_banks,
   refresh_wallet,
   buyer_offers,
+  state_offer_need,
 } from "./route_handlers/wallet";
 
 const routes = (app) => {
@@ -83,6 +92,7 @@ const routes = (app) => {
   app.get("/onsale_offers/:onsale/:status", onsale_offers);
   app.get("/conversion_rates", get_conversion_rates);
   app.get("/get_banks", get_banks);
+  app.get("/get_verification_detail/:user", get_verification_detail);
   app.get("/get_code_by_country/:country", get_code_by_country);
 
   /* POST */
@@ -94,6 +104,7 @@ const routes = (app) => {
   app.post("/update_phone", update_phone);
   app.post("/update_password", update_password);
   app.post("/logging_in", logging_in);
+  app.post("/state_offer_need", state_offer_need);
   app.post("/onsale", onsale);
   app.post("/topup", topup);
   app.post("/dislike_sale", dislike_sale);
@@ -128,6 +139,11 @@ const routes = (app) => {
   app.post("/my_sales/:seller", my_sales);
   app.post("/add_fiat_account", add_fiat_account);
   app.post("/new_message", new_message);
+  app.post("/account_verification", account_verification);
+  app.post("/unverified_details", unverified_details);
+  app.post("/verify_account/:detail", verify_account);
+  app.post("/notifications/:user", notifications);
+  app.post("/notifications_seen/:user", notifications_seen);
 
   // Paga Web hook
   app.post("/paga_deposit/:user", paga_deposit);

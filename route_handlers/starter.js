@@ -16,7 +16,7 @@ const create_platform_wallet = async () => {
     username: "admin",
     firstname: "admin",
     lastname: "udara",
-    phone: "2348060324082",
+    email: "admin@udaralinksapp.com",
     country: "nigeria",
     country_code: "+234",
     _id: platform_user,

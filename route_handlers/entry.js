@@ -1,22 +1,24 @@
 import {
   HASHES,
   ONBOARDINGS,
-  PAYMENT_ACCOUNTS,
   USERS,
   UTILS,
+  VERIFICATION_DETAILS,
   WALLETS,
 } from "../conn/ds_conn";
-import { paga_collection_client } from "../Udara";
 import {
+  email_regex,
   generate_random_string,
   gen_random_int,
-  phone_regex,
 } from "../utils/functions";
-import { send_otp } from "../utils/Services";
 import { conversion_rates } from "./starter";
+import nodemailer from "nodemailer";
+import { verification } from "./email";
+import fs from "fs";
+import { new_notification, platform_user } from "./wallet";
 
 let pending_otps = new Object();
-let operating_currencies, list_of_banks;
+let operating_currencies;
 
 const load_operating_currencies = () => {
   if (!operating_currencies)
@@ -78,6 +80,9 @@ const load_operating_currencies = () => {
       )
     );
 
+  !UTILS.readone({ util: UTIL_verification_details }) &&
+    UTILS.write({ util: UTIL_verification_details, details: new Array() });
+
   !UTILS.readone({ util: "purposes" }) &&
     UTILS.write_several(
       new Array(
@@ -105,49 +110,100 @@ const user_refresh = async (req, res) => {
     return res.json({ ok: false, message: "user not found" });
   user = result;
   let wallet = WALLETS.readone(result.wallet);
-  if (!wallet) {
-    console.error("Wallet not found!!!");
-  }
+  if (!wallet) console.error("Wallet not found!!!");
+
   wallet.conversion_rates = conversion_rates;
   wallet.currencies = load_operating_currencies();
 
   res.json({ ok: true, message: "ok", data: { user, wallet } });
 };
 
+const send_mail = ({
+  recipient,
+  recipient_name,
+  sender_pass,
+  sender_name,
+  sender,
+  subject,
+  text,
+  html,
+  to,
+}) => {
+  let transporter;
+
+  try {
+    transporter = nodemailer.createTransport({
+      host: "66.29.137.48" || "udaralinksapp.com",
+      port: 465,
+      secure: true,
+      tls: {
+        servername: "udaralinksapp.com",
+      },
+      auth: {
+        user: sender,
+        pass: sender_pass,
+      },
+    });
+  } catch (err) {}
+
+  try {
+    transporter.sendMail({
+      from: `${sender_name} <${sender}>`,
+      to: to || `${recipient_name} <${recipient}>`,
+      subject,
+      text,
+      html,
+    });
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
 const request_otp = async (req, res) => {
-  let { phone } = req.body;
-  if (!phone || !phone_regex.test(phone))
-    return res.json({ ok: false, message: "phone field missing" });
+  let { email } = req.body;
+  if (!email || !email_regex.test(email))
+    return res.json({ ok: false, message: "email field missing" });
 
-  let user = USERS.readone({ phone });
+  email = email.trim().toLowerCase();
+  let user = USERS.readone({ email });
 
-  if (user && user.verified)
-    return res.json({ ok: false, message: "phone already used", data: phone });
+  if (user)
+    return res.json({ ok: false, message: "email already used", data: email });
 
-  let result = await send_otp(phone);
+  let code = generate_random_string(6);
+  pending_otps[email] = code;
 
-  if (result.sent) {
-    pending_otps[phone] = result.code;
-    res.json({ ok: true, message: "opt sent", data: phone });
-  } else res.json({ ok: false, message: "opt not sent", data: phone });
+  send_mail({
+    recipient: email,
+    subject: "[Udara Links] Please verify your email",
+    sender: "signup@udaralinksapp.com",
+    sender_name: "Udara Links",
+    sender_pass: "signupudaralinks",
+    html: verification(code),
+  });
+
+  res.json({ ok: true, message: "opt sent", data: email });
 };
 
 const verify_otp = async (req, res) => {
-  let { code, country, country_code, verify_later, phone } = req.body;
-  if (!!USERS.readone({ phone }))
-    return res.json({ ok: false, message: "phone already used", data: phone });
+  let { code, country, country_code, email } = req.body;
+  if (!!USERS.readone({ email }))
+    return res.json({ ok: false, message: "email already used", data: email });
 
-  let otp_code = pending_otps[phone];
-  delete pending_otps[phone];
+  email = email.toLowerCase().trim();
+  let otp_code = pending_otps[email];
+  delete pending_otps[email];
 
-  if ((otp_code && otp_code === code) || verify_later) {
+  if (
+    String(otp_code).trim() &&
+    String(otp_code).trim() === String(code).trim()
+  ) {
     let random_string = generate_random_string(gen_random_int(5, 3));
     let user = {
       username: `user-${random_string}`,
-      phone,
+      email,
       country,
       country_code,
-      verified: !verify_later,
       created: Date.now(),
       updated: Date.now(),
     };
@@ -172,7 +228,7 @@ const verify_otp = async (req, res) => {
     res.json({
       ok: false,
       message: "verification failed",
-      data: { phone, code },
+      data: { email, code },
     });
 };
 
@@ -190,10 +246,25 @@ const update_phone = (req, res) => {
       phone,
       country: country_code.country,
       country_code: country_code.code,
-      verified: !verify_later,
     });
 
     res.json({ ok: true, message: "user phone updated", data: user });
+  }
+};
+
+const update_email = (req, res) => {
+  let { email, user, code } = req.body;
+
+  if (!USERS.readone(user))
+    return res.json({ ok: false, message: "user does not exist", data: user });
+
+  let otp_code = pending_otps[email];
+  delete pending_otps[email];
+
+  if (otp_code && otp_code === code) {
+    USERS.update(user, { email });
+
+    res.json({ ok: true, message: "user email updated", data: user });
   }
 };
 
@@ -238,16 +309,20 @@ const update_password = async (req, res) => {
 
   HASHES.update_several({ user }, { hash: key });
   let result = HASHES.write({ user, hash: key });
-  if (result && result._id)
+  result &&
+    result._id &&
     res.json({ ok: true, message: "update successful", data: user });
 };
 
 const logging_in = async (req, res) => {
-  let { phone, key } = req.body;
+  let { email, key } = req.body;
 
-  let user = USERS.readone({ phone });
-  let phone_pass = phone_regex.test(phone);
-  if (!phone || !user) return res.json({ ok: false, data: "User not found" });
+  email = email.toLowerCase().trim();
+
+  let user = USERS.readone({ email });
+  let email_pass = email_regex.test(email);
+  if (!email_pass || !user)
+    return res.json({ ok: false, data: "User not found" });
   else if (!key) return res.json({ ok: false, data: "Provide your password" });
 
   let pass = HASHES.readone({ user: user._id });
@@ -264,6 +339,79 @@ const logging_in = async (req, res) => {
   res.json({ ok: true, message: "loggedin", data: { user, wallet } });
 };
 
+const UTIL_verification_details = "verification_details";
+
+const unverified_details = (req, res) => {
+  let unverified = UTILS.readone({ util: UTIL_verification_details });
+  unverified = unverified.details.length
+    ? VERIFICATION_DETAILS.read(unverified.details)
+    : new Array();
+
+  res.json({ ok: true, message: "unverified details", data: unverified });
+};
+
+const get_verification_detail = (req, res) => {
+  let { user } = req.params;
+
+  res.json({
+    ok: true,
+    message: "verification detail",
+    data: VERIFICATION_DETAILS.readone({ user }),
+  });
+};
+
+const verify_account = (req, res) => {
+  let { detail } = req.params;
+
+  UTILS.update(
+    { util: UTIL_verification_details },
+    { details: { $splice: detail } }
+  );
+
+  detail = VERIFICATION_DETAILS.update(detail, { verifed: true });
+  detail.user &&
+    USERS.update(detail.user, {
+      verified: true,
+      status: "verified",
+      phone: detail.phone,
+    });
+
+  res.json({ ok: true, message: "verify account", data: detail });
+};
+
+const account_verification = (req, res) => {
+  let { phone, user, id, id_type, country_code } = req.body;
+
+  let filename = `${generate_reference_number()}.jpg`;
+  fs.writeFileSync(
+    `${__dirname.split("/").slice(0, -1).join("/")}/Assets/Images/${filename}`,
+    Buffer.from(`${id}`, "base64")
+  );
+
+  id = filename;
+
+  let result = VERIFICATION_DETAILS.write({
+    id,
+    id_type,
+    user,
+    phone,
+    country_code,
+  });
+  UTILS.update(
+    { util: UTIL_verification_details },
+    { details: { $push: result._id } }
+  );
+  USERS.update(user, { status: "pending" });
+
+  new_notification({
+    user: platform_user,
+    title: "Verification Request",
+    data: new Array(result._id),
+  });
+
+  res.json({ ok: true, message: "account verification", data: { id, user } });
+};
+
 export {
   onboardings,
   request_otp,
@@ -271,8 +419,13 @@ export {
   user_refresh,
   update_password,
   update_phone,
+  unverified_details,
+  verify_account,
+  account_verification,
+  update_email,
   logging_in,
   load_operating_currencies,
   operating_currencies,
   generate_reference_number,
+  get_verification_detail,
 };

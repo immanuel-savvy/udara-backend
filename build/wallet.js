@@ -1,9 +1,11 @@
 "use strict";
 
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.withdraw = exports.update_fav_currency = exports.transactions = exports.transaction_offer = exports.topup = exports.resolve_dispute = exports.request_time_extension = exports.request_account_details = exports.remove_sale = exports.remove_offer = exports.remove_bank_account = exports.refund_buyer = exports.refresh_wallet = exports.platform_wallet = exports.platform_user = exports.place_sale = exports.paga_deposit = exports.onsale_offers = exports.onsale_currency = exports.onsale = exports.offer_in_dispute = exports.offer = exports.my_sales = exports.my_offers = exports.make_offer = exports.like_sale = exports.get_banks = exports.fulfil_offer = exports.extend_time = exports.disputes = exports.dispute = exports.dislike_sale = exports.deposit_to_escrow = exports.decline_offer = exports.confirm_offer = exports.buyer_offers = exports.bank_accounts = exports.add_fiat_account = exports.add_bank_account = exports.accept_offer = void 0;
+exports.withdraw = exports.update_fav_currency = exports.transactions = exports.transaction_offer = exports.topup = exports.resolve_dispute = exports.request_time_extension = exports.request_account_details = exports.remove_sale = exports.remove_offer = exports.remove_bank_account = exports.refund_buyer = exports.refresh_wallet = exports.platform_wallet = exports.platform_user = exports.place_sale = exports.paga_deposit = exports.onsale_offers = exports.onsale_currency = exports.onsale = exports.offer_in_dispute = exports.offer = exports.new_notification = exports.my_sales = exports.my_offers = exports.make_offer = exports.like_sale = exports.get_banks = exports.fulfil_offer = exports.extend_time = exports.disputes = exports.dispute = exports.dislike_sale = exports.deposit_to_escrow = exports.decline_offer = exports.confirm_offer = exports.buyer_offers = exports.bank_accounts = exports.add_fiat_account = exports.add_bank_account = exports.accept_offer = void 0;
 
 var _axios = _interopRequireDefault(require("axios"));
 
@@ -21,6 +23,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "d
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return exports; }; var exports = {}, Op = Object.prototype, hasOwn = Op.hasOwnProperty, $Symbol = "function" == typeof Symbol ? Symbol : {}, iteratorSymbol = $Symbol.iterator || "@@iterator", asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator", toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag"; function define(obj, key, value) { return Object.defineProperty(obj, key, { value: value, enumerable: !0, configurable: !0, writable: !0 }), obj[key]; } try { define({}, ""); } catch (err) { define = function define(obj, key, value) { return obj[key] = value; }; } function wrap(innerFn, outerFn, self, tryLocsList) { var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator, generator = Object.create(protoGenerator.prototype), context = new Context(tryLocsList || []); return generator._invoke = function (innerFn, self, context) { var state = "suspendedStart"; return function (method, arg) { if ("executing" === state) throw new Error("Generator is already running"); if ("completed" === state) { if ("throw" === method) throw arg; return doneResult(); } for (context.method = method, context.arg = arg;;) { var delegate = context.delegate; if (delegate) { var delegateResult = maybeInvokeDelegate(delegate, context); if (delegateResult) { if (delegateResult === ContinueSentinel) continue; return delegateResult; } } if ("next" === context.method) context.sent = context._sent = context.arg;else if ("throw" === context.method) { if ("suspendedStart" === state) throw state = "completed", context.arg; context.dispatchException(context.arg); } else "return" === context.method && context.abrupt("return", context.arg); state = "executing"; var record = tryCatch(innerFn, self, context); if ("normal" === record.type) { if (state = context.done ? "completed" : "suspendedYield", record.arg === ContinueSentinel) continue; return { value: record.arg, done: context.done }; } "throw" === record.type && (state = "completed", context.method = "throw", context.arg = record.arg); } }; }(innerFn, self, context), generator; } function tryCatch(fn, obj, arg) { try { return { type: "normal", arg: fn.call(obj, arg) }; } catch (err) { return { type: "throw", arg: err }; } } exports.wrap = wrap; var ContinueSentinel = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var IteratorPrototype = {}; define(IteratorPrototype, iteratorSymbol, function () { return this; }); var getProto = Object.getPrototypeOf, NativeIteratorPrototype = getProto && getProto(getProto(values([]))); NativeIteratorPrototype && NativeIteratorPrototype !== Op && hasOwn.call(NativeIteratorPrototype, iteratorSymbol) && (IteratorPrototype = NativeIteratorPrototype); var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype); function defineIteratorMethods(prototype) { ["next", "throw", "return"].forEach(function (method) { define(prototype, method, function (arg) { return this._invoke(method, arg); }); }); } function AsyncIterator(generator, PromiseImpl) { function invoke(method, arg, resolve, reject) { var record = tryCatch(generator[method], generator, arg); if ("throw" !== record.type) { var result = record.arg, value = result.value; return value && "object" == _typeof(value) && hasOwn.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function (value) { invoke("next", value, resolve, reject); }, function (err) { invoke("throw", err, resolve, reject); }) : PromiseImpl.resolve(value).then(function (unwrapped) { result.value = unwrapped, resolve(result); }, function (error) { return invoke("throw", error, resolve, reject); }); } reject(record.arg); } var previousPromise; this._invoke = function (method, arg) { function callInvokeWithMethodAndArg() { return new PromiseImpl(function (resolve, reject) { invoke(method, arg, resolve, reject); }); } return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); }; } function maybeInvokeDelegate(delegate, context) { var method = delegate.iterator[context.method]; if (undefined === method) { if (context.delegate = null, "throw" === context.method) { if (delegate.iterator["return"] && (context.method = "return", context.arg = undefined, maybeInvokeDelegate(delegate, context), "throw" === context.method)) return ContinueSentinel; context.method = "throw", context.arg = new TypeError("The iterator does not provide a 'throw' method"); } return ContinueSentinel; } var record = tryCatch(method, delegate.iterator, context.arg); if ("throw" === record.type) return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel; var info = record.arg; return info ? info.done ? (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, "return" !== context.method && (context.method = "next", context.arg = undefined), context.delegate = null, ContinueSentinel) : info : (context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel); } function pushTryEntry(locs) { var entry = { tryLoc: locs[0] }; 1 in locs && (entry.catchLoc = locs[1]), 2 in locs && (entry.finallyLoc = locs[2], entry.afterLoc = locs[3]), this.tryEntries.push(entry); } function resetTryEntry(entry) { var record = entry.completion || {}; record.type = "normal", delete record.arg, entry.completion = record; } function Context(tryLocsList) { this.tryEntries = [{ tryLoc: "root" }], tryLocsList.forEach(pushTryEntry, this), this.reset(!0); } function values(iterable) { if (iterable) { var iteratorMethod = iterable[iteratorSymbol]; if (iteratorMethod) return iteratorMethod.call(iterable); if ("function" == typeof iterable.next) return iterable; if (!isNaN(iterable.length)) { var i = -1, next = function next() { for (; ++i < iterable.length;) { if (hasOwn.call(iterable, i)) return next.value = iterable[i], next.done = !1, next; } return next.value = undefined, next.done = !0, next; }; return next.next = next; } } return { next: doneResult }; } function doneResult() { return { value: undefined, done: !0 }; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, define(Gp, "constructor", GeneratorFunctionPrototype), define(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"), exports.isGeneratorFunction = function (genFun) { var ctor = "function" == typeof genFun && genFun.constructor; return !!ctor && (ctor === GeneratorFunction || "GeneratorFunction" === (ctor.displayName || ctor.name)); }, exports.mark = function (genFun) { return Object.setPrototypeOf ? Object.setPrototypeOf(genFun, GeneratorFunctionPrototype) : (genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction")), genFun.prototype = Object.create(Gp), genFun; }, exports.awrap = function (arg) { return { __await: arg }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function () { return this; }), exports.AsyncIterator = AsyncIterator, exports.async = function (innerFn, outerFn, self, tryLocsList, PromiseImpl) { void 0 === PromiseImpl && (PromiseImpl = Promise); var iter = new AsyncIterator(wrap(innerFn, outerFn, self, tryLocsList), PromiseImpl); return exports.isGeneratorFunction(outerFn) ? iter : iter.next().then(function (result) { return result.done ? result.value : iter.next(); }); }, defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function () { return this; }), define(Gp, "toString", function () { return "[object Generator]"; }), exports.keys = function (object) { var keys = []; for (var key in object) { keys.push(key); } return keys.reverse(), function next() { for (; keys.length;) { var key = keys.pop(); if (key in object) return next.value = key, next.done = !1, next; } return next.done = !0, next; }; }, exports.values = values, Context.prototype = { constructor: Context, reset: function reset(skipTempReset) { if (this.prev = 0, this.next = 0, this.sent = this._sent = undefined, this.done = !1, this.delegate = null, this.method = "next", this.arg = undefined, this.tryEntries.forEach(resetTryEntry), !skipTempReset) for (var name in this) { "t" === name.charAt(0) && hasOwn.call(this, name) && !isNaN(+name.slice(1)) && (this[name] = undefined); } }, stop: function stop() { this.done = !0; var rootRecord = this.tryEntries[0].completion; if ("throw" === rootRecord.type) throw rootRecord.arg; return this.rval; }, dispatchException: function dispatchException(exception) { if (this.done) throw exception; var context = this; function handle(loc, caught) { return record.type = "throw", record.arg = exception, context.next = loc, caught && (context.method = "next", context.arg = undefined), !!caught; } for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i], record = entry.completion; if ("root" === entry.tryLoc) return handle("end"); if (entry.tryLoc <= this.prev) { var hasCatch = hasOwn.call(entry, "catchLoc"), hasFinally = hasOwn.call(entry, "finallyLoc"); if (hasCatch && hasFinally) { if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0); if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc); } else if (hasCatch) { if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0); } else { if (!hasFinally) throw new Error("try statement without catch or finally"); if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc); } } } }, abrupt: function abrupt(type, arg) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.tryLoc <= this.prev && hasOwn.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) { var finallyEntry = entry; break; } } finallyEntry && ("break" === type || "continue" === type) && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc && (finallyEntry = null); var record = finallyEntry ? finallyEntry.completion : {}; return record.type = type, record.arg = arg, finallyEntry ? (this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel) : this.complete(record); }, complete: function complete(record, afterLoc) { if ("throw" === record.type) throw record.arg; return "break" === record.type || "continue" === record.type ? this.next = record.arg : "return" === record.type ? (this.rval = this.arg = record.arg, this.method = "return", this.next = "end") : "normal" === record.type && afterLoc && (this.next = afterLoc), ContinueSentinel; }, finish: function finish(finallyLoc) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.finallyLoc === finallyLoc) return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel; } }, "catch": function _catch(tryLoc) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.tryLoc === tryLoc) { var record = entry.completion; if ("throw" === record.type) { var thrown = record.arg; resetTryEntry(entry); } return thrown; } } throw new Error("illegal catch attempt"); }, delegateYield: function delegateYield(iterable, resultName, nextLoc) { return this.delegate = { iterator: values(iterable), resultName: resultName, nextLoc: nextLoc }, "next" === this.method && (this.arg = undefined), ContinueSentinel; } }, exports; }
+
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
@@ -33,23 +37,17 @@ exports.platform_user = platform_user;
 var acceptable_payment_method = "BANK_TRANSFER";
 
 var request_account_details = /*#__PURE__*/function () {
-  var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(req, res) {
-    var _req$body, user, amount, _user, phone, _id, response, account_details;
+  var _ref = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(req, res) {
+    var _req$body, user, amount, _user, email, _id, response, account_details;
 
-    return regeneratorRuntime.wrap(function _callee$(_context) {
+    return _regeneratorRuntime().wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
             _req$body = req.body, user = _req$body.user, amount = _req$body.amount;
             user = _ds_conn.USERS.readone(user);
-            _user = user, phone = _user.phone, _id = _user._id;
-
-            if (phone.startsWith("+234")) {
-              phone = phone.slice(4);
-              if (phone[0] !== "0") phone = "0".concat(phone);
-            }
-
-            _context.next = 6;
+            _user = user, email = _user.email, _id = _user._id;
+            _context.next = 5;
             return _Udara.paga_collection_client.paymentRequest({
               referenceNumber: (0, _entry.generate_reference_number)(),
               amount: amount,
@@ -62,14 +60,14 @@ var request_account_details = /*#__PURE__*/function () {
               },
               payer: {
                 name: "".concat(_id),
-                phoneNumber: phone
+                email: email.trim().toLowerCase()
               },
               payerCollectionFeeShare: 1.0,
               recipientCollectionFeeShare: 0.0,
               paymentMethods: [acceptable_payment_method]
             });
 
-          case 6:
+          case 5:
             response = _context.sent;
 
             if (!response.error) {
@@ -89,11 +87,12 @@ var request_account_details = /*#__PURE__*/function () {
             } else res.json({
               ok: false,
               data: {
-                message: "could not generate account details at this time"
+                message: "could not generate account details at this time",
+                reason: response.response.statusMessage
               }
             });
 
-          case 8:
+          case 7:
           case "end":
             return _context.stop();
         }
@@ -107,6 +106,23 @@ var request_account_details = /*#__PURE__*/function () {
 }();
 
 exports.request_account_details = request_account_details;
+
+var new_notification = function new_notification(user, title, data, metadata) {
+  _ds_conn.NOTIFICATIONS.write({
+    user: user,
+    title: title,
+    data: data,
+    metadata: metadata
+  });
+
+  _ds_conn.USERS.update(user, {
+    new_notification: {
+      $inc: 1
+    }
+  });
+};
+
+exports.new_notification = new_notification;
 
 var create_transaction = function create_transaction(_ref2) {
   var title = _ref2.title,
@@ -184,17 +200,27 @@ exports.update_fav_currency = update_fav_currency;
 var onsale = function onsale(req, res) {
   var _req$body4 = req.body,
       currency = _req$body4.currency,
-      value = _req$body4.value;
+      fetch_currencies = _req$body4.fetch_currencies,
+      user = _req$body4.user,
+      skip = _req$body4.skip,
+      limit = _req$body4.limit;
 
   var onsale = _ds_conn.ONSALE.read({
     currency: currency,
-    value: {
-      $gte: value
-    },
-    minimum_sell_value: {
-      $lte: value
+    seller: {
+      $ne: user
     }
+  }, {
+    skip: skip,
+    limit: limit
   });
+
+  if (fetch_currencies) {
+    onsale = {
+      onsales: onsale
+    };
+    onsale.currencies = (0, _entry.load_operating_currencies)();
+  }
 
   res.json({
     ok: true,
@@ -205,10 +231,10 @@ var onsale = function onsale(req, res) {
 exports.onsale = onsale;
 
 var paga_deposit = /*#__PURE__*/function () {
-  var _ref3 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(req, res) {
+  var _ref3 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(req, res) {
     var user, _req$body5, paymentAmount, collectionFee, event, statusCode, amount;
 
-    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+    return _regeneratorRuntime().wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
@@ -253,10 +279,10 @@ var paga_deposit = /*#__PURE__*/function () {
 exports.paga_deposit = paga_deposit;
 
 var topup = /*#__PURE__*/function () {
-  var _ref4 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(req, res) {
+  var _ref4 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee3(req, res) {
     var _req$body6, value, user, wallet;
 
-    return regeneratorRuntime.wrap(function _callee3$(_context3) {
+    return _regeneratorRuntime().wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
@@ -333,9 +359,9 @@ var add_fiat_account = function add_fiat_account(req, res) {
 exports.add_fiat_account = add_fiat_account;
 
 var make_payment = /*#__PURE__*/function () {
-  var _ref6 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4(_ref5, amount) {
+  var _ref6 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee4(_ref5, amount) {
     var bank, account_number, referenceNumber, destinationBankUUID, destinationBankAccountNumber, hash, response;
-    return regeneratorRuntime.wrap(function _callee4$(_context4) {
+    return _regeneratorRuntime().wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
           case 0:
@@ -393,10 +419,10 @@ var make_payment = /*#__PURE__*/function () {
 }();
 
 var withdraw = /*#__PURE__*/function () {
-  var _ref7 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee5(req, res) {
+  var _ref7 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee5(req, res) {
     var _req$body8, user, amount, bank_account, paycheck, wallet, user_obj, _yield$make_payment, response, reference_number;
 
-    return regeneratorRuntime.wrap(function _callee5$(_context5) {
+    return _regeneratorRuntime().wrap(function _callee5$(_context5) {
       while (1) {
         switch (_context5.prev = _context5.next) {
           case 0:
@@ -726,7 +752,7 @@ var make_offer = function make_offer(req, res) {
     onsale: onsale
   });
 
-  _ds_conn.ONSALE.update({
+  var onsale_res = _ds_conn.ONSALE.update({
     _id: onsale,
     currency: currency
   }, {
@@ -735,6 +761,9 @@ var make_offer = function make_offer(req, res) {
     }
   });
 
+  new_notification(onsale_res.seller, "new offer from ".concat(_ds_conn.USERS.readone(user).username), new Array(onsale, offer._id), {
+    currency: currency
+  });
   res.json({
     ok: true,
     message: "offer placed",
@@ -860,11 +889,12 @@ var accept_offer = function accept_offer(req, res) {
     status: "accepted"
   });
 
-  forward_message(result.user._id, result.seller, offer, {
+  if (result.user._id) result.user = result.user._id;
+  forward_message(result.user, result.seller, offer, {
     status: "accepted"
   });
 
-  _ds_conn.ONSALE.update({
+  var onsale_res = _ds_conn.ONSALE.update({
     _id: onsale,
     currency: result.currency
   }, {
@@ -876,6 +906,9 @@ var accept_offer = function accept_offer(req, res) {
     }
   });
 
+  new_notification(result.user, "offer accepted by ".concat(_ds_conn.USERS.readone(onsale_res.seller).username), new Array(onsale, offer), {
+    currency: result.currency
+  });
   result ? res.json({
     ok: true,
     message: "Offer accepted",
@@ -899,11 +932,12 @@ var decline_offer = function decline_offer(req, res) {
     status: "declined"
   });
 
-  forward_message(result.user._id, result.seller, offer, {
+  if (result.user._id) result.user = result.user._id;
+  forward_message(result.user, result.seller, offer, {
     status: "declined"
   });
 
-  _ds_conn.ONSALE.update({
+  var onsale_res = _ds_conn.ONSALE.update({
     _id: onsale,
     currency: result.currency
   }, {
@@ -915,6 +949,9 @@ var decline_offer = function decline_offer(req, res) {
     }
   });
 
+  new_notification(result.user, "offer declined by ".concat(_ds_conn.USERS.readone(onsale_res.seller).username), new Array(onsale, offer), {
+    currency: result.currency
+  });
   result ? res.json({
     ok: true,
     message: "Offer declined",
@@ -940,6 +977,15 @@ var remove_offer = function remove_offer(req, res) {
     offer: offer,
     buyer: result.user
   });
+
+  _ds_conn.ONSALE.update(result.onsale, {
+    pending: {
+      $dec: 1
+    }
+  }, {
+    subfolder: result.currency
+  });
+
   res.json({
     ok: true,
     message: "offer removed",
@@ -980,6 +1026,9 @@ var fulfil_offer = function fulfil_offer(req, res) {
   forward_message(seller, buyer, offer, {
     status: "awaiting confirmation"
   });
+  new_notification(buyer, "Fulfilled offer by ".concat(_ds_conn.USERS.readone(onsale_res.seller).username), new Array(onsale, offer), {
+    currency: offer_.currency
+  });
   res.json({
     ok: true,
     message: "offer fulfilled",
@@ -994,9 +1043,9 @@ var fulfil_offer = function fulfil_offer(req, res) {
 exports.fulfil_offer = fulfil_offer;
 
 var forward_message = /*#__PURE__*/function () {
-  var _ref8 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee6(from, to, offer, meta) {
+  var _ref8 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee6(from, to, offer, meta) {
     var chat, message, result;
-    return regeneratorRuntime.wrap(function _callee6$(_context6) {
+    return _regeneratorRuntime().wrap(function _callee6$(_context6) {
       while (1) {
         switch (_context6.prev = _context6.next) {
           case 0:
@@ -1083,6 +1132,9 @@ var deposit_to_escrow = function deposit_to_escrow(req, res) {
   forward_message(offer_.user._id, seller, offer, {
     status: "in-escrow"
   });
+  new_notification(seller, "buyer deposited to escrow", new Array(onsale, offer), {
+    currency: offer_.currency
+  });
   res.json({
     ok: true,
     message: "deposited to escrow",
@@ -1157,6 +1209,9 @@ var confirm_offer = function confirm_offer(req, res) {
     }
   });
 
+  new_notification(seller, "buyer confirmed transaction successful", new Array(onsale, offer), {
+    currency: offer_.currency
+  });
   forward_message(offer_.user._id, seller, offer, {
     status: "completed"
   });
@@ -1284,6 +1339,9 @@ var offer_in_dispute = function offer_in_dispute(req, res) {
     status: "in-dispute"
   });
 
+  new_notification(initiator === buyer ? seller : buyer, "Offer in dispute", new Array(offer, onsale), {
+    currency: currency
+  });
   forward_message(offer_.user._id, seller, offer, {
     status: "in-dispute"
   });
@@ -1348,6 +1406,13 @@ var resolve_dispute = function resolve_dispute(req, res) {
     $dec: 1
   }), _ONSALE$update2));
 
+  var dispute = _ds_conn.DISPUTES.readone({
+    offer: offer
+  });
+
+  dispute && new_notification(dispute.initiator === offer_.user._id ? update.seller._id || update.seller : offer_.user._id, "Dispute resolved", new Array(offer, onsale), {
+    currency: offer_.currency
+  });
   forward_message(offer_.user._id, update.seller, offer, {
     status: offer_.prior_offer_status
   });
@@ -1385,12 +1450,13 @@ var dispute = function dispute(req, res) {
 exports.dispute = dispute;
 
 var disputes = function disputes(req, res) {
-  var reset_pager = req.body.reset_pager;
+  var _req$body28 = req.body,
+      skip = _req$body28.skip,
+      limit = _req$body28.limit;
 
   var disputes = _ds_conn.DISPUTES.read(null, {
-    limit: 15,
-    paging: platform_user,
-    reset_pager: reset_pager
+    skip: skip,
+    limit: limit
   });
 
   var onsales = _ds_conn.ONSALE.read(disputes.map(function (dispute) {
@@ -1430,9 +1496,9 @@ var disputes = function disputes(req, res) {
 exports.disputes = disputes;
 
 var refund_buyer = function refund_buyer(req, res) {
-  var _req$body28 = req.body,
-      offer = _req$body28.offer,
-      onsale = _req$body28.onsale;
+  var _req$body29 = req.body,
+      offer = _req$body29.offer,
+      onsale = _req$body29.onsale;
 
   var offer_ = _ds_conn.OFFERS.readone({
     _id: offer,
@@ -1476,6 +1542,9 @@ var refund_buyer = function refund_buyer(req, res) {
     }
   });
 
+  new_notification(offer_.user._id, "Your escrow deposit for below offer has been refunded", new Array(offer, onsale), {
+    currency: offer_.currency
+  });
   forward_message(offer_.user._id, onsale_update.seller, offer, {
     status: "closed"
   });
@@ -1501,9 +1570,9 @@ var refund_buyer = function refund_buyer(req, res) {
 exports.refund_buyer = refund_buyer;
 
 var get_banks = /*#__PURE__*/function () {
-  var _ref9 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee7(req, res) {
+  var _ref9 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee7(req, res) {
     var banks;
-    return regeneratorRuntime.wrap(function _callee7$(_context7) {
+    return _regeneratorRuntime().wrap(function _callee7$(_context7) {
       while (1) {
         switch (_context7.prev = _context7.next) {
           case 0:
@@ -1565,12 +1634,12 @@ var bank_accounts = function bank_accounts(req, res) {
 exports.bank_accounts = bank_accounts;
 
 var add_bank_account = function add_bank_account(req, res) {
-  var _req$body29 = req.body,
-      bank = _req$body29.bank,
-      bank_name = _req$body29.bank_name,
-      user = _req$body29.user,
-      wallet = _req$body29.wallet,
-      account_number = _req$body29.account_number;
+  var _req$body30 = req.body,
+      bank = _req$body30.bank,
+      bank_name = _req$body30.bank_name,
+      user = _req$body30.user,
+      wallet = _req$body30.wallet,
+      account_number = _req$body30.account_number;
 
   var result = _ds_conn.BANK_ACCOUNTS.write({
     bank: bank,
@@ -1598,10 +1667,10 @@ var add_bank_account = function add_bank_account(req, res) {
 exports.add_bank_account = add_bank_account;
 
 var remove_bank_account = function remove_bank_account(req, res) {
-  var _req$body30 = req.body,
-      user = _req$body30.user,
-      account = _req$body30.account,
-      wallet = _req$body30.wallet;
+  var _req$body31 = req.body,
+      user = _req$body31.user,
+      account = _req$body31.account,
+      wallet = _req$body31.wallet;
 
   _ds_conn.BANK_ACCOUNTS.remove({
     user: user,

@@ -1,11 +1,12 @@
 import { CHATS, MESSAGES, OFFERS } from "../conn/ds_conn";
 import { generate_reference_number } from "./entry";
 import fs from "fs";
+import { new_notification } from "./wallet";
 
 const on_chat = (req, res) => {
-  let { chat, offer } = req.body;
+  let { chat, offer, user } = req.body;
 
-  res.json({ data: CHATS.readone(chat, { subfolder: offer }) });
+  res.json({ data: CHATS.readone({ _id: chat, user }, { subfolder: offer }) });
 };
 
 const on_message_write = (req, res) => {
@@ -26,7 +27,17 @@ const on_message_write = (req, res) => {
     }
   } catch (e) {}
 
-  res.json({ data: MESSAGES.write(message) });
+  let result = MESSAGES.write(message);
+  message._id = result._id;
+
+  new_notification(
+    message.to,
+    `New Message request in Offer`,
+    new Array(message.offer, message.onsale, message.chat, message._id),
+    { currency: message.currency }
+  );
+
+  res.json({ data: result });
 };
 
 const on_offer = (req, res) => {
@@ -36,7 +47,15 @@ const on_offer = (req, res) => {
 };
 
 const on_offer_update = (req, res) => {
-  let { offer, onsale, offer_update } = req.body;
+  let { offer, onsale, currency, message, chat, offer_update, notify } =
+    req.body;
+
+  new_notification(
+    notify,
+    `New message`,
+    new Array(message, chat, offer, onsale),
+    { currency }
+  );
 
   res.json({ data: OFFERS.update({ _id: offer, onsale }, offer_update) });
 };

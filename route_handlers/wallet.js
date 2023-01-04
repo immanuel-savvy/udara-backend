@@ -7,7 +7,9 @@ import {
   LOGS,
   MESSAGES,
   MY_OFFERS,
+  NOTIFICATIONS,
   OFFERS,
+  OFFER_NEED,
   ONSALE,
   TRANSACTIONS,
   USERS,
@@ -15,7 +17,11 @@ import {
   WALLETS,
 } from "../conn/ds_conn";
 import { api_key, client_id, paga_collection_client, password } from "../Udara";
-import { generate_reference_number, operating_currencies } from "./entry";
+import {
+  generate_reference_number,
+  load_operating_currencies,
+  operating_currencies,
+} from "./entry";
 
 import sha512 from "js-sha512";
 import { generate_random_string } from "../utils/functions";
@@ -31,11 +37,7 @@ const request_account_details = async (req, res) => {
   let { user, amount } = req.body;
 
   user = USERS.readone(user);
-  let { phone, _id } = user;
-  if (phone.startsWith("+234")) {
-    phone = phone.slice(4);
-    if (phone[0] !== "0") phone = `0${phone}`;
-  }
+  let { email, _id } = user;
 
   let response = await paga_collection_client.paymentRequest({
     referenceNumber: generate_reference_number(),
@@ -47,7 +49,7 @@ const request_account_details = async (req, res) => {
     payee: { name: "Admin" },
     payer: {
       name: `${_id}`,
-      phoneNumber: phone,
+      email: email.trim().toLowerCase(),
     },
     payerCollectionFeeShare: 1.0,
     recipientCollectionFeeShare: 0.0,
@@ -73,8 +75,21 @@ const request_account_details = async (req, res) => {
   } else
     res.json({
       ok: false,
-      data: { message: "could not generate account details at this time" },
+      data: {
+        message: "could not generate account details at this time",
+        reason: response.response.statusMessage,
+      },
     });
+};
+
+const new_notification = (user, title, data, metadata) => {
+  NOTIFICATIONS.write({
+    user,
+    title,
+    data,
+    metadata,
+  });
+  USERS.update(user, { new_notification: { $inc: 1 } });
 };
 
 const create_transaction = ({
@@ -131,13 +146,20 @@ const update_fav_currency = (req, res) => {
 };
 
 const onsale = (req, res) => {
-  let { currency, value } = req.body;
+  let { currency, fetch_currencies, user, skip, limit } = req.body;
 
-  let onsale = ONSALE.read({
-    currency,
-    value: { $gte: value },
-    minimum_sell_value: { $lte: value },
-  });
+  let onsale = ONSALE.read(
+    {
+      currency,
+      seller: { $ne: user },
+    },
+    { skip, limit }
+  );
+
+  if (fetch_currencies) {
+    onsale = { onsales: onsale };
+    onsale.currencies = load_operating_currencies();
+  }
 
   res.json({ ok: true, data: onsale });
 };
@@ -378,7 +400,8 @@ const dislike_sale = (req, res) => {
 };
 
 const make_offer = (req, res) => {
-  let { amount, offer_rate, wallet, currency, user, onsale } = req.body;
+  let { amount, offer_rate, offer_need, wallet, currency, user, onsale } =
+    req.body;
 
   let offer = {
     amount,
@@ -387,6 +410,7 @@ const make_offer = (req, res) => {
     onsale,
     currency,
     wallet,
+    offer_need,
     status: "pending",
   };
   let result = OFFERS.write(offer);
@@ -396,7 +420,17 @@ const make_offer = (req, res) => {
 
   MY_OFFERS.write({ user, currency, offer: offer._id, onsale });
 
-  ONSALE.update({ _id: onsale, currency }, { pending: { $inc: 1 } });
+  let onsale_res = ONSALE.update(
+    { _id: onsale, currency },
+    { pending: { $inc: 1 } }
+  );
+
+  new_notification(
+    onsale_res.seller,
+    `new offer from ${USERS.readone(user).username}`,
+    new Array(onsale, offer._id),
+    { currency }
+  );
 
   res.json({ ok: true, message: "offer placed", data: offer });
 };
@@ -453,14 +487,22 @@ const onsale_offers = (req, res) => {
 const accept_offer = (req, res) => {
   let { onsale, offer } = req.body;
   let result = OFFERS.update({ _id: offer, onsale }, { status: "accepted" });
+  if (result.user._id) result.user = result.user._id;
 
-  forward_message(result.user._id, result.seller, offer, {
+  forward_message(result.user, result.seller, offer, {
     status: "accepted",
   });
 
-  ONSALE.update(
+  let onsale_res = ONSALE.update(
     { _id: onsale, currency: result.currency },
     { pending: { $dec: 1 }, accepted: { $inc: 1 } }
+  );
+
+  new_notification(
+    result.user,
+    `offer accepted by ${USERS.readone(onsale_res.seller).username}`,
+    new Array(onsale, offer),
+    { currency: result.currency }
   );
 
   result
@@ -471,14 +513,22 @@ const accept_offer = (req, res) => {
 const decline_offer = (req, res) => {
   let { onsale, offer } = req.body;
   let result = OFFERS.update({ _id: offer, onsale }, { status: "declined" });
+  if (result.user._id) result.user = result.user._id;
 
-  forward_message(result.user._id, result.seller, offer, {
+  forward_message(result.user, result.seller, offer, {
     status: "declined",
   });
 
-  ONSALE.update(
+  let onsale_res = ONSALE.update(
     { _id: onsale, currency: result.currency },
     { pending: { $dec: 1 }, declined: { $inc: 1 } }
+  );
+
+  new_notification(
+    result.user,
+    `offer declined by ${USERS.readone(onsale_res.seller).username}`,
+    new Array(onsale, offer),
+    { currency: result.currency }
   );
 
   result
@@ -491,6 +541,12 @@ const remove_offer = (req, res) => {
 
   let result = OFFERS.remove({ _id: offer, onsale });
   result && MY_OFFERS.remove({ offer, buyer: result.user });
+
+  ONSALE.update(
+    result.onsale,
+    { pending: { $dec: 1 } },
+    { subfolder: result.currency }
+  );
 
   res.json({ ok: true, message: "offer removed", data: offer });
 };
@@ -509,6 +565,13 @@ const fulfil_offer = (req, res) => {
   );
 
   forward_message(seller, buyer, offer, { status: "awaiting confirmation" });
+
+  new_notification(
+    buyer,
+    `Fulfilled offer by ${USERS.readone(onsale_res.seller).username}`,
+    new Array(onsale, offer),
+    { currency: offer_.currency }
+  );
 
   res.json({
     ok: true,
@@ -551,6 +614,13 @@ const deposit_to_escrow = (req, res) => {
 
   forward_message(offer_.user._id, seller, offer, { status: "in-escrow" });
 
+  new_notification(
+    seller,
+    `buyer deposited to escrow`,
+    new Array(onsale, offer),
+    { currency: offer_.currency }
+  );
+
   res.json({
     ok: true,
     message: "deposited to escrow",
@@ -591,6 +661,13 @@ const confirm_offer = (req, res) => {
     naira: { $dec: cost },
     profits: { $inc: cost * 0.005 },
   });
+
+  new_notification(
+    seller,
+    `buyer confirmed transaction successful`,
+    new Array(onsale, offer),
+    { currency: offer_.currency }
+  );
 
   forward_message(offer_.user._id, seller, offer, { status: "completed" });
 
@@ -679,6 +756,13 @@ const offer_in_dispute = (req, res) => {
     { prior_offer_status, status: "in-dispute" }
   );
 
+  new_notification(
+    initiator === buyer ? seller : buyer,
+    "Offer in dispute",
+    new Array(offer, onsale),
+    { currency }
+  );
+
   forward_message(offer_.user._id, seller, offer, { status: "in-dispute" });
 
   ONSALE.update(
@@ -714,6 +798,18 @@ const resolve_dispute = (req, res) => {
     }
   );
 
+  let dispute = DISPUTES.readone({ offer });
+
+  dispute &&
+    new_notification(
+      dispute.initiator === offer_.user._id
+        ? update.seller._id || update.seller
+        : offer_.user._id,
+      "Dispute resolved",
+      new Array(offer, onsale),
+      { currency: offer_.currency }
+    );
+
   forward_message(offer_.user._id, update.seller, offer, {
     status: offer_.prior_offer_status,
   });
@@ -735,11 +831,10 @@ const dispute = (req, res) => {
 };
 
 const disputes = (req, res) => {
-  let { reset_pager } = req.body;
+  let { skip, limit } = req.body;
   let disputes = DISPUTES.read(null, {
-    limit: 15,
-    paging: platform_user,
-    reset_pager,
+    skip,
+    limit,
   });
   let onsales = ONSALE.read(
     disputes.map((dispute) => dispute.onsale),
@@ -778,6 +873,15 @@ const refund_buyer = (req, res) => {
   let onsale_update = ONSALE.update(
     { _id: onsale, currency: offer_.currency },
     { in_dispute: { $dec: 1 }, closed: { $inc: 1 } }
+  );
+
+  new_notification(
+    offer_.user._id,
+    `Your escrow deposit for below offer has been refunded`,
+    new Array(offer, onsale),
+    {
+      currency: offer_.currency,
+    }
   );
 
   forward_message(offer_.user._id, onsale_update.seller, offer, {
@@ -857,11 +961,24 @@ const refresh_wallet = (req, res) => {
   });
 };
 
+const state_offer_need = (req, res) => {
+  let { offer_need } = req.body;
+
+  let result = OFFER_NEED.write(offer_need);
+
+  res.json({
+    ok: true,
+    message: "offer need",
+    data: { _id: result._id, created: result.created },
+  });
+};
+
 export {
   get_banks,
   bank_accounts,
   add_bank_account,
   remove_bank_account,
+  state_offer_need,
   transactions,
   place_sale,
   my_sales,
@@ -897,5 +1014,6 @@ export {
   buyer_offers,
   paga_deposit,
   add_fiat_account,
+  new_notification,
   request_account_details,
 };

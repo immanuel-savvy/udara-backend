@@ -16,6 +16,9 @@ let USERS,
   LOGS,
   BANK_ACCOUNTS,
   MY_OFFERS,
+  VERIFICATION_DETAILS,
+  OFFER_NEED,
+  NOTIFICATIONS,
   gds;
 
 let ds_conn = () => {
@@ -32,11 +35,14 @@ let ds_conn = () => {
   ONBOARDINGS = gds.folder("onboardings");
   MY_OFFERS = gds.folder("my_offers", "user", new Array("onsale", "offer"));
   ONSALE = gds.folder("onsale", "currency", "seller");
-  OFFERS = gds.folder("offers", "onsale", "user");
+  OFFERS = gds.folder("offers", "onsale", ["user", "offer_need"]);
   DISPUTES = gds.folder("disputes", "offer", "offer");
   PAYMENT_ACCOUNTS = gds.folder("payment_accounts");
   BANK_ACCOUNTS = gds.folder("bank_account", "user");
+  NOTIFICATIONS = gds.folder("notifications", "user");
   FIAT_ACCOUNTS = gds.folder("fiat_accounts", "user");
+  OFFER_NEED = gds.folder("offer_need");
+  VERIFICATION_DETAILS = gds.folder("verification_details");
   UTILS = gds.folder("utils", "util");
 
   console.log("Datastore is ready.");
@@ -51,14 +57,17 @@ export {
   TRANSACTIONS,
   HASHES,
   ONBOARDINGS,
+  NOTIFICATIONS,
   CHATS,
   MESSAGES,
   ONSALE,
   UTILS,
   DISPUTES,
+  VERIFICATION_DETAILS,
   LOGS,
   MY_OFFERS,
   OFFERS,
+  OFFER_NEED,
   PAYMENT_ACCOUNTS,
   FIAT_ACCOUNTS,
   BANK_ACCOUNTS,

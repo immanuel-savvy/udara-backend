@@ -1,10 +1,13 @@
 import { CHATS, MESSAGES, OFFERS } from "../conn/ds_conn";
 import fs from "fs";
 import { generate_reference_number } from "./entry";
+import { new_notification } from "./wallet";
 
 const new_chat = (req, res) => {
   let { offer, from, to } = req.body;
   let chat = { offer, from, to };
+
+  chat.user = new Array(from, to);
   let result = CHATS.write(chat);
 
   if (!result) res.json({ ok: false, message: "unable to write chat" });
@@ -54,9 +57,9 @@ const clear_new_messages = (req, res) => {
 };
 
 const chat = (req, res) => {
-  let { offer } = req.body;
+  let { offer, user } = req.body;
 
-  let chat = CHATS.readone({ offer });
+  let chat = CHATS.readone({ offer, user });
 
   res.json({ ok: true, message: "chat fetched", data: chat });
 };

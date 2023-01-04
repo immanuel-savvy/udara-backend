@@ -11,6 +11,8 @@ var _entry = require("./entry");
 
 var _fs = _interopRequireDefault(require("fs"));
 
+var _wallet = require("./wallet");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 var on_chat = function on_chat(req, res) {
@@ -39,8 +41,10 @@ var on_message_write = function on_message_write(req, res) {
     }
   } catch (e) {}
 
+  var result = _ds_conn.MESSAGES.write(message);
+
   res.json({
-    data: _ds_conn.MESSAGES.write(message)
+    data: result
   });
 };
 
@@ -64,7 +68,14 @@ var on_offer_update = function on_offer_update(req, res) {
   var _req$body3 = req.body,
       offer = _req$body3.offer,
       onsale = _req$body3.onsale,
-      offer_update = _req$body3.offer_update;
+      currency = _req$body3.currency,
+      message = _req$body3.message,
+      chat = _req$body3.chat,
+      offer_update = _req$body3.offer_update,
+      notify = _req$body3.notify;
+  (0, _wallet.new_notification)(notify, "New message", new Array(message, chat, offer, onsale), {
+    currency: currency
+  });
   res.json({
     data: _ds_conn.OFFERS.update({
       _id: offer,
