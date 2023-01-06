@@ -2,8 +2,9 @@ import "core-js/stable";
 import "regenerator-runtime/runtime";
 
 import express from "express";
-import ds_conn, { MY_OFFERS } from "./conn/ds_conn";
+import ds_conn from "./conn/ds_conn";
 import routes from "./routes";
+import cors from "cors";
 import bodyParser from "body-parser";
 import { create_platform_wallet } from "./route_handlers/starter";
 import { load_operating_currencies } from "./route_handlers/entry";
@@ -26,6 +27,7 @@ const paga_collection_client = new PagaCollectClient()
   .setTest(true)
   .build();
 
+app.use(cors());
 app.use(express.static(__dirname + "/Assets"));
 app.use(bodyParser.urlencoded({ extended: true, limit: "100mb" }));
 app.use(bodyParser.json({ limit: "100mb" }));

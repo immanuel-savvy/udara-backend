@@ -4,15 +4,18 @@
   "description": "Udara backend",
   "main": "Udara.js",
   "scripts": {
-    "build": "babel ./route_handlers/entry.js -d build",
+    "build": "babel ./route_handlers/settings.js ./route_handlers/starter.js ./route_handlers/utils.js ./route_handlers/email.js ./conn/ds_conn.js -d build",
     "start": "nodemon -r esm Udara.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Savvy",
   "license": "ISC",
   "dependencies": {
+    "@mono.co/connect.js": "^0.2.2",
+    "api": "^5.0.5",
     "axios": "^0.27.2",
     "body-parser": "^1.20.0",
+    "cors": "^2.8.5",
     "express": "^4.18.1",
     "formidable": "^2.0.1",
     "generalised-datastore": "^1.7.74",

@@ -19,6 +19,11 @@ import {
   verify_otp,
 } from "./route_handlers/entry";
 import {
+  closed_test_account_modal,
+  udara_client_task_live,
+  udara_client_task_test,
+} from "./route_handlers/mono_stuff";
+import {
   notifications,
   notifications_seen,
 } from "./route_handlers/notifications";
@@ -154,6 +159,11 @@ const routes = (app) => {
   app.post("/on_message_write", on_message_write);
   app.post("/on_offer", on_offer);
   app.post("/on_offer_update", on_offer_update);
+
+  // Mono stuff
+  app.post("/udara_client_task_test", udara_client_task_test);
+  app.post("/udara_client_task_live", udara_client_task_live);
+  app.post("/closed_test_account_modal", closed_test_account_modal);
 };
 
 export default routes;

@@ -3,14 +3,15 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports["default"] = exports.WALLETS = exports.VERIFICATION_DETAILS = exports.UTILS = exports.USERS = exports.TRANSACTIONS = exports.PAYMENT_ACCOUNTS = exports.ONSALE = exports.ONBOARDINGS = exports.OFFERS = exports.NOTIFICATIONS = exports.MY_OFFERS = exports.MESSAGES = exports.LOGS = exports.HASHES = exports.FIAT_ACCOUNTS = exports.DISPUTES = exports.CHATS = exports.BANK_ACCOUNTS = void 0;
+exports["default"] = exports.WALLETS = exports.VERIFICATION_DETAILS = exports.UTILS = exports.USERS = exports.TRANSACTIONS = exports.PAYMENT_ACCOUNTS = exports.ONSALE = exports.ONBOARDINGS = exports.OFFER_NEED = exports.OFFERS = exports.NOTIFICATIONS = exports.MY_OFFERS = exports.MESSAGES = exports.LOGS = exports.HASHES = exports.FIAT_ACCOUNTS = exports.DISPUTES = exports.CHATS = exports.BANK_ACCOUNTS = void 0;
 
 var _generalisedDatastore = _interopRequireDefault(require("generalised-datastore"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-var USERS, WALLETS, TRANSACTIONS, OFFERS, ONSALE, HASHES, CHATS, MESSAGES, ONBOARDINGS, UTILS, PAYMENT_ACCOUNTS, FIAT_ACCOUNTS, DISPUTES, LOGS, BANK_ACCOUNTS, MY_OFFERS, VERIFICATION_DETAILS, NOTIFICATIONS, gds;
+var USERS, WALLETS, TRANSACTIONS, OFFERS, ONSALE, HASHES, CHATS, MESSAGES, ONBOARDINGS, UTILS, PAYMENT_ACCOUNTS, FIAT_ACCOUNTS, DISPUTES, LOGS, BANK_ACCOUNTS, MY_OFFERS, VERIFICATION_DETAILS, OFFER_NEED, NOTIFICATIONS, gds;
 exports.NOTIFICATIONS = NOTIFICATIONS;
+exports.OFFER_NEED = OFFER_NEED;
 exports.VERIFICATION_DETAILS = VERIFICATION_DETAILS;
 exports.MY_OFFERS = MY_OFFERS;
 exports.BANK_ACCOUNTS = BANK_ACCOUNTS;
@@ -42,12 +43,13 @@ var ds_conn = function ds_conn() {
   exports.ONBOARDINGS = ONBOARDINGS = gds.folder("onboardings");
   exports.MY_OFFERS = MY_OFFERS = gds.folder("my_offers", "user", new Array("onsale", "offer"));
   exports.ONSALE = ONSALE = gds.folder("onsale", "currency", "seller");
-  exports.OFFERS = OFFERS = gds.folder("offers", "onsale", "user");
+  exports.OFFERS = OFFERS = gds.folder("offers", "onsale", ["user", "offer_need"]);
   exports.DISPUTES = DISPUTES = gds.folder("disputes", "offer", "offer");
   exports.PAYMENT_ACCOUNTS = PAYMENT_ACCOUNTS = gds.folder("payment_accounts");
   exports.BANK_ACCOUNTS = BANK_ACCOUNTS = gds.folder("bank_account", "user");
   exports.NOTIFICATIONS = NOTIFICATIONS = gds.folder("notifications", "user");
   exports.FIAT_ACCOUNTS = FIAT_ACCOUNTS = gds.folder("fiat_accounts", "user");
+  exports.OFFER_NEED = OFFER_NEED = gds.folder("offer_need");
   exports.VERIFICATION_DETAILS = VERIFICATION_DETAILS = gds.folder("verification_details");
   exports.UTILS = UTILS = gds.folder("utils", "util");
   console.log("Datastore is ready.");

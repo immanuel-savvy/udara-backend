@@ -428,4 +428,5 @@ export {
   operating_currencies,
   generate_reference_number,
   get_verification_detail,
+  send_mail,
 };
