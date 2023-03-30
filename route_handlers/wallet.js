@@ -973,7 +973,29 @@ const state_offer_need = (req, res) => {
   });
 };
 
+const brass_webhook_secret = "udara_brass_webhook_secreet";
+
+const brass_callback = (req, res) => {
+  let event = req.body;
+
+  // validate event
+  const hash = require("crypto")
+    .createHmac("sha256", brass_webhook_secret)
+    .update(JSON.stringify(event))
+    .digest("hex");
+
+  // return appropriate response if the request hash does not match the header
+  if (hash != req.headers["X-Brass-Signature"])
+    return res.status(401).json({ message: "Unauthorized request." });
+
+  // do something with event
+  LOGS.write(event);
+
+  res.send(200);
+};
+
 export {
+  brass_callback,
   get_banks,
   bank_accounts,
   add_bank_account,

@@ -81,6 +81,7 @@ import {
   refresh_wallet,
   buyer_offers,
   state_offer_need,
+  brass_callback,
 } from "./route_handlers/wallet";
 
 const routes = (app) => {
@@ -160,10 +161,8 @@ const routes = (app) => {
   app.post("/on_offer", on_offer);
   app.post("/on_offer_update", on_offer_update);
 
-  // Mono stuff
-  app.post("/udara_client_task_test", udara_client_task_test);
-  app.post("/udara_client_task_live", udara_client_task_live);
-  app.post("/closed_test_account_modal", closed_test_account_modal);
+  // Brass
+  app.post("/brass_callback", brass_callback);
 };
 
 export default routes;
