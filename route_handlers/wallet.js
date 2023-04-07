@@ -1,6 +1,7 @@
 import axios from "axios";
 import {
   BANK_ACCOUNTS,
+  BRASS_SUBACCOUNTS,
   CHATS,
   DISPUTES,
   FIAT_ACCOUNTS,
@@ -975,26 +976,51 @@ const state_offer_need = (req, res) => {
 
 const brass_webhook_secret = "udara_brass_webhook_secreet";
 
+const brass_personal_access_token =
+  "335|pat-L1yPwtp5HyylGgNWbN9kUjhcQ6W7784h6IydqlIP";
+
 const brass_callback = (req, res) => {
-  let event = req.body;
+  let event_ = req.body;
 
   // validate event
-  const hash = require("crypto")
-    .createHmac("sha256", brass_webhook_secret)
-    .update(JSON.stringify(event))
-    .digest("hex");
+  // const hash = require("crypto")
+  //   .createHmac("sha256", brass_webhook_secret)
+  //   .update(JSON.stringify(event))
+  //   .digest("hex");
 
   // return appropriate response if the request hash does not match the header
-  if (hash != req.headers["X-Brass-Signature"])
-    return res.status(401).json({ message: "Unauthorized request." });
+  // if (hash != req.headers["X-Brass-Signature"])thorized request." });
 
+  //   return res.status(401).json({ message: "Unau
   // do something with event
-  LOGS.write(event);
+  // LOGS.write(event_);
+  let { event, data } = event_;
+
+  if (event === "account.created") {
+    let user = data.customer_reference.replace(/_/g, "~");
+
+    let result = BRASS_SUBACCOUNTS.write({
+      number: data.number,
+      name: data.name,
+      alias: data.alias,
+      account_id: data.id,
+      user,
+    });
+    user = USERS.update(user, { brass_account: result._id });
+    WALLETS.update(user.wallet, { brass_account: result._id });
+  } else if (event === "account.credited") {
+    let user = USERS.readone(data.account.customer_reference);
+
+    WALLETS.update(user.wallet, {
+      naira: { $inc: Number(data.amount.raw) / 100 },
+    });
+  }
 
   res.send(200);
 };
 
 export {
+  brass_personal_access_token,
   brass_callback,
   get_banks,
   bank_accounts,

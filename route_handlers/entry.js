@@ -15,7 +15,12 @@ import { conversion_rates } from "./starter";
 import nodemailer from "nodemailer";
 import { verification } from "./email";
 import fs from "fs";
-import { new_notification, platform_user } from "./wallet";
+import {
+  brass_personal_access_token,
+  new_notification,
+  platform_user,
+} from "./wallet";
+import axios, { Axios } from "axios";
 
 let pending_otps = new Object();
 let operating_currencies;
@@ -209,6 +214,23 @@ const verify_otp = async (req, res) => {
     };
     let result = USERS.write(user);
     user._id = result._id;
+
+    await axios({
+      url: "https://sandbox-api.getbrass.co/banking/accounts",
+      method: "post",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        Authorization: `Bearer ${brass_personal_access_token}`,
+      },
+      data: {
+        alias: `${user.username}`,
+        monthly_budget: 1000000000,
+        debit_wait_time_in_minutes: 0,
+        customer_reference: user._id.replace(/~/g, "_"),
+      },
+    });
+
     let wallet = { user: user._id, naira: 0, dollar: 0, pound: 0, euro: 0 };
     result = WALLETS.write(wallet);
     wallet._id = result._id;

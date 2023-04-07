@@ -18,6 +18,7 @@ let USERS,
   MY_OFFERS,
   VERIFICATION_DETAILS,
   OFFER_NEED,
+  BRASS_SUBACCOUNTS,
   NOTIFICATIONS,
   gds;
 
@@ -26,7 +27,8 @@ let ds_conn = () => {
   gds.sync();
 
   USERS = gds.folder("users");
-  WALLETS = gds.folder("wallets");
+  BRASS_SUBACCOUNTS = gds.folder("brass_subaccounts");
+  WALLETS = gds.folder("wallets", null, "brass_account");
   TRANSACTIONS = gds.folder("transactions", "wallet");
   CHATS = gds.folder("chats", "offer");
   LOGS = gds.folder("logs");
@@ -59,6 +61,7 @@ export {
   ONBOARDINGS,
   NOTIFICATIONS,
   CHATS,
+  BRASS_SUBACCOUNTS,
   MESSAGES,
   ONSALE,
   UTILS,

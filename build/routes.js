@@ -9,8 +9,6 @@ var _chats = require("./route_handlers/chats");
 
 var _entry = require("./route_handlers/entry");
 
-var _mono_stuff = require("./route_handlers/mono_stuff");
-
 var _notifications = require("./route_handlers/notifications");
 
 var _settings = require("./route_handlers/settings");
@@ -94,11 +92,7 @@ var routes = function routes(app) {
   app.post("/on_chat", _socket.on_chat);
   app.post("/on_message_write", _socket.on_message_write);
   app.post("/on_offer", _socket.on_offer);
-  app.post("/on_offer_update", _socket.on_offer_update); // Mono stuff
-
-  app.post("/udara_client_task_test", _mono_stuff.udara_client_task_test);
-  app.post("/udara_client_task_live", _mono_stuff.udara_client_task_live);
-  app.post("/closed_test_account_modal", _mono_stuff.closed_test_account_modal); // Brass
+  app.post("/on_offer_update", _socket.on_offer_update); // Brass
 
   app.post("/brass_callback", _wallet.brass_callback);
 };

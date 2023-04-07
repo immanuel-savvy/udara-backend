@@ -1,0 +1,209 @@
+{
+  "event": {
+    "event": "account.credited",
+    "data": {
+      "embeds": ["account", "causer", "fee", "additional_fees"],
+      "id": "led_5SFtBdLaTE6jpYMDWcdk0g",
+      "type": "credit",
+      "currency": "NGN",
+      "amount": {
+        "raw": "5000000",
+        "formatted": "50000.00",
+        "formatted_display": "₦50,000.00"
+      },
+      "memo": "Lola School Fees Term-2",
+      "ledger_balance": {
+        "raw": "49984940000",
+        "formatted": "499849400.00",
+        "formatted_display": "₦499,849,400.00"
+      },
+      "available_balance": {
+        "raw": "49984940000",
+        "formatted": "499849400.00",
+        "formatted_display": "₦499,849,400.00"
+      },
+      "gateway": "Paystack",
+      "gateway_reference": "csh_6kjjuYgqrEBsmTyfTXN4Xv",
+      "is_committed": true,
+      "commit_at": "2023-03-30T01:36:34+01:00",
+      "is_trashed": false,
+      "deleted_at": null,
+      "created_at": "2023-03-30T01:36:34+01:00",
+      "updated_at": "2023-03-30T01:36:34+01:00",
+      "causer_type": "cash_inflow",
+      "is_fee": false,
+      "account": {
+        "data": {
+          "embeds": ["bank", "customer", "total_outgoing", "signatories"],
+          "id": "acc_2grHIUj1HAHQ7TYlroxXCB",
+          "provider": "BlackHole",
+          "provider_reference": null,
+          "customer_reference": null,
+          "number": "SA7695PZ2R7K50YQ29KX20W1",
+          "name": "udara",
+          "currency": "NGN",
+          "ledger_balance": {
+            "raw": "49989880000",
+            "formatted": "499898800.00",
+            "formatted_display": "₦499,898,800.00"
+          },
+          "available_balance": {
+            "raw": "49989880000",
+            "formatted": "499898800.00",
+            "formatted_display": "₦499,898,800.00"
+          },
+          "is_default": true,
+          "is_virtual": false,
+          "is_partner_managed": false,
+          "is_wallet": false,
+          "wallet_type": null,
+          "callback_time_minutes": 10,
+          "locked_reason": null,
+          "locked_at": null,
+          "disable_reason": null,
+          "disabled_at": null,
+          "is_trashed": false,
+          "deleted_at": null,
+          "created_at": "2023-03-27T17:20:15+01:00",
+          "updated_at": "2023-03-30T01:19:55+01:00",
+          "alias": null,
+          "masked_number": "SA*******************0W1",
+          "preferences": { "monthly_budget": null, "monthly_limit": null },
+          "qr_codes": {
+            "green": "https://s3.eu-west-1.amazonaws.com/sandbox-private.getbrass.co/cus_5xSTjqvINft1iwtcKuWbSl/public-files/qr-codes/acc_2grHIUj1HAHQ7TYlroxXCB-bog.svg",
+            "white": "https://s3.eu-west-1.amazonaws.com/sandbox-private.getbrass.co/cus_5xSTjqvINft1iwtcKuWbSl/public-files/qr-codes/acc_2grHIUj1HAHQ7TYlroxXCB-bow.svg",
+            "qr_pdf_card": "https://s3.eu-west-1.amazonaws.com/sandbox-private.getbrass.co/cus_5xSTjqvINft1iwtcKuWbSl/public-files/qr-cards/portrait-card-acc_2grHIUj1HAHQ7TYlroxXCB.pdf",
+            "qr_image_card": "https://s3.eu-west-1.amazonaws.com/sandbox-private.getbrass.co/cus_5xSTjqvINft1iwtcKuWbSl/public-files/qr-cards/acc_2grHIUj1HAHQ7TYlroxXCB.jpg"
+          },
+          "titan_reference": "586d4f09-1403-419c-a300-5598080e0bdf",
+          "titan_id": null,
+          "bank": {
+            "data": {
+              "embeds": ["country"],
+              "id": "bnk_2VuZw1v8QFXh3ragc2qaVm",
+              "code": "035",
+              "name": "Wema Bank",
+              "type": "nuban",
+              "is_visible": true,
+              "is_trashed": false,
+              "deleted_at": null,
+              "created_at": "2020-03-23T22:41:36+01:00",
+              "updated_at": "2023-03-29T15:46:29+01:00"
+            }
+          }
+        }
+      },
+      "causer": {
+        "data": {
+          "embeds": ["customer", "transactable", "payer"],
+          "id": "csh_6kjjuYgqrEBsmTyfTXN4Xv",
+          "gateway": "Paystack",
+          "currency": "NGN",
+          "amount": {
+            "raw": "5000000",
+            "formatted": "50000.00",
+            "formatted_display": "₦50,000.00"
+          },
+          "fee": {
+            "raw": "60000",
+            "formatted": "600.00",
+            "formatted_display": "₦600.00"
+          },
+          "status": "success",
+          "gateway_reference": "csh_6kjjuYgqrEBsmTyfTXN4Xv",
+          "gateway_code": "account-public-page-deposit",
+          "gateway_message": "Successful",
+          "gateway_response": {
+            "id": 2674459695,
+            "log": null,
+            "fees": 60000,
+            "plan": [],
+            "split": [],
+            "amount": 5000000,
+            "domain": "test",
+            "paidAt": "2023-03-30T00:36:32.000Z",
+            "source": {
+              "type": "web",
+              "source": "checkout",
+              "identifier": null,
+              "entry_point": "request_inline"
+            },
+            "status": "success",
+            "channel": "card",
+            "message": null,
+            "paid_at": "2023-03-30T00:36:32.000Z",
+            "currency": "NGN",
+            "customer": {
+              "id": 117541033,
+              "email": "immanuelsavvy@gmail.com",
+              "phone": null,
+              "metadata": null,
+              "last_name": null,
+              "first_name": "Immanuel Savvy",
+              "risk_action": "default",
+              "customer_code": "CUS_msw8uo2hqiny79n",
+              "international_format_phone": null
+            },
+            "metadata": {
+              "referrer": "https://pages.getbrass.co/payment/acc_2grHIUj1HAHQ7TYlroxXCB"
+            },
+            "order_id": null,
+            "reference": "csh_6kjjuYgqrEBsmTyfTXN4Xv",
+            "created_at": "2023-03-30T00:36:29.000Z",
+            "fees_split": null,
+            "ip_address": "105.112.63.65",
+            "subaccount": [],
+            "authorization": {
+              "bin": "408408",
+              "bank": "TEST BANK",
+              "brand": "visa",
+              "last4": "4081",
+              "channel": "card",
+              "exp_year": "2030",
+              "reusable": true,
+              "card_type": "visa",
+              "exp_month": "12",
+              "signature": "SIG_KgRQgiP6q4MhpHvplnFv",
+              "account_name": null,
+              "country_code": "NG",
+              "receiver_bank": null,
+              "authorization_code": "AUTH_79t0h0bid7",
+              "receiver_bank_account_number": null
+            },
+            "fees_breakdown": null,
+            "gateway_response": "Successful",
+            "requested_amount": 5000000,
+            "pos_transaction_data": null
+          },
+          "is_successful": true,
+          "requery_trials": 0,
+          "requeried_at": null,
+          "processed_at": "2023-03-30T01:36:32+01:00",
+          "is_trashed": false,
+          "deleted_at": null,
+          "created_at": "2023-03-30T01:36:27+01:00",
+          "updated_at": "2023-03-30T01:36:34+01:00",
+          "gateway_metadata": [],
+          "payer": {
+            "data": {
+              "embeds": ["customer", "bank"],
+              "id": "pyr_PoZqA70bKe1eVfh3wiqkf",
+              "number": null,
+              "name": "Immanuel Savvy",
+              "email": "immanuelsavvy@gmail.com",
+              "phone": "+2349011167699",
+              "is_trashed": false,
+              "deleted_at": null,
+              "created_at": "2023-03-30T01:20:40+01:00",
+              "updated_at": "2023-03-30T01:20:40+01:00"
+            }
+          }
+        }
+      }
+    }
+  },
+  "from_me": "YEAH??",
+  "_id": "logs~wi35bkze9zDHAFfourzm~1680136597585",
+  "created": 1680136597585,
+  "updated": 1680136597585
+}

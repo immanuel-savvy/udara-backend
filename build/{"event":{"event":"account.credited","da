@@ -1,0 +1,235 @@
+{
+  "event": {
+    "event": "account.credited",
+    "data": {
+      "embeds": [
+        "account",
+        "causer",
+        "fee",
+        "additional_fees"
+      ],
+      "id": "led_4Xy6fbMB8UGa8KkrVSJrFM",
+      "type": "credit",
+      "currency": "NGN",
+      "amount": {
+        "raw": "11000000",
+        "formatted": "110000.00",
+        "formatted_display": "₦110,000.00"
+      },
+      "memo": "Nothing much",
+      "ledger_balance": {
+        "raw": "9000000",
+        "formatted": "90000.00",
+        "formatted_display": "₦90,000.00"
+      },
+      "available_balance": {
+        "raw": "9000000",
+        "formatted": "90000.00",
+        "formatted_display": "₦90,000.00"
+      },
+      "gateway": "Paystack",
+      "gateway_reference": "csh_784FuqmZu14aiso9ep07pD",
+      "is_committed": true,
+      "commit_at": "2023-03-30T01:54:57+01:00",
+      "is_trashed": false,
+      "deleted_at": null,
+      "created_at": "2023-03-30T01:54:57+01:00",
+      "updated_at": "2023-03-30T01:54:57+01:00",
+      "causer_type": "cash_inflow",
+      "is_fee": false,
+      "account": {
+        "data": {
+          "embeds": [
+            "bank",
+            "customer",
+            "total_outgoing",
+            "signatories"
+          ],
+          "id": "acc_5qbgzC1oIvk7alEURaEEip",
+          "provider": "BlackHole",
+          "provider_reference": null,
+          "customer_reference": "xyz",
+          "number": "CH3216780TY9I26TCD6DQ",
+          "name": "udara - savvo",
+          "currency": "NGN",
+          "ledger_balance": {
+            "raw": "19868000",
+            "formatted": "198680.00",
+            "formatted_display": "₦198,680.00"
+          },
+          "available_balance": {
+            "raw": "19868000",
+            "formatted": "198680.00",
+            "formatted_display": "₦198,680.00"
+          },
+          "is_default": false,
+          "is_virtual": false,
+          "is_partner_managed": false,
+          "is_wallet": false,
+          "wallet_type": null,
+          "callback_time_minutes": 0,
+          "locked_reason": null,
+          "locked_at": null,
+          "disable_reason": null,
+          "disabled_at": null,
+          "is_trashed": false,
+          "deleted_at": null,
+          "created_at": "2023-03-29T23:53:55+01:00",
+          "updated_at": "2023-03-30T01:54:08+01:00",
+          "alias": "savvo",
+          "masked_number": "CH****************6DQ",
+          "preferences": {
+            "monthly_budget": {
+              "raw": "1000000000",
+              "formatted": "10000000.00",
+              "formatted_display": "₦10,000,000.00"
+            },
+            "monthly_limit": null
+          },
+          "qr_codes": {
+            "green": "https://s3.eu-west-1.amazonaws.com/sandbox-private.getbrass.co/cus_5xSTjqvINft1iwtcKuWbSl/public-files/qr-codes/acc_5qbgzC1oIvk7alEURaEEip-bog.svg",
+            "white": "https://s3.eu-west-1.amazonaws.com/sandbox-private.getbrass.co/cus_5xSTjqvINft1iwtcKuWbSl/public-files/qr-codes/acc_5qbgzC1oIvk7alEURaEEip-bow.svg",
+            "qr_pdf_card": "https://s3.eu-west-1.amazonaws.com/sandbox-private.getbrass.co/cus_5xSTjqvINft1iwtcKuWbSl/public-files/qr-cards/portrait-card-acc_5qbgzC1oIvk7alEURaEEip.pdf",
+            "qr_image_card": "https://s3.eu-west-1.amazonaws.com/sandbox-private.getbrass.co/cus_5xSTjqvINft1iwtcKuWbSl/public-files/qr-cards/acc_5qbgzC1oIvk7alEURaEEip.jpg"
+          },
+          "titan_reference": "c029f098-e61d-4912-9339-fab384912503",
+          "titan_id": null,
+          "bank": {
+            "data": {
+              "embeds": [
+                "country"
+              ],
+              "id": "bnk_2VuZw1v8QFXh3ragc2qaVm",
+              "code": "035",
+              "name": "Wema Bank",
+              "type": "nuban",
+              "is_visible": true,
+              "is_trashed": false,
+              "deleted_at": null,
+              "created_at": "2020-03-23T22:41:36+01:00",
+              "updated_at": "2023-03-29T15:46:29+01:00"
+            }
+          }
+        }
+      },
+      "causer": {
+        "data": {
+          "embeds": [
+            "customer",
+            "transactable",
+            "payer"
+          ],
+          "id": "csh_784FuqmZu14aiso9ep07pD",
+          "gateway": "Paystack",
+          "currency": "NGN",
+          "amount": {
+            "raw": "11000000",
+            "formatted": "110000.00",
+            "formatted_display": "₦110,000.00"
+          },
+          "fee": {
+            "raw": "132000",
+            "formatted": "1320.00",
+            "formatted_display": "₦1,320.00"
+          },
+          "status": "success",
+          "gateway_reference": "csh_784FuqmZu14aiso9ep07pD",
+          "gateway_code": "account-public-page-deposit",
+          "gateway_message": "Successful",
+          "gateway_response": {
+            "id": 2674470976,
+            "log": null,
+            "fees": 132000,
+            "plan": [],
+            "split": [],
+            "amount": 11000000,
+            "domain": "test",
+            "paidAt": "2023-03-30T00:54:56.000Z",
+            "source": {
+              "type": "web",
+              "source": "checkout",
+              "identifier": null,
+              "entry_point": "request_inline"
+            },
+            "status": "success",
+            "channel": "card",
+            "message": null,
+            "paid_at": "2023-03-30T00:54:56.000Z",
+            "currency": "NGN",
+            "customer": {
+              "id": 117541033,
+              "email": "immanuelsavvy@gmail.com",
+              "phone": null,
+              "metadata": null,
+              "last_name": null,
+              "first_name": "Immanuel Savvy",
+              "risk_action": "default",
+              "customer_code": "CUS_msw8uo2hqiny79n",
+              "international_format_phone": null
+            },
+            "metadata": {
+              "referrer": "https://pages.getbrass.co/payment/acc_5qbgzC1oIvk7alEURaEEip"
+            },
+            "order_id": null,
+            "reference": "csh_784FuqmZu14aiso9ep07pD",
+            "created_at": "2023-03-30T00:54:53.000Z",
+            "fees_split": null,
+            "ip_address": "105.112.63.65",
+            "subaccount": [],
+            "authorization": {
+              "bin": "408408",
+              "bank": "TEST BANK",
+              "brand": "visa",
+              "last4": "4081",
+              "channel": "card",
+              "exp_year": "2030",
+              "reusable": true,
+              "card_type": "visa",
+              "exp_month": "12",
+              "signature": "SIG_KgRQgiP6q4MhpHvplnFv",
+              "account_name": null,
+              "country_code": "NG",
+              "receiver_bank": null,
+              "authorization_code": "AUTH_js61g2cwri",
+              "receiver_bank_account_number": null
+            },
+            "fees_breakdown": null,
+            "gateway_response": "Successful",
+            "requested_amount": 11000000,
+            "pos_transaction_data": null
+          },
+          "is_successful": true,
+          "requery_trials": 0,
+          "requeried_at": null,
+          "processed_at": "2023-03-30T01:54:56+01:00",
+          "is_trashed": false,
+          "deleted_at": null,
+          "created_at": "2023-03-30T01:54:50+01:00",
+          "updated_at": "2023-03-30T01:54:58+01:00",
+          "gateway_metadata": [],
+          "payer": {
+            "data": {
+              "embeds": [
+                "customer",
+                "bank"
+              ],
+              "id": "pyr_PoZqA70bKe1eVfh3wiqkf",
+              "number": null,
+              "name": "Immanuel Savvy",
+              "email": "immanuelsavvy@gmail.com",
+              "phone": "+2349011167699",
+              "is_trashed": false,
+              "deleted_at": null,
+              "created_at": "2023-03-30T01:20:40+01:00",
+              "updated_at": "2023-03-30T01:20:40+01:00"
+            }
+          }
+        }
+      }
+    }
+  },
+  "from_me": "YEAH??",
+  "_id": "logs~zKzWMocGZ5Kdlrer5zzAc~1680137700419",
+  "created": 1680137700419,
+  "updated": 1680137700419
+}

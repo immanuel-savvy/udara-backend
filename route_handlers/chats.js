@@ -1,7 +1,6 @@
 import { CHATS, MESSAGES, OFFERS } from "../conn/ds_conn";
 import fs from "fs";
 import { generate_reference_number } from "./entry";
-import { new_notification } from "./wallet";
 
 const new_chat = (req, res) => {
   let { offer, from, to } = req.body;

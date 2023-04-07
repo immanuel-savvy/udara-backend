@@ -19,11 +19,6 @@ import {
   verify_otp,
 } from "./route_handlers/entry";
 import {
-  closed_test_account_modal,
-  udara_client_task_live,
-  udara_client_task_test,
-} from "./route_handlers/mono_stuff";
-import {
   notifications,
   notifications_seen,
 } from "./route_handlers/notifications";
