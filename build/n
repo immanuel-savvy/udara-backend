@@ -1,0 +1,258 @@
+{
+  "event": "account.debited",
+  "data": {
+    "embeds": [
+      "account",
+      "causer",
+      "fee",
+      "additional_fees"
+    ],
+    "id": "led_2lIBwHXRgz31bVMzmyCgI7",
+    "type": "debit",
+    "currency": "NGN",
+    "amount": {
+      "raw": "3500",
+      "formatted": "35.00",
+      "formatted_display": "₦35.00"
+    },
+    "memo": "Transfer commission",
+    "ledger_balance": {
+      "raw": "440500",
+      "formatted": "4405.00",
+      "formatted_display": "₦4,405.00"
+    },
+    "available_balance": {
+      "raw": "415500",
+      "formatted": "4155.00",
+      "formatted_display": "₦4,155.00"
+    },
+    "gateway": "BlackHole",
+    "gateway_reference": "dis_61ZSXTO6Gb9KdW78kMxKIM-fee",
+    "is_committed": true,
+    "commit_at": "2023-04-08T11:15:11+01:00",
+    "is_trashed": false,
+    "deleted_at": null,
+    "created_at": "2023-04-08T11:15:11+01:00",
+    "updated_at": "2023-04-08T11:15:11+01:00",
+    "causer_type": "disbursement",
+    "is_fee": true,
+    "account": {
+      "data": {
+        "embeds": [
+          "bank",
+          "customer",
+          "total_outgoing",
+          "signatories"
+        ],
+        "id": "acc_1Qo2zFVDk9dmEy9naXBDvy",
+        "provider": "BlackHole",
+        "provider_reference": null,
+        "customer_reference": "users_UvhcA3PcGM1tAPaKwp5EKX8_1680870252219",
+        "number": "6996896339",
+        "name": "udara - user-535",
+        "currency": "NGN",
+        "ledger_balance": {
+          "raw": "412000",
+          "formatted": "4120.00",
+          "formatted_display": "₦4,120.00"
+        },
+        "available_balance": {
+          "raw": "412000",
+          "formatted": "4120.00",
+          "formatted_display": "₦4,120.00"
+        },
+        "is_default": false,
+        "is_virtual": false,
+        "is_partner_managed": false,
+        "is_wallet": false,
+        "wallet_type": null,
+        "callback_time_minutes": 0,
+        "locked_reason": null,
+        "locked_at": null,
+        "disable_reason": null,
+        "disabled_at": null,
+        "is_trashed": false,
+        "deleted_at": null,
+        "created_at": "2023-04-07T13:24:23+01:00",
+        "updated_at": "2023-04-07T13:24:23+01:00",
+        "alias": "user-535",
+        "masked_number": "69*****339",
+        "preferences": {
+          "monthly_budget": {
+            "raw": "1000000000",
+            "formatted": "10000000.00",
+            "formatted_display": "₦10,000,000.00"
+          },
+          "monthly_limit": null
+        },
+        "qr_codes": {
+          "green": "https://s3.eu-west-1.amazonaws.com/sandbox-private.getbrass.co/cus_5xSTjqvINft1iwtcKuWbSl/public-files/qr-codes/acc_1Qo2zFVDk9dmEy9naXBDvy-bog.svg",
+          "white": "https://s3.eu-west-1.amazonaws.com/sandbox-private.getbrass.co/cus_5xSTjqvINft1iwtcKuWbSl/public-files/qr-codes/acc_1Qo2zFVDk9dmEy9naXBDvy-bow.svg"
+        },
+        "titan_reference": "2f10363a-0147-4652-9d07-a21c6ec39736",
+        "titan_id": null,
+        "bank": {
+          "data": {
+            "embeds": [
+              "country"
+            ],
+            "id": "bnk_2VuZw1v8QFXh3ragc2qaVm",
+            "code": "035",
+            "name": "Wema Bank",
+            "type": "nuban",
+            "is_visible": true,
+            "is_trashed": false,
+            "deleted_at": null,
+            "created_at": "2020-03-23T22:41:36+01:00",
+            "updated_at": "2023-04-06T19:07:38+01:00"
+          }
+        }
+      }
+    },
+    "causer": {
+      "data": {
+        "embeds": [
+          "counterparty",
+          "timeline_events"
+        ],
+        "id": "dis_61ZSXTO6Gb9KdW78kMxKIM",
+        "gateway": "BlackHole",
+        "status": "success",
+        "gateway_reference": "dis_61ZSXTO6Gb9KdW78kMxKIM",
+        "gateway_code": null,
+        "gateway_message": "success",
+        "gateway_response": {
+          "id": 51512,
+          "fee": 3500,
+          "amount": 25000,
+          "status": "success",
+          "currency": "NGN",
+          "bank_code": "058",
+          "reference": "dis_61ZSXTO6Gb9KdW78kMxKIM",
+          "account_name": "GIWA EMMANUEL OLORUNTOBI",
+          "account_number": "0273658996"
+        },
+        "is_successful": true,
+        "requery_trials": 0,
+        "requery_response": null,
+        "requeried_at": null,
+        "is_trashed": false,
+        "deleted_at": null,
+        "created_at": "2023-04-08T11:15:10+01:00",
+        "updated_at": "2023-04-08T11:15:11+01:00",
+        "counterparty": {
+          "data": {
+            "embeds": [
+              "customer",
+              "added_by_user",
+              "counterparty",
+              "disbursements",
+              "transactable"
+            ],
+            "id": "cpt_3hZ3AjspNCz466YsXuTU8y",
+            "status": "unprocessed",
+            "responded_at": null,
+            "created_at": "2023-04-08T11:14:04+01:00",
+            "updated_at": "2023-04-08T11:14:04+01:00",
+            "counterparty_type": "contact",
+            "transactable_type": "payment",
+            "counterparty": {
+              "data": {
+                "embeds": [
+                  "customer",
+                  "contact_group",
+                  "contact_tag",
+                  "added_by_user",
+                  "recipient_customer_profile",
+                  "bank"
+                ],
+                "id": "con_2d7gSuWTI4XiIpakwHc4LJ",
+                "number": "0273658996",
+                "name": "GIWA EMMANUEL OLORUNTOBI",
+                "alias": null,
+                "currency": "NGN",
+                "phone": null,
+                "email": null,
+                "is_beneficiary": true,
+                "is_starred": false,
+                "is_hidden": false,
+                "disabled_at": null,
+                "is_trashed": false,
+                "deleted_at": null,
+                "created_at": "2023-04-08T07:32:07+01:00",
+                "updated_at": "2023-04-08T07:32:07+01:00",
+                "bank": {
+                  "data": {
+                    "embeds": [
+                      "country"
+                    ],
+                    "id": "bnk_6olmbCUFbOepd0XQIzDRTA",
+                    "code": "058",
+                    "name": "Guaranty Trust Bank",
+                    "type": "nuban",
+                    "is_visible": true,
+                    "is_trashed": false,
+                    "deleted_at": null,
+                    "created_at": "2020-03-23T22:41:36+01:00",
+                    "updated_at": "2023-04-06T19:07:37+01:00"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "timeline_events": {
+          "data": [
+            {
+              "embeds": [
+                "customer"
+              ],
+              "id": "tev_4LQ9XJXAVE1vzKZ61Qjnga",
+              "event_name": "debit",
+              "display_text": "On source account for ₦250.00",
+              "created_at": "2023-04-08T11:15:11+01:00",
+              "updated_at": "2023-04-08T11:15:11+01:00",
+              "for": "disbursement"
+            },
+            {
+              "embeds": [
+                "customer"
+              ],
+              "id": "tev_3bKsllb6H11ETA7KuB17nE",
+              "event_name": "debit",
+              "display_text": "Transfer fee of ₦35.00",
+              "created_at": "2023-04-08T11:15:11+01:00",
+              "updated_at": "2023-04-08T11:15:11+01:00",
+              "for": "disbursement"
+            },
+            {
+              "embeds": [
+                "customer"
+              ],
+              "id": "tev_6BIE4oMpz5HhJ2EgGGeZV6",
+              "event_name": "updated",
+              "display_text": "Processing disbursement",
+              "created_at": "2023-04-08T11:15:11+01:00",
+              "updated_at": "2023-04-08T11:15:11+01:00",
+              "for": "disbursement"
+            },
+            {
+              "embeds": [
+                "customer"
+              ],
+              "id": "tev_5a4doTrbaxX67GbjimroG6",
+              "event_name": "sent_instruction",
+              "display_text": "To credit recipient",
+              "created_at": "2023-04-08T11:15:11+01:00",
+              "updated_at": "2023-04-08T11:15:11+01:00",
+              "for": "disbursement"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "_id": "logs~d7qVcTn4e13qF2nlk~1680948914520",
+  "created": 1680948914520,
+  "updated": 1680948914520
+}

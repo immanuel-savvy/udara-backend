@@ -33,6 +33,8 @@ var routes = function routes(app) {
   app.get("/onsale_offers/:onsale/:status", _wallet.onsale_offers);
   app.get("/conversion_rates", _settings.get_conversion_rates);
   app.get("/get_banks", _wallet.get_banks);
+  app.get("/user_brass_account/:user", _wallet.user_brass_account);
+  app.get("/resolve_bank_account_name", _wallet.resolve_bank_account_name);
   app.get("/get_verification_detail/:user", _entry.get_verification_detail);
   app.get("/get_code_by_country/:country", _settings.get_code_by_country);
   /* POST */

@@ -100,6 +100,7 @@ const create_transaction = ({
   debit,
   from_value,
   data,
+  reference_number,
 }) => {
   let transaction = {
     title,
@@ -108,6 +109,7 @@ const create_transaction = ({
     user,
     from_value,
     debit,
+    reference_number,
     data,
   };
 
@@ -255,8 +257,79 @@ const make_payment = async ({ bank, account_number }, amount) => {
   return { response, reference_number: referenceNumber };
 };
 
+const make_brass_payment = async (
+  bank_account,
+  amount,
+  source_account,
+  { req, res, wallet, user }
+) => {
+  let { account_name, bank_id, account_number } = bank_account;
+  LOGS.write({ account_name, bank_id, account_number, amount, source_account });
+
+  let reference_number = generate_reference_number();
+  let response;
+
+  LOGS.write({
+    account_name,
+    bank_id,
+    account_number,
+    amount,
+    source_account,
+    reference_number,
+  });
+
+  try {
+    response = await axios({
+      url: "https://sandbox-api.getbrass.co/banking/payments",
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${brass_personal_access_token}`,
+      },
+      data: {
+        title: "withdrawal",
+        amount: Number(amount) * 100,
+        to: {
+          name: account_name,
+          bank: bank_id,
+          account_number,
+        },
+        source_account,
+        customer_reference: reference_number,
+      },
+    });
+
+    response = response && response.data;
+
+    res.json({
+      ok: true,
+      message: "transaction successful",
+      data: {
+        ok: true,
+        message: "topup",
+        transaction: create_transaction({
+          wallet: wallet._id,
+          user,
+          from_value: Number(amount),
+          title: "pending-withdrawal",
+          debit: true,
+          reference_number,
+        }),
+      },
+    });
+  } catch (e) {
+    LOGS.write(e);
+    res.json({
+      ok: false,
+      message: "withdrawal failed",
+      data: { ok: false },
+    });
+  }
+};
+
 const withdraw = async (req, res) => {
   let { user, amount, bank_account, paycheck, wallet } = req.body;
+
   if (!Number(amount))
     return res.json({ ok: false, message: "invalid transaction amount" });
 
@@ -269,38 +342,21 @@ const withdraw = async (req, res) => {
     if (wallet.profits < Number(amount)) return res.end();
   } else if (wallet.naira < Number(amount)) return res.end();
 
-  let { response, reference_number } = await make_payment(bank_account, amount);
-
-  if ((response && response.responseCode) || !response)
-    return res.json({
-      ok: false,
-      message: "withdrawal failed",
-      data: { ok: false },
-    });
-
-  WALLETS.update(
-    wallet,
-    paycheck
-      ? { profits: { $dec: Number(amount) } }
-      : { naira: { $dec: Number(amount) } }
+  await make_brass_payment(
+    typeof bank_account === "object"
+      ? bank_account
+      : BANK_ACCOUNTS.readone({ user, _id: bank_account }),
+    amount,
+    BRASS_SUBACCOUNTS.readone(wallet.brass_account).account_id,
+    { req, res, wallet, user }
   );
 
-  res.json({
-    ok: true,
-    message: "transaction successful",
-    data: {
-      ok: true,
-      message: "topup",
-      transaction: create_transaction({
-        wallet,
-        user,
-        from_value: Number(amount),
-        title: "withdrawal",
-        debit: true,
-        reference_number,
-      }),
-    },
-  });
+  // WALLETS.update(
+  //   wallet,
+  //   paycheck
+  //     ? { profits: { $dec: Number(amount) } }
+  //     : { naira: { $dec: Number(amount) } }
+  // );
 };
 
 const place_sale = (req, res) => {
@@ -908,18 +964,56 @@ const refund_buyer = (req, res) => {
 const get_banks = async (req, res) => {
   let banks;
   try {
-    banks = await paga_collection_client.getBanks({
-      referenceNumber: generate_reference_number(),
+    banks = await axios({
+      method: "get",
+      url: "https://sandbox-api.getbrass.co/banking/banks?page=1&limit=95",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${brass_personal_access_token}`,
+      },
     });
   } catch (e) {}
 
-  banks && !banks.error
+  banks = banks && banks.data;
+
+  banks && banks.data
     ? res.json({
         ok: true,
         message: "get banks endpoint",
-        data: banks.response.banks,
+        data: banks.data,
       })
     : res.json({ ok: false, message: "cannot get banks", data: new Array() });
+};
+
+const resolve_bank_account_name = async (req, res) => {
+  let { account_number, bank } = req.body;
+
+  let details;
+  try {
+    details = await axios({
+      method: "get",
+      url: `https://sandbox-api.getbrass.co/banking/banks/account-name?bank=${bank}&account_number=${account_number}`,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${brass_personal_access_token}`,
+      },
+    });
+
+    details = details && details.data;
+
+    if (details && details.data)
+      res.json({
+        ok: true,
+        message: "Account name resolved",
+        data: details.data,
+      });
+    else
+      res.json({
+        ok: false,
+        message: "Cannot resolve account name at the moment",
+        data: details.error,
+      });
+  } catch (e) {}
 };
 
 const bank_accounts = (req, res) => {
@@ -931,9 +1025,17 @@ const bank_accounts = (req, res) => {
 };
 
 const add_bank_account = (req, res) => {
-  let { bank, bank_name, user, wallet, account_number } = req.body;
+  let { bank, bank_name, bank_id, user, wallet, account_name, account_number } =
+    req.body;
 
-  let result = BANK_ACCOUNTS.write({ bank, bank_name, user, account_number });
+  let result = BANK_ACCOUNTS.write({
+    bank,
+    bank_name,
+    account_name,
+    user,
+    bank_id,
+    account_number,
+  });
   WALLETS.update(wallet, { bank_accounts: { $inc: 1 } });
 
   res.json({
@@ -993,7 +1095,7 @@ const brass_callback = (req, res) => {
 
   //   return res.status(401).json({ message: "Unau
   // do something with event
-  // LOGS.write(event_);
+  LOGS.write(event_);
   let { event, data } = event_;
 
   if (event === "account.created") {
@@ -1009,14 +1111,94 @@ const brass_callback = (req, res) => {
     user = USERS.update(user, { brass_account: result._id });
     WALLETS.update(user.wallet, { brass_account: result._id });
   } else if (event === "account.credited") {
-    let user = USERS.readone(data.account.customer_reference);
+    let user = USERS.readone(
+      data.account &&
+        data.account.data.customer_reference &&
+        data.account &&
+        data.account.data.customer_reference.replace(/_/g, "~")
+    );
 
-    WALLETS.update(user.wallet, {
-      naira: { $inc: Number(data.amount.raw) / 100 },
+    LOGS.write({
+      user,
+      wallet: user && user.wallet,
+      use:
+        data.account &&
+        data.account.data.customer_reference &&
+        data.account &&
+        data.account.data.customer_reference.replace(/_/g, "~"),
+      raw_use: data.account.data.customer_reference,
+      amount: Number(data.amount.raw) / 100,
+      walL_det: WALLETS.update(user && user.wallet, {
+        naira: { $inc: Number(data.amount.raw) / 100 },
+      }),
     });
+
+    create_transaction({
+      wallet: user.wallet,
+      user: user._id,
+      from_value: Number(Number(data.amount.raw) / 100),
+      title: `Top Up - ${data.memo}`,
+    });
+  } else if (event === "account.debited") {
+    let { amount, memo, account } = data;
+    let user = account.data.customer_reference.replace(/_/g, "~");
+
+    user = USERS.readone(user);
+    let wallet = WALLETS.readone(user.wallet);
+
+    if (memo !== "withdrawal") {
+      create_transaction({
+        wallet: wallet._id,
+        user: user._id,
+        from_value: Number(Number(amount.raw) / 100),
+        title: memo,
+        debit: true,
+      });
+
+      WALLETS.update(wallet._id, { naira: { $dec: Number(amount.raw) / 100 } });
+    }
+  } else if (event === "payable.completed") {
+    let { amount, status, customer_reference, source_account: account } = data;
+    let user = account.data.customer_reference.replace(/_/g, "~");
+    user = USERS.readone(user);
+
+    let wallet = WALLETS.readone(user.wallet);
+
+    LOGS.write({
+      user: user && user._id,
+      wallet: wallet && wallet._id,
+      acc: account.data.customer_reference,
+      amt: Number(amount.raw),
+    });
+
+    if (status === "success") {
+      WALLETS.update(wallet._id, { naira: { $dec: Number(amount.raw) / 100 } });
+      TRANSACTIONS.update(
+        { reference_number: customer_reference, wallet: wallet._id },
+        { title: "Withdraw Successful" }
+      );
+    } else {
+      WALLETS.update(wallet._id, { naira: { $inc: Number(amount.raw) / 100 } });
+      TRANSACTIONS.update(
+        { reference_number: customer_reference, wallet: wallet._id },
+        {
+          title: "Withdrawal Failed",
+        }
+      );
+    }
   }
 
   res.send(200);
+};
+
+const user_brass_account = (req, res) => {
+  let { user } = req.params;
+
+  res.json({
+    ok: true,
+    message: "User brass account",
+    data: user && BRASS_SUBACCOUNTS.readone({ user }),
+  });
 };
 
 export {
@@ -1025,6 +1207,7 @@ export {
   get_banks,
   bank_accounts,
   add_bank_account,
+  user_brass_account,
   remove_bank_account,
   state_offer_need,
   transactions,
@@ -1064,4 +1247,5 @@ export {
   add_fiat_account,
   new_notification,
   request_account_details,
+  resolve_bank_account_name,
 };

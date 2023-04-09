@@ -77,6 +77,8 @@ import {
   buyer_offers,
   state_offer_need,
   brass_callback,
+  resolve_bank_account_name,
+  user_brass_account,
 } from "./route_handlers/wallet";
 
 const routes = (app) => {
@@ -93,6 +95,7 @@ const routes = (app) => {
   app.get("/onsale_offers/:onsale/:status", onsale_offers);
   app.get("/conversion_rates", get_conversion_rates);
   app.get("/get_banks", get_banks);
+  app.get("/user_brass_account/:user", user_brass_account);
   app.get("/get_verification_detail/:user", get_verification_detail);
   app.get("/get_code_by_country/:country", get_code_by_country);
 
@@ -158,6 +161,7 @@ const routes = (app) => {
 
   // Brass
   app.post("/brass_callback", brass_callback);
+  app.post("/resolve_bank_account_name", resolve_bank_account_name);
 };
 
 export default routes;

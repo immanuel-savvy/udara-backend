@@ -20,7 +20,7 @@ import {
   new_notification,
   platform_user,
 } from "./wallet";
-import axios, { Axios } from "axios";
+import axios from "axios";
 
 let pending_otps = new Object();
 let operating_currencies;
