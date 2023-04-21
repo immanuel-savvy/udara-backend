@@ -5,7 +5,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" =
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.verify_otp = exports.verify_account = exports.user_refresh = exports.update_phone = exports.update_password = exports.update_email = exports.unverified_details = exports.send_mail = exports.request_otp = exports.operating_currencies = exports.onboardings = exports.logging_in = exports.load_operating_currencies = exports.get_verification_detail = exports.generate_reference_number = exports.account_verification = void 0;
+exports.verify_otp = exports.verify_email = exports.verify_account = exports.user_refresh = exports.update_user_data = exports.update_phone = exports.update_password = exports.update_email = exports.unverified_details = exports.send_mail = exports.request_otp = exports.operating_currencies = exports.onboardings = exports.logging_in = exports.load_operating_currencies = exports.get_verification_detail = exports.generate_reference_number = exports.forgot_password = exports.create_brass_subaccount = exports.account_verification = void 0;
 
 var _ds_conn = require("../conn/ds_conn");
 
@@ -64,6 +64,10 @@ var load_operating_currencies = function load_operating_currencies() {
       icon: "dollar_icon.png",
       flag: "usa_flag_rectangle.png",
       alphabetic_name: "USD",
+      util: "operating_currencies"
+    });
+
+    _ds_conn.UTILS.remove_several({
       util: "operating_currencies"
     });
 
@@ -216,6 +220,43 @@ var send_mail = function send_mail(_ref2) {
 
 exports.send_mail = send_mail;
 
+var create_brass_subaccount = function create_brass_subaccount(username, user) {
+  (0, _axios["default"])({
+    url: "https://sandbox-api.getbrass.co/banking/accounts",
+    method: "post",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      Authorization: "Bearer ".concat(_wallet.brass_personal_access_token)
+    },
+    data: {
+      alias: "".concat(username),
+      monthly_budget: 1000000000,
+      debit_wait_time_in_minutes: 0,
+      customer_reference: user.replace(/~/g, "_")
+    }
+  });
+};
+
+exports.create_brass_subaccount = create_brass_subaccount;
+
+var update_user_data = function update_user_data(req, res) {
+  var _req$body = req.body,
+      user = _req$body.user,
+      username = _req$body.username,
+      phone = _req$body.phone;
+
+  _ds_conn.USERS.update(user, {
+    username: username,
+    phone: phone
+  });
+
+  create_brass_subaccount(username, user);
+  res.end();
+};
+
+exports.update_user_data = update_user_data;
+
 var request_otp = /*#__PURE__*/function () {
   var _ref3 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(req, res) {
     var email, user, code;
@@ -286,13 +327,13 @@ exports.request_otp = request_otp;
 
 var verify_otp = /*#__PURE__*/function () {
   var _ref4 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee3(req, res) {
-    var _req$body, code, country, country_code, email, otp_code, random_string, user, result, wallet;
+    var _req$body2, code, country, country_code, email, otp_code, random_string, user, result, wallet;
 
     return _regeneratorRuntime().wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            _req$body = req.body, code = _req$body.code, country = _req$body.country, country_code = _req$body.country_code, email = _req$body.email;
+            _req$body2 = req.body, code = _req$body2.code, country = _req$body2.country, country_code = _req$body2.country_code, email = _req$body2.email;
 
             if (!_ds_conn.USERS.readone({
               email: email
@@ -312,70 +353,44 @@ var verify_otp = /*#__PURE__*/function () {
             otp_code = pending_otps[email];
             delete pending_otps[email];
 
-            if (!(String(otp_code).trim() && String(otp_code).trim() === String(code).trim())) {
-              _context3.next = 23;
-              break;
-            }
+            if (String(otp_code).trim() && String(otp_code).trim() === String(code).trim()) {
+              random_string = (0, _functions.generate_random_string)((0, _functions.gen_random_int)(5, 3));
+              user = {
+                username: "user-".concat(random_string),
+                email: email,
+                country: country,
+                country_code: country_code,
+                created: Date.now(),
+                updated: Date.now()
+              };
+              result = _ds_conn.USERS.write(user);
+              user._id = result._id;
+              wallet = {
+                user: user._id,
+                naira: 0,
+                dollar: 0,
+                pound: 0,
+                euro: 0
+              };
+              result = _ds_conn.WALLETS.write(wallet);
+              wallet._id = result._id;
+              wallet.conversion_rates = _starter.conversion_rates;
+              wallet.currencies = load_operating_currencies();
 
-            random_string = (0, _functions.generate_random_string)((0, _functions.gen_random_int)(5, 3));
-            user = {
-              username: "user-".concat(random_string),
-              email: email,
-              country: country,
-              country_code: country_code,
-              created: Date.now(),
-              updated: Date.now()
-            };
-            result = _ds_conn.USERS.write(user);
-            user._id = result._id;
-            _context3.next = 13;
-            return (0, _axios["default"])({
-              url: "https://sandbox-api.getbrass.co/banking/accounts",
-              method: "post",
-              headers: {
-                accept: "application/json",
-                "content-type": "application/json",
-                Authorization: "Bearer ".concat(_wallet.brass_personal_access_token)
-              },
-              data: {
-                alias: "".concat(user.username),
-                monthly_budget: 1000000000,
-                debit_wait_time_in_minutes: 0,
-                customer_reference: user._id.replace(/~/g, "_")
-              }
-            });
+              _ds_conn.USERS.update(user._id, {
+                wallet: wallet._id
+              });
 
-          case 13:
-            wallet = {
-              user: user._id,
-              naira: 0,
-              dollar: 0,
-              pound: 0,
-              euro: 0
-            };
-            result = _ds_conn.WALLETS.write(wallet);
-            wallet._id = result._id;
-            wallet.conversion_rates = _starter.conversion_rates;
-            wallet.currencies = load_operating_currencies();
-
-            _ds_conn.USERS.update(user._id, {
-              wallet: wallet._id
-            });
-
-            user.wallet = wallet._id;
-            res.json({
-              ok: true,
-              message: "verification successful",
-              data: {
-                user: user,
-                wallet: wallet
-              }
-            });
-            _context3.next = 24;
-            break;
-
-          case 23:
-            res.json({
+              user.wallet = wallet._id;
+              res.json({
+                ok: true,
+                message: "verification successful",
+                data: {
+                  user: user,
+                  wallet: wallet
+                }
+              });
+            } else res.json({
               ok: false,
               message: "verification failed",
               data: {
@@ -384,7 +399,7 @@ var verify_otp = /*#__PURE__*/function () {
               }
             });
 
-          case 24:
+          case 7:
           case "end":
             return _context3.stop();
         }
@@ -400,12 +415,12 @@ var verify_otp = /*#__PURE__*/function () {
 exports.verify_otp = verify_otp;
 
 var update_phone = function update_phone(req, res) {
-  var _req$body2 = req.body,
-      phone = _req$body2.phone,
-      verify_later = _req$body2.verify_later,
-      user = _req$body2.user,
-      code = _req$body2.code,
-      country_code = _req$body2.country_code;
+  var _req$body3 = req.body,
+      phone = _req$body3.phone,
+      verify_later = _req$body3.verify_later,
+      user = _req$body3.user,
+      code = _req$body3.code,
+      country_code = _req$body3.country_code;
   if (!_ds_conn.USERS.readone(user)) return res.json({
     ok: false,
     message: "user does not exist",
@@ -432,10 +447,10 @@ var update_phone = function update_phone(req, res) {
 exports.update_phone = update_phone;
 
 var update_email = function update_email(req, res) {
-  var _req$body3 = req.body,
-      email = _req$body3.email,
-      user = _req$body3.user,
-      code = _req$body3.code;
+  var _req$body4 = req.body,
+      email = _req$body4.email,
+      user = _req$body4.user,
+      code = _req$body4.code;
   if (!_ds_conn.USERS.readone(user)) return res.json({
     ok: false,
     message: "user does not exist",
@@ -461,46 +476,19 @@ exports.update_email = update_email;
 
 var generate_reference_number = function generate_reference_number() {
   return "".concat((0, _functions.generate_random_string)(14, "alnum")).concat(Date.now());
-}; // const register_persistent_payment_reference = async (user) => {
-//   let user_obj = USERS.readone(user);
-//   let data = {
-//     referenceNumber: generate_reference_number(),
-//     phoneNumber: user_obj.phone,
-//     firstName: user_obj.firstname,
-//     lastName: user_obj.lastname,
-//     accountName: `${user_obj.firstname} ${user_obj.lastname}`,
-//     accountReference: `${generate_random_string(12)}${generate_random_string(
-//       6
-//     )}`,
-//     callBackUrl: `https://mobile.udaralinksapp.com/paga_deposit/${user}`,
-//   };
-//   let { response, error } =
-//     await paga_collection_client.registerPersistentPaymentAccount(data);
-//   let result = PAYMENT_ACCOUNTS.write({
-//     user,
-//     reference_number: data.referenceNumber,
-//     account_reference: data.accountReference,
-//     account_number: response.accountNumber,
-//   });
-//   USERS.update(user_obj._id, {
-//     payment_account: result._id,
-//     account_number: response.accountNumber,
-//   });
-//   return response;
-// };
-
+};
 
 exports.generate_reference_number = generate_reference_number;
 
 var update_password = /*#__PURE__*/function () {
   var _ref5 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee4(req, res) {
-    var _req$body4, user, key, new_user, result;
+    var _req$body5, user, key, result;
 
     return _regeneratorRuntime().wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
           case 0:
-            _req$body4 = req.body, user = _req$body4.user, key = _req$body4.key, new_user = _req$body4.new_user;
+            _req$body5 = req.body, user = _req$body5.user, key = _req$body5.key;
 
             if (!(!user || !key)) {
               _context4.next = 3;
@@ -514,23 +502,25 @@ var update_password = /*#__PURE__*/function () {
             }));
 
           case 3:
-            _ds_conn.HASHES.update_several({
+            result = _ds_conn.HASHES.update_several({
               user: user
             }, {
               hash: key
             });
-
-            result = _ds_conn.HASHES.write({
-              user: user,
-              hash: key
-            });
-            result && result._id && res.json({
+            if (result) res.json({
               ok: true,
               message: "update successful",
-              data: user
+              data: {
+                user: user
+              }
+            });else res.json({
+              ok: false,
+              data: {
+                message: "Data not found"
+              }
             });
 
-          case 6:
+          case 5:
           case "end":
             return _context4.stop();
         }
@@ -547,13 +537,13 @@ exports.update_password = update_password;
 
 var logging_in = /*#__PURE__*/function () {
   var _ref6 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee5(req, res) {
-    var _req$body5, email, key, user, email_pass, pass, wallet;
+    var _req$body6, email, key, user, email_pass, pass, wallet;
 
     return _regeneratorRuntime().wrap(function _callee5$(_context5) {
       while (1) {
         switch (_context5.prev = _context5.next) {
           case 0:
-            _req$body5 = req.body, email = _req$body5.email, key = _req$body5.key;
+            _req$body6 = req.body, email = _req$body6.email, key = _req$body6.key;
             email = email.toLowerCase().trim();
             user = _ds_conn.USERS.readone({
               email: email
@@ -698,12 +688,12 @@ var verify_account = function verify_account(req, res) {
 exports.verify_account = verify_account;
 
 var account_verification = function account_verification(req, res) {
-  var _req$body6 = req.body,
-      phone = _req$body6.phone,
-      user = _req$body6.user,
-      id = _req$body6.id,
-      id_type = _req$body6.id_type,
-      country_code = _req$body6.country_code;
+  var _req$body7 = req.body,
+      phone = _req$body7.phone,
+      user = _req$body7.user,
+      id = _req$body7.id,
+      id_type = _req$body7.id_type,
+      country_code = _req$body7.country_code;
   var filename = "".concat(generate_reference_number(), ".jpg");
 
   _fs["default"].writeFileSync("".concat(__dirname.split("/").slice(0, -1).join("/"), "/Assets/Images/").concat(filename), Buffer.from("".concat(id), "base64"));
@@ -746,3 +736,74 @@ var account_verification = function account_verification(req, res) {
 };
 
 exports.account_verification = account_verification;
+
+var forgot_password = function forgot_password(req, res) {
+  var email = req.body.email;
+
+  var user = _ds_conn.USERS.readone({
+    email: email
+  });
+
+  if (!user) return res.json({
+    ok: false,
+    data: {
+      message: "Email not registered"
+    }
+  });
+  var code = (0, _functions.generate_random_string)(6);
+  pending_otps[email] = code;
+  console.log(code);
+  send_mail({
+    recipient: email,
+    subject: "[Udara Links] Please verify your email",
+    sender: "signup@udaralinksapp.com",
+    sender_name: "Udara Links",
+    sender_pass: "signupudaralinks",
+    html: (0, _email.forgot_password_email)(code)
+  });
+  res.json({
+    ok: true,
+    message: "verify email",
+    data: {
+      email: email,
+      user: user._id
+    }
+  });
+};
+
+exports.forgot_password = forgot_password;
+
+var verify_email = function verify_email(req, res) {
+  var _req$body8 = req.body,
+      code = _req$body8.code,
+      email = _req$body8.email;
+  var otp_code = pending_otps[email];
+
+  if (!!otp_code && !!code && Number(code) === Number(otp_code)) {
+    var user = _ds_conn.USERS.readone({
+      email: email
+    });
+
+    if (!user) return res.json({
+      ok: false,
+      data: {
+        message: "Email not registered"
+      }
+    });
+    res.json({
+      ok: true,
+      message: "verify email",
+      data: {
+        email: email,
+        user: user._id
+      }
+    });
+  } else res.json({
+    ok: false,
+    data: {
+      message: "OTP does not match"
+    }
+  });
+};
+
+exports.verify_email = verify_email;

@@ -13,7 +13,7 @@ import {
 } from "../utils/functions";
 import { conversion_rates } from "./starter";
 import nodemailer from "nodemailer";
-import { verification } from "./email";
+import { forgot_password_email, verification } from "./email";
 import fs from "fs";
 import {
   brass_personal_access_token,
@@ -60,6 +60,7 @@ const load_operating_currencies = () => {
         util: "operating_currencies",
       }
     );
+    UTILS.remove_several({ util: "operating_currencies" });
     UTILS.write(operating_currencies);
   }
   if (!ONBOARDINGS.readone())
@@ -164,8 +165,37 @@ const send_mail = ({
   }
 };
 
+const create_brass_subaccount = (username, user) => {
+  axios({
+    url: "https://sandbox-api.getbrass.co/banking/accounts",
+    method: "post",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      Authorization: `Bearer ${brass_personal_access_token}`,
+    },
+    data: {
+      alias: `${username}`,
+      monthly_budget: 1000000000,
+      debit_wait_time_in_minutes: 0,
+      customer_reference: user.replace(/~/g, "_"),
+    },
+  });
+};
+
+const update_user_data = (req, res) => {
+  let { user, username, phone } = req.body;
+
+  USERS.update(user, { username, phone });
+
+  create_brass_subaccount(username, user);
+
+  res.end();
+};
+
 const request_otp = async (req, res) => {
   let { email } = req.body;
+
   if (!email || !email_regex.test(email))
     return res.json({ ok: false, message: "email field missing" });
 
@@ -214,22 +244,6 @@ const verify_otp = async (req, res) => {
     };
     let result = USERS.write(user);
     user._id = result._id;
-
-    await axios({
-      url: "https://sandbox-api.getbrass.co/banking/accounts",
-      method: "post",
-      headers: {
-        accept: "application/json",
-        "content-type": "application/json",
-        Authorization: `Bearer ${brass_personal_access_token}`,
-      },
-      data: {
-        alias: `${user.username}`,
-        monthly_budget: 1000000000,
-        debit_wait_time_in_minutes: 0,
-        customer_reference: user._id.replace(/~/g, "_"),
-      },
-    });
 
     let wallet = { user: user._id, naira: 0, dollar: 0, pound: 0, euro: 0 };
     result = WALLETS.write(wallet);
@@ -293,47 +307,20 @@ const update_email = (req, res) => {
 const generate_reference_number = () =>
   `${generate_random_string(14, "alnum")}${Date.now()}`;
 
-// const register_persistent_payment_reference = async (user) => {
-//   let user_obj = USERS.readone(user);
-
-//   let data = {
-//     referenceNumber: generate_reference_number(),
-//     phoneNumber: user_obj.phone,
-//     firstName: user_obj.firstname,
-//     lastName: user_obj.lastname,
-//     accountName: `${user_obj.firstname} ${user_obj.lastname}`,
-//     accountReference: `${generate_random_string(12)}${generate_random_string(
-//       6
-//     )}`,
-//     callBackUrl: `https://mobile.udaralinksapp.com/paga_deposit/${user}`,
-//   };
-
-//   let { response, error } =
-//     await paga_collection_client.registerPersistentPaymentAccount(data);
-//   let result = PAYMENT_ACCOUNTS.write({
-//     user,
-//     reference_number: data.referenceNumber,
-//     account_reference: data.accountReference,
-//     account_number: response.accountNumber,
-//   });
-//   USERS.update(user_obj._id, {
-//     payment_account: result._id,
-//     account_number: response.accountNumber,
-//   });
-
-//   return response;
-// };
-
 const update_password = async (req, res) => {
-  let { user, key, new_user } = req.body;
+  let { user, key } = req.body;
   if (!user || !key)
     return res.json({ ok: false, message: "invalid credentials", data: user });
 
-  HASHES.update_several({ user }, { hash: key });
-  let result = HASHES.write({ user, hash: key });
-  result &&
-    result._id &&
-    res.json({ ok: true, message: "update successful", data: user });
+  let result = HASHES.update_several({ user }, { hash: key });
+
+  if (result)
+    res.json({
+      ok: true,
+      message: "update successful",
+      data: { user },
+    });
+  else res.json({ ok: false, data: { message: "Data not found" } });
 };
 
 const logging_in = async (req, res) => {
@@ -434,6 +421,52 @@ const account_verification = (req, res) => {
   res.json({ ok: true, message: "account verification", data: { id, user } });
 };
 
+const forgot_password = (req, res) => {
+  let { email } = req.body;
+
+  let user = USERS.readone({ email });
+  if (!user)
+    return res.json({ ok: false, data: { message: "Email not registered" } });
+
+  let code = generate_random_string(6);
+  pending_otps[email] = code;
+  console.log(code);
+
+  send_mail({
+    recipient: email,
+    subject: "[Udara Links] Please verify your email",
+    sender: "signup@udaralinksapp.com",
+    sender_name: "Udara Links",
+    sender_pass: "signupudaralinks",
+    html: forgot_password_email(code),
+  });
+
+  res.json({
+    ok: true,
+    message: "verify email",
+    data: { email, user: user._id },
+  });
+};
+
+const verify_email = (req, res) => {
+  let { code, email } = req.body;
+
+  let otp_code = pending_otps[email];
+
+  if (!!otp_code && !!code && Number(code) === Number(otp_code)) {
+    let user = USERS.readone({ email });
+
+    if (!user)
+      return res.json({ ok: false, data: { message: "Email not registered" } });
+
+    res.json({
+      ok: true,
+      message: "verify email",
+      data: { email, user: user._id },
+    });
+  } else res.json({ ok: false, data: { message: "OTP does not match" } });
+};
+
 export {
   onboardings,
   request_otp,
@@ -442,6 +475,8 @@ export {
   update_password,
   update_phone,
   unverified_details,
+  forgot_password,
+  verify_email,
   verify_account,
   account_verification,
   update_email,
@@ -451,4 +486,6 @@ export {
   generate_reference_number,
   get_verification_detail,
   send_mail,
+  create_brass_subaccount,
+  update_user_data,
 };

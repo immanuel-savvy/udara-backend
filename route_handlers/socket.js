@@ -60,4 +60,32 @@ const on_offer_update = (req, res) => {
   res.json({ data: OFFERS.update({ _id: offer, onsale }, offer_update) });
 };
 
-export { on_chat, on_offer, on_offer_update, on_message_write };
+const direct_message = (req, res) => {
+  let payload = req.body;
+
+  let { chat, message } = payload;
+  let { offer, onsale, currency } = message;
+
+  if (!chat) {
+    on_chat(
+      {
+        body: {
+          chat: message.chat,
+          user: message.to === platform_id ? message.from : message.to,
+          onsale,
+          offer,
+        },
+      },
+      { json: (d) => d && d.data }
+    );
+  }
+  let resp =
+    on_message_write({ body: { message } }, { json: (d) => d && d.data }) || {};
+  message._id = resp._id;
+  message.created = resp.created;
+  message.updated = resp.updated;
+
+  res.end();
+};
+
+export { on_chat, on_offer, on_offer_update, on_message_write, direct_message };

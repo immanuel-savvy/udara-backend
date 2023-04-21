@@ -50,10 +50,13 @@ const clean_notification_data = (data) => {
 };
 
 const notifications = (req, res) => {
-  let { limit, skip } = req.body;
+  let { limit, skip, unseen } = req.body;
   let { user } = req.params;
 
-  let data = NOTIFICATIONS.read({ user }, { limit, skip });
+  let data = NOTIFICATIONS.read(unseen ? { user, unseen: true } : { user }, {
+    limit,
+    skip,
+  });
 
   data = clean_notification_data(data);
 
@@ -63,6 +66,7 @@ const notifications = (req, res) => {
 const notifications_seen = (req, res) => {
   let { user } = req.params;
 
+  NOTIFICATIONS.update_several({ user }, { unseen: false });
   USERS.update(user, { new_notification: 0 });
 
   res.end();

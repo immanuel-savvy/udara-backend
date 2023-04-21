@@ -31,6 +31,7 @@ const COMMISSION = 0.995;
 
 const platform_wallet = `wallets~platform_wallet~3000`;
 const platform_user = `users~platform_user~3000`;
+const platform_bank_account = `bank_account~platform_user~3000`;
 
 let acceptable_payment_method = "BANK_TRANSFER";
 
@@ -89,6 +90,7 @@ const new_notification = (user, title, data, metadata) => {
     title,
     data,
     metadata,
+    unseen: true,
   });
   USERS.update(user, { new_notification: { $inc: 1 } });
 };
@@ -261,7 +263,7 @@ const make_brass_payment = async (
   bank_account,
   amount,
   source_account,
-  { req, res, wallet, user }
+  { res, wallet, user, paycheck }
 ) => {
   let { account_name, bank_id, account_number } = bank_account;
   LOGS.write({ account_name, bank_id, account_number, amount, source_account });
@@ -300,6 +302,14 @@ const make_brass_payment = async (
     });
 
     response = response && response.data;
+
+    if (wallet._id)
+      WALLETS.update(
+        wallet._id,
+        paycheck
+          ? { profits: { $dec: Number(amount) } }
+          : { naira: { $dec: Number(amount) } }
+      );
 
     res.json({
       ok: true,
@@ -345,17 +355,15 @@ const withdraw = async (req, res) => {
   await make_brass_payment(
     typeof bank_account === "object"
       ? bank_account
-      : BANK_ACCOUNTS.readone({ user, _id: bank_account }),
+      : BANK_ACCOUNTS.readone(
+          paycheck
+            ? { user: platform_user, _id: platform_bank_account }
+            : { user, _id: bank_account }
+        ),
     amount,
     BRASS_SUBACCOUNTS.readone(wallet.brass_account).account_id,
-    { req, res, wallet, user }
+    { req, res, wallet, user, paycheck }
   );
-
-  // WALLETS.update(
-  //   wallet,
-  //   paycheck
-  //     ? { profits: { $dec: Number(amount) } }
-  //     : { naira: { $dec: Number(amount) } }
   // );
 };
 
@@ -616,7 +624,7 @@ const fulfil_offer = (req, res) => {
     { _id: offer, onsale },
     { status: "awaiting confirmation", timestamp }
   );
-  ONSALE.update(
+  let onsale_res = ONSALE.update(
     { _id: onsale, currency: offer_.currency },
     { in_escrow: { $dec: 1 }, awaiting_confirmation: { $inc: 1 } }
   );
@@ -662,12 +670,12 @@ const deposit_to_escrow = (req, res) => {
 
   OFFERS.update({ _id: offer, onsale }, { status: "in-escrow", timestamp });
   let wallet_update = WALLETS.update(buyer_wallet, { naira: { $dec: cost } });
+  WALLETS.update(platform_wallet, { naira: { $inc: cost } });
 
   ONSALE.update(
     { _id: onsale, currency: offer_.currency },
     { in_escrow: { $inc: 1 }, accepted: { $dec: 1 } }
   );
-  WALLETS.update({ _id: platform_wallet }, { naira: { $inc: cost } });
 
   forward_message(offer_.user._id, seller, offer, { status: "in-escrow" });
 
@@ -1172,7 +1180,6 @@ const brass_callback = (req, res) => {
     });
 
     if (status === "success") {
-      WALLETS.update(wallet._id, { naira: { $dec: Number(amount.raw) / 100 } });
       TRANSACTIONS.update(
         { reference_number: customer_reference, wallet: wallet._id },
         { title: "Withdraw Successful" }
@@ -1201,6 +1208,16 @@ const user_brass_account = (req, res) => {
   });
 };
 
+const paycheck_bank_account = (req, res) => {
+  res.json({
+    ok: true,
+    data: BANK_ACCOUNTS.readone({
+      _id: platform_bank_account,
+      user: platform_user,
+    }),
+  });
+};
+
 export {
   brass_personal_access_token,
   brass_callback,
@@ -1210,6 +1227,7 @@ export {
   user_brass_account,
   remove_bank_account,
   state_offer_need,
+  paycheck_bank_account,
   transactions,
   place_sale,
   my_sales,
@@ -1246,6 +1264,7 @@ export {
   paga_deposit,
   add_fiat_account,
   new_notification,
+  platform_bank_account,
   request_account_details,
   resolve_bank_account_name,
 };

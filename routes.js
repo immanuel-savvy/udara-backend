@@ -7,6 +7,7 @@ import {
 } from "./route_handlers/chats";
 import {
   account_verification,
+  forgot_password,
   get_verification_detail,
   logging_in,
   onboardings,
@@ -14,8 +15,10 @@ import {
   unverified_details,
   update_password,
   update_phone,
+  update_user_data,
   user_refresh,
   verify_account,
+  verify_email,
   verify_otp,
 } from "./route_handlers/entry";
 import {
@@ -30,6 +33,7 @@ import {
   get_conversion_rates,
 } from "./route_handlers/settings";
 import {
+  direct_message,
   on_chat,
   on_message_write,
   on_offer,
@@ -79,6 +83,7 @@ import {
   brass_callback,
   resolve_bank_account_name,
   user_brass_account,
+  paycheck_bank_account,
 } from "./route_handlers/wallet";
 
 const routes = (app) => {
@@ -95,6 +100,7 @@ const routes = (app) => {
   app.get("/onsale_offers/:onsale/:status", onsale_offers);
   app.get("/conversion_rates", get_conversion_rates);
   app.get("/get_banks", get_banks);
+  app.get("/paycheck_bank_account", paycheck_bank_account);
   app.get("/user_brass_account/:user", user_brass_account);
   app.get("/get_verification_detail/:user", get_verification_detail);
   app.get("/get_code_by_country/:country", get_code_by_country);
@@ -107,6 +113,8 @@ const routes = (app) => {
   app.post("/buyer_offers", buyer_offers);
   app.post("/update_phone", update_phone);
   app.post("/update_password", update_password);
+  app.post("/forgot_password", forgot_password);
+  app.post("/verify_email", verify_email);
   app.post("/logging_in", logging_in);
   app.post("/state_offer_need", state_offer_need);
   app.post("/onsale", onsale);
@@ -143,11 +151,13 @@ const routes = (app) => {
   app.post("/my_sales/:seller", my_sales);
   app.post("/add_fiat_account", add_fiat_account);
   app.post("/new_message", new_message);
+  app.post("/direct_message", direct_message);
   app.post("/account_verification", account_verification);
   app.post("/unverified_details", unverified_details);
   app.post("/verify_account/:detail", verify_account);
   app.post("/notifications/:user", notifications);
   app.post("/notifications_seen/:user", notifications_seen);
+  app.post("/update_user_data", update_user_data);
 
   // Paga Web hook
   app.post("/paga_deposit/:user", paga_deposit);

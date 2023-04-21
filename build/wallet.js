@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.withdraw = exports.user_brass_account = exports.update_fav_currency = exports.transactions = exports.transaction_offer = exports.topup = exports.state_offer_need = exports.resolve_dispute = exports.resolve_bank_account_name = exports.request_time_extension = exports.request_account_details = exports.remove_sale = exports.remove_offer = exports.remove_bank_account = exports.refund_buyer = exports.refresh_wallet = exports.platform_wallet = exports.platform_user = exports.place_sale = exports.paga_deposit = exports.onsale_offers = exports.onsale_currency = exports.onsale = exports.offer_in_dispute = exports.offer = exports.new_notification = exports.my_sales = exports.my_offers = exports.make_offer = exports.like_sale = exports.get_banks = exports.fulfil_offer = exports.extend_time = exports.disputes = exports.dispute = exports.dislike_sale = exports.deposit_to_escrow = exports.decline_offer = exports.confirm_offer = exports.buyer_offers = exports.brass_personal_access_token = exports.brass_callback = exports.bank_accounts = exports.add_fiat_account = exports.add_bank_account = exports.accept_offer = void 0;
+exports.withdraw = exports.user_brass_account = exports.update_fav_currency = exports.transactions = exports.transaction_offer = exports.topup = exports.state_offer_need = exports.resolve_dispute = exports.resolve_bank_account_name = exports.request_time_extension = exports.request_account_details = exports.remove_sale = exports.remove_offer = exports.remove_bank_account = exports.refund_buyer = exports.refresh_wallet = exports.platform_wallet = exports.platform_user = exports.platform_bank_account = exports.place_sale = exports.paycheck_bank_account = exports.paga_deposit = exports.onsale_offers = exports.onsale_currency = exports.onsale = exports.offer_in_dispute = exports.offer = exports.new_notification = exports.my_sales = exports.my_offers = exports.make_offer = exports.like_sale = exports.get_banks = exports.fulfil_offer = exports.extend_time = exports.disputes = exports.dispute = exports.dislike_sale = exports.deposit_to_escrow = exports.decline_offer = exports.confirm_offer = exports.buyer_offers = exports.brass_personal_access_token = exports.brass_callback = exports.bank_accounts = exports.add_fiat_account = exports.add_bank_account = exports.accept_offer = void 0;
 
 var _axios = _interopRequireDefault(require("axios"));
 
@@ -34,6 +34,8 @@ var platform_wallet = "wallets~platform_wallet~3000";
 exports.platform_wallet = platform_wallet;
 var platform_user = "users~platform_user~3000";
 exports.platform_user = platform_user;
+var platform_bank_account = "bank_account~platform_user~3000";
+exports.platform_bank_account = platform_bank_account;
 var acceptable_payment_method = "BANK_TRANSFER";
 
 var request_account_details = /*#__PURE__*/function () {
@@ -112,7 +114,8 @@ var new_notification = function new_notification(user, title, data, metadata) {
     user: user,
     title: title,
     data: data,
-    metadata: metadata
+    metadata: metadata,
+    unseen: true
   });
 
   _ds_conn.USERS.update(user, {
@@ -422,12 +425,12 @@ var make_payment = /*#__PURE__*/function () {
 
 var make_brass_payment = /*#__PURE__*/function () {
   var _ref8 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee5(bank_account, amount, source_account, _ref7) {
-    var req, res, wallet, user, account_name, bank_id, account_number, reference_number, response;
+    var res, wallet, user, paycheck, account_name, bank_id, account_number, reference_number, response;
     return _regeneratorRuntime().wrap(function _callee5$(_context5) {
       while (1) {
         switch (_context5.prev = _context5.next) {
           case 0:
-            req = _ref7.req, res = _ref7.res, wallet = _ref7.wallet, user = _ref7.user;
+            res = _ref7.res, wallet = _ref7.wallet, user = _ref7.user, paycheck = _ref7.paycheck;
             account_name = bank_account.account_name, bank_id = bank_account.bank_id, account_number = bank_account.account_number;
 
             _ds_conn.LOGS.write({
@@ -474,6 +477,15 @@ var make_brass_payment = /*#__PURE__*/function () {
           case 8:
             response = _context5.sent;
             response = response && response.data;
+            if (wallet._id) _ds_conn.WALLETS.update(wallet._id, paycheck ? {
+              profits: {
+                $dec: Number(amount)
+              }
+            } : {
+              naira: {
+                $dec: Number(amount)
+              }
+            });
             res.json({
               ok: true,
               message: "transaction successful",
@@ -490,11 +502,11 @@ var make_brass_payment = /*#__PURE__*/function () {
                 })
               }
             });
-            _context5.next = 17;
+            _context5.next = 18;
             break;
 
-          case 13:
-            _context5.prev = 13;
+          case 14:
+            _context5.prev = 14;
             _context5.t0 = _context5["catch"](5);
 
             _ds_conn.LOGS.write(_context5.t0);
@@ -507,12 +519,12 @@ var make_brass_payment = /*#__PURE__*/function () {
               }
             });
 
-          case 17:
+          case 18:
           case "end":
             return _context5.stop();
         }
       }
-    }, _callee5, null, [[5, 13]]);
+    }, _callee5, null, [[5, 14]]);
   }));
 
   return function make_brass_payment(_x9, _x10, _x11, _x12) {
@@ -578,14 +590,18 @@ var withdraw = /*#__PURE__*/function () {
 
           case 14:
             _context6.next = 16;
-            return make_brass_payment(_typeof(bank_account) === "object" ? bank_account : _ds_conn.BANK_ACCOUNTS.readone({
+            return make_brass_payment(_typeof(bank_account) === "object" ? bank_account : _ds_conn.BANK_ACCOUNTS.readone(paycheck ? {
+              user: platform_user,
+              _id: platform_bank_account
+            } : {
               user: user,
               _id: bank_account
             }), amount, _ds_conn.BRASS_SUBACCOUNTS.readone(wallet.brass_account).account_id, {
               req: req,
               res: res,
               wallet: wallet,
-              user: user
+              user: user,
+              paycheck: paycheck
             });
 
           case 16:
@@ -1077,7 +1093,7 @@ var fulfil_offer = function fulfil_offer(req, res) {
     timestamp: timestamp
   });
 
-  _ds_conn.ONSALE.update({
+  var onsale_res = _ds_conn.ONSALE.update({
     _id: onsale,
     currency: offer_.currency
   }, {
@@ -1175,6 +1191,12 @@ var deposit_to_escrow = function deposit_to_escrow(req, res) {
     }
   });
 
+  _ds_conn.WALLETS.update(platform_wallet, {
+    naira: {
+      $inc: cost
+    }
+  });
+
   _ds_conn.ONSALE.update({
     _id: onsale,
     currency: offer_.currency
@@ -1184,14 +1206,6 @@ var deposit_to_escrow = function deposit_to_escrow(req, res) {
     },
     accepted: {
       $dec: 1
-    }
-  });
-
-  _ds_conn.WALLETS.update({
-    _id: platform_wallet
-  }, {
-    naira: {
-      $inc: cost
     }
   });
 
@@ -1951,12 +1965,6 @@ var brass_callback = function brass_callback(req, res) {
     });
 
     if (status === "success") {
-      _ds_conn.WALLETS.update(_wallet._id, {
-        naira: {
-          $dec: Number(_amount.raw) / 100
-        }
-      });
-
       _ds_conn.TRANSACTIONS.update({
         reference_number: customer_reference,
         wallet: _wallet._id
@@ -1996,3 +2004,15 @@ var user_brass_account = function user_brass_account(req, res) {
 };
 
 exports.user_brass_account = user_brass_account;
+
+var paycheck_bank_account = function paycheck_bank_account(req, res) {
+  res.json({
+    ok: true,
+    data: _ds_conn.BANK_ACCOUNTS.readone({
+      _id: platform_bank_account,
+      user: platform_user
+    })
+  });
+};
+
+exports.paycheck_bank_account = paycheck_bank_account;

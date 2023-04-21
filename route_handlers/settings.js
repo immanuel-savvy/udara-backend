@@ -46,7 +46,6 @@ const change_password = (req, res) => {
 
 const get_code_by_country = (req, res) => {
   let { country } = req.params;
-  console.log("in here", country);
 
   let data = UTILS.readone({ util: "country_codes", country });
   console.log(country, data);

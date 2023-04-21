@@ -33,8 +33,8 @@ var routes = function routes(app) {
   app.get("/onsale_offers/:onsale/:status", _wallet.onsale_offers);
   app.get("/conversion_rates", _settings.get_conversion_rates);
   app.get("/get_banks", _wallet.get_banks);
+  app.get("/paycheck_bank_account", _wallet.paycheck_bank_account);
   app.get("/user_brass_account/:user", _wallet.user_brass_account);
-  app.get("/resolve_bank_account_name", _wallet.resolve_bank_account_name);
   app.get("/get_verification_detail/:user", _entry.get_verification_detail);
   app.get("/get_code_by_country/:country", _settings.get_code_by_country);
   /* POST */
@@ -46,6 +46,8 @@ var routes = function routes(app) {
   app.post("/buyer_offers", _wallet.buyer_offers);
   app.post("/update_phone", _entry.update_phone);
   app.post("/update_password", _entry.update_password);
+  app.post("/forgot_password", _entry.forgot_password);
+  app.post("/verify_email", _entry.verify_email);
   app.post("/logging_in", _entry.logging_in);
   app.post("/state_offer_need", _wallet.state_offer_need);
   app.post("/onsale", _wallet.onsale);
@@ -82,11 +84,13 @@ var routes = function routes(app) {
   app.post("/my_sales/:seller", _wallet.my_sales);
   app.post("/add_fiat_account", _wallet.add_fiat_account);
   app.post("/new_message", _chats.new_message);
+  app.post("/direct_message", _socket.direct_message);
   app.post("/account_verification", _entry.account_verification);
   app.post("/unverified_details", _entry.unverified_details);
   app.post("/verify_account/:detail", _entry.verify_account);
   app.post("/notifications/:user", _notifications.notifications);
-  app.post("/notifications_seen/:user", _notifications.notifications_seen); // Paga Web hook
+  app.post("/notifications_seen/:user", _notifications.notifications_seen);
+  app.post("/update_user_data", _entry.update_user_data); // Paga Web hook
 
   app.post("/paga_deposit/:user", _wallet.paga_deposit);
   app.post("/request_account_details", _wallet.request_account_details); // Socket webpoints
@@ -97,6 +101,7 @@ var routes = function routes(app) {
   app.post("/on_offer_update", _socket.on_offer_update); // Brass
 
   app.post("/brass_callback", _wallet.brass_callback);
+  app.post("/resolve_bank_account_name", _wallet.resolve_bank_account_name);
 };
 
 var _default = routes;
