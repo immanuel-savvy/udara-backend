@@ -208,14 +208,16 @@ const request_otp = async (req, res) => {
   let code = generate_random_string(6);
   pending_otps[email] = code;
 
-  send_mail({
-    recipient: email,
-    subject: "[Udara Links] Please verify your email",
-    sender: "signup@udaralinksapp.com",
-    sender_name: "Udara Links",
-    sender_pass: "signupudaralinks",
-    html: verification(code),
-  });
+  try {
+    send_mail({
+      recipient: email,
+      subject: "[Udara Links] Please verify your email",
+      sender: "signup@udaralinksapp.com",
+      sender_name: "Udara Links",
+      sender_pass: "signupudaralinks",
+      html: verification(code),
+    });
+  } catch (e) {}
 
   res.json({ ok: true, message: "opt sent", data: email });
 };
@@ -308,11 +310,17 @@ const generate_reference_number = () =>
   `${generate_random_string(14, "alnum")}${Date.now()}`;
 
 const update_password = async (req, res) => {
-  let { user, key } = req.body;
+  let { user, key, new_user } = req.body;
+
+  console.log(user, key, new_user);
+
   if (!user || !key)
     return res.json({ ok: false, message: "invalid credentials", data: user });
 
-  let result = HASHES.update_several({ user }, { hash: key });
+  let result = HASHES[new_user ? "write" : "update_several"](
+    new_user ? { user, hash: key } : { user },
+    { hash: key }
+  );
 
   if (result)
     res.json({
@@ -335,6 +343,7 @@ const logging_in = async (req, res) => {
   else if (!key) return res.json({ ok: false, data: "Provide your password" });
 
   let pass = HASHES.readone({ user: user._id });
+
   if (!pass || pass.hash !== key)
     return res.json({ ok: false, data: "Invalid password" });
 
@@ -430,7 +439,6 @@ const forgot_password = (req, res) => {
 
   let code = generate_random_string(6);
   pending_otps[email] = code;
-  console.log(code);
 
   send_mail({
     recipient: email,

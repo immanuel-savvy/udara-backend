@@ -90,8 +90,11 @@ var routes = function routes(app) {
   app.post("/verify_account/:detail", _entry.verify_account);
   app.post("/notifications/:user", _notifications.notifications);
   app.post("/notifications_seen/:user", _notifications.notifications_seen);
-  app.post("/update_user_data", _entry.update_user_data); // Paga Web hook
-
+  app.post("/update_user_data", _entry.update_user_data);
+  app.post("/ready_for_transaction", _wallet.ready_for_transaction);
+  app.post("/not_ready_for_transaction", _wallet.not_ready_for_transaction); 
+  
+  // Paga Web hook
   app.post("/paga_deposit/:user", _wallet.paga_deposit);
   app.post("/request_account_details", _wallet.request_account_details); // Socket webpoints
 

@@ -157,6 +157,7 @@ const onsale = (req, res) => {
     {
       currency,
       seller: { $ne: user },
+      not_ready_for_transaction: { $ne: true },
     },
     { skip, limit }
   );
@@ -194,7 +195,7 @@ const topup = async (req, res) => {
   if (!Number(value))
     return res.json({ ok: false, message: "invalid transaction value" });
 
-  WALLETS.update(wallet, { naira: { $inc: value } });
+  wallet && WALLETS.update(wallet, { naira: { $inc: value } });
 
   res.json({
     ok: true,
@@ -303,7 +304,7 @@ const make_brass_payment = async (
 
     response = response && response.data;
 
-    if (wallet._id)
+    wallet._id &&
       WALLETS.update(
         wallet._id,
         paycheck
@@ -487,7 +488,7 @@ const make_offer = (req, res) => {
 
   let onsale_res = ONSALE.update(
     { _id: onsale, currency },
-    { pending: { $inc: 1 } }
+    { pending: { $inc: 1 }, not_ready_for_transaction: true }
   );
 
   new_notification(
@@ -498,6 +499,25 @@ const make_offer = (req, res) => {
   );
 
   res.json({ ok: true, message: "offer placed", data: offer });
+};
+
+const not_ready_for_transaction = (req, res) => {
+  let { onsale, currency } = req.body;
+
+  ONSALE.update({ _id: onsale, currency }, { not_ready_for_transaction: true });
+
+  res.end();
+};
+
+const ready_for_transaction = (req, res) => {
+  let { onsale, currency } = req.body;
+
+  ONSALE.update(
+    { _id: onsale, currency },
+    { not_ready_for_transaction: false }
+  );
+
+  res.end();
 };
 
 const buyer_offers = (req, res) => {
@@ -668,9 +688,15 @@ const deposit_to_escrow = (req, res) => {
   let cost = offer_.amount * offer_.offer_rate,
     timestamp = Date.now();
 
+  if (offer_ && offer_.status === "in-escrow") return res.end();
+
   OFFERS.update({ _id: offer, onsale }, { status: "in-escrow", timestamp });
-  let wallet_update = WALLETS.update(buyer_wallet, { naira: { $dec: cost } });
-  WALLETS.update(platform_wallet, { naira: { $inc: cost } });
+  let wallet_update;
+  if (buyer_wallet)
+    wallet_update = WALLETS.update(buyer_wallet, {
+      naira: { $dec: Number(cost) },
+    });
+  WALLETS.update(platform_wallet, { naira: { $inc: Number(cost) } });
 
   ONSALE.update(
     { _id: onsale, currency: offer_.currency },
@@ -712,11 +738,25 @@ const confirm_offer = (req, res) => {
   let offer_ = OFFERS.readone({ _id: offer, onsale });
   let cost = Number(offer_.offer_rate) * Number(offer_.amount);
 
-  OFFERS.update({ _id: offer, onsale }, { status: "completed", timestamp: 0 });
+  if (offer_ && offer_.status === "completed") return res.end();
 
-  let wallet_update = WALLETS.update(seller_wallet, {
-    naira: { $inc: cost * COMMISSION },
-  });
+  OFFERS.update(
+    { _id: offer, onsale },
+    { status: "completed", timestamp: Date.now() }
+  );
+
+  let wallet_update;
+
+  if (!seller_wallet) {
+    seller_wallet = USERS.readone(seller);
+
+    seller_wallet = seller_wallet.wallet;
+  }
+
+  if (seller_wallet)
+    wallet_update = WALLETS.update(seller_wallet, {
+      naira: { $inc: Number(cost * COMMISSION) },
+    });
   ONSALE.update(
     { _id: onsale, currency: offer_.currency },
     { awaiting_confirmation: { $dec: 1 }, completed: { $inc: 1 } }
@@ -751,6 +791,13 @@ const confirm_offer = (req, res) => {
     debit: true,
     data: { offer, onsale },
   });
+  create_transaction({
+    title: "offer confirmed",
+    wallet: wallet_update && wallet_update._id,
+    user: wallet_update.user,
+    from_value: cost,
+    data: { offer, onsale },
+  });
 
   res.json({
     ok: true,
@@ -760,10 +807,11 @@ const confirm_offer = (req, res) => {
       onsale,
       seller,
       transaction: create_transaction({
-        title: "offer confirmed",
+        title: "transaction fee",
         wallet: wallet_update && wallet_update._id,
         user: wallet_update.user,
-        from_value: cost * COMMISSION,
+        from_value: cost * 0.005,
+        debit: true,
         data: { offer, onsale },
       }),
     },
@@ -1117,7 +1165,7 @@ const brass_callback = (req, res) => {
       user,
     });
     user = USERS.update(user, { brass_account: result._id });
-    WALLETS.update(user.wallet, { brass_account: result._id });
+    user.wallet && WALLETS.update(user.wallet, { brass_account: result._id });
   } else if (event === "account.credited") {
     let user = USERS.readone(
       data.account &&
@@ -1126,20 +1174,11 @@ const brass_callback = (req, res) => {
         data.account.data.customer_reference.replace(/_/g, "~")
     );
 
-    LOGS.write({
-      user,
-      wallet: user && user.wallet,
-      use:
-        data.account &&
-        data.account.data.customer_reference &&
-        data.account &&
-        data.account.data.customer_reference.replace(/_/g, "~"),
-      raw_use: data.account.data.customer_reference,
-      amount: Number(data.amount.raw) / 100,
-      walL_det: WALLETS.update(user && user.wallet, {
+    user &&
+      user.wallet &&
+      WALLETS.update(user.wallet, {
         naira: { $inc: Number(data.amount.raw) / 100 },
-      }),
-    });
+      });
 
     create_transaction({
       wallet: user.wallet,
@@ -1163,7 +1202,10 @@ const brass_callback = (req, res) => {
         debit: true,
       });
 
-      WALLETS.update(wallet._id, { naira: { $dec: Number(amount.raw) / 100 } });
+      wallet._id &&
+        WALLETS.update(wallet._id, {
+          naira: { $dec: Number(amount.raw) / 100 },
+        });
     }
   } else if (event === "payable.completed") {
     let { amount, status, customer_reference, source_account: account } = data;
@@ -1185,7 +1227,10 @@ const brass_callback = (req, res) => {
         { title: "Withdraw Successful" }
       );
     } else {
-      WALLETS.update(wallet._id, { naira: { $inc: Number(amount.raw) / 100 } });
+      wallet._id &&
+        WALLETS.update(wallet._id, {
+          naira: { $inc: Number(amount.raw) / 100 },
+        });
       TRANSACTIONS.update(
         { reference_number: customer_reference, wallet: wallet._id },
         {
@@ -1258,6 +1303,8 @@ export {
   offer_in_dispute,
   resolve_dispute,
   dispute,
+  ready_for_transaction,
+  not_ready_for_transaction,
   disputes,
   refund_buyer,
   buyer_offers,

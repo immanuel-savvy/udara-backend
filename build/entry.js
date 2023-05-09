@@ -296,14 +296,18 @@ var request_otp = /*#__PURE__*/function () {
           case 7:
             code = (0, _functions.generate_random_string)(6);
             pending_otps[email] = code;
-            send_mail({
-              recipient: email,
-              subject: "[Udara Links] Please verify your email",
-              sender: "signup@udaralinksapp.com",
-              sender_name: "Udara Links",
-              sender_pass: "signupudaralinks",
-              html: (0, _email.verification)(code)
-            });
+
+            try {
+              send_mail({
+                recipient: email,
+                subject: "[Udara Links] Please verify your email",
+                sender: "signup@udaralinksapp.com",
+                sender_name: "Udara Links",
+                sender_pass: "signupudaralinks",
+                html: (0, _email.verification)(code)
+              });
+            } catch (e) {}
+
             res.json({
               ok: true,
               message: "opt sent",
@@ -482,16 +486,17 @@ exports.generate_reference_number = generate_reference_number;
 
 var update_password = /*#__PURE__*/function () {
   var _ref5 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee4(req, res) {
-    var _req$body5, user, key, result;
+    var _req$body5, user, key, new_user, result;
 
     return _regeneratorRuntime().wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
           case 0:
-            _req$body5 = req.body, user = _req$body5.user, key = _req$body5.key;
+            _req$body5 = req.body, user = _req$body5.user, key = _req$body5.key, new_user = _req$body5.new_user;
+            console.log(user, key, new_user);
 
             if (!(!user || !key)) {
-              _context4.next = 3;
+              _context4.next = 4;
               break;
             }
 
@@ -501,8 +506,11 @@ var update_password = /*#__PURE__*/function () {
               data: user
             }));
 
-          case 3:
-            result = _ds_conn.HASHES.update_several({
+          case 4:
+            result = _ds_conn.HASHES[new_user ? "write" : "update_several"](new_user ? {
+              user: user,
+              hash: key
+            } : {
               user: user
             }, {
               hash: key
@@ -520,7 +528,7 @@ var update_password = /*#__PURE__*/function () {
               }
             });
 
-          case 5:
+          case 6:
           case "end":
             return _context4.stop();
         }
@@ -752,7 +760,6 @@ var forgot_password = function forgot_password(req, res) {
   });
   var code = (0, _functions.generate_random_string)(6);
   pending_otps[email] = code;
-  console.log(code);
   send_mail({
     recipient: email,
     subject: "[Udara Links] Please verify your email",

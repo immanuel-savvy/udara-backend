@@ -84,6 +84,8 @@ import {
   resolve_bank_account_name,
   user_brass_account,
   paycheck_bank_account,
+  ready_for_transaction,
+  not_ready_for_transaction,
 } from "./route_handlers/wallet";
 
 const routes = (app) => {
@@ -158,6 +160,8 @@ const routes = (app) => {
   app.post("/notifications/:user", notifications);
   app.post("/notifications_seen/:user", notifications_seen);
   app.post("/update_user_data", update_user_data);
+  app.post("/ready_for_transaction", ready_for_transaction);
+  app.post("/not_ready_for_transaction", not_ready_for_transaction);
 
   // Paga Web hook
   app.post("/paga_deposit/:user", paga_deposit);

@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.withdraw = exports.user_brass_account = exports.update_fav_currency = exports.transactions = exports.transaction_offer = exports.topup = exports.state_offer_need = exports.resolve_dispute = exports.resolve_bank_account_name = exports.request_time_extension = exports.request_account_details = exports.remove_sale = exports.remove_offer = exports.remove_bank_account = exports.refund_buyer = exports.refresh_wallet = exports.platform_wallet = exports.platform_user = exports.platform_bank_account = exports.place_sale = exports.paycheck_bank_account = exports.paga_deposit = exports.onsale_offers = exports.onsale_currency = exports.onsale = exports.offer_in_dispute = exports.offer = exports.new_notification = exports.my_sales = exports.my_offers = exports.make_offer = exports.like_sale = exports.get_banks = exports.fulfil_offer = exports.extend_time = exports.disputes = exports.dispute = exports.dislike_sale = exports.deposit_to_escrow = exports.decline_offer = exports.confirm_offer = exports.buyer_offers = exports.brass_personal_access_token = exports.brass_callback = exports.bank_accounts = exports.add_fiat_account = exports.add_bank_account = exports.accept_offer = void 0;
+exports.withdraw = exports.user_brass_account = exports.update_fav_currency = exports.transactions = exports.transaction_offer = exports.topup = exports.state_offer_need = exports.resolve_dispute = exports.resolve_bank_account_name = exports.request_time_extension = exports.request_account_details = exports.remove_sale = exports.remove_offer = exports.remove_bank_account = exports.refund_buyer = exports.refresh_wallet = exports.ready_for_transaction = exports.platform_wallet = exports.platform_user = exports.platform_bank_account = exports.place_sale = exports.paycheck_bank_account = exports.paga_deposit = exports.onsale_offers = exports.onsale_currency = exports.onsale = exports.offer_in_dispute = exports.offer = exports.not_ready_for_transaction = exports.new_notification = exports.my_sales = exports.my_offers = exports.make_offer = exports.like_sale = exports.get_banks = exports.fulfil_offer = exports.extend_time = exports.disputes = exports.dispute = exports.dislike_sale = exports.deposit_to_escrow = exports.decline_offer = exports.confirm_offer = exports.buyer_offers = exports.brass_personal_access_token = exports.brass_callback = exports.bank_accounts = exports.add_fiat_account = exports.add_bank_account = exports.accept_offer = void 0;
 
 var _axios = _interopRequireDefault(require("axios"));
 
@@ -214,6 +214,9 @@ var onsale = function onsale(req, res) {
     currency: currency,
     seller: {
       $ne: user
+    },
+    not_ready_for_transaction: {
+      $ne: true
     }
   }, {
     skip: skip,
@@ -304,12 +307,11 @@ var topup = /*#__PURE__*/function () {
             }));
 
           case 3:
-            _ds_conn.WALLETS.update(wallet, {
+            wallet && _ds_conn.WALLETS.update(wallet, {
               naira: {
                 $inc: value
               }
             });
-
             res.json({
               ok: true,
               message: "transaction successful",
@@ -477,7 +479,7 @@ var make_brass_payment = /*#__PURE__*/function () {
           case 8:
             response = _context5.sent;
             response = response && response.data;
-            if (wallet._id) _ds_conn.WALLETS.update(wallet._id, paycheck ? {
+            wallet._id && _ds_conn.WALLETS.update(wallet._id, paycheck ? {
               profits: {
                 $dec: Number(amount)
               }
@@ -840,7 +842,8 @@ var make_offer = function make_offer(req, res) {
   }, {
     pending: {
       $inc: 1
-    }
+    },
+    not_ready_for_transaction: true
   });
 
   new_notification(onsale_res.seller, "new offer from ".concat(_ds_conn.USERS.readone(user).username), new Array(onsale, offer._id), {
@@ -855,11 +858,45 @@ var make_offer = function make_offer(req, res) {
 
 exports.make_offer = make_offer;
 
-var buyer_offers = function buyer_offers(req, res) {
+var not_ready_for_transaction = function not_ready_for_transaction(req, res) {
   var _req$body15 = req.body,
-      buyer = _req$body15.buyer,
-      skip = _req$body15.skip,
-      limit = _req$body15.limit;
+      onsale = _req$body15.onsale,
+      currency = _req$body15.currency;
+
+  _ds_conn.ONSALE.update({
+    _id: onsale,
+    currency: currency
+  }, {
+    not_ready_for_transaction: true
+  });
+
+  res.end();
+};
+
+exports.not_ready_for_transaction = not_ready_for_transaction;
+
+var ready_for_transaction = function ready_for_transaction(req, res) {
+  var _req$body16 = req.body,
+      onsale = _req$body16.onsale,
+      currency = _req$body16.currency;
+
+  _ds_conn.ONSALE.update({
+    _id: onsale,
+    currency: currency
+  }, {
+    not_ready_for_transaction: false
+  });
+
+  res.end();
+};
+
+exports.ready_for_transaction = ready_for_transaction;
+
+var buyer_offers = function buyer_offers(req, res) {
+  var _req$body17 = req.body,
+      buyer = _req$body17.buyer,
+      skip = _req$body17.skip,
+      limit = _req$body17.limit;
 
   var offers = _ds_conn.MY_OFFERS.read({
     user: buyer
@@ -900,9 +937,9 @@ var buyer_offers = function buyer_offers(req, res) {
 exports.buyer_offers = buyer_offers;
 
 var offer = function offer(req, res) {
-  var _req$body16 = req.body,
-      offer_id = _req$body16.offer,
-      onsale = _req$body16.onsale;
+  var _req$body18 = req.body,
+      offer_id = _req$body18.offer,
+      onsale = _req$body18.onsale;
 
   var offer_ = _ds_conn.OFFERS.readone({
     _id: offer_id,
@@ -922,9 +959,9 @@ var offer = function offer(req, res) {
 exports.offer = offer;
 
 var my_offers = function my_offers(req, res) {
-  var _req$body17 = req.body,
-      onsale = _req$body17.onsale,
-      user = _req$body17.user;
+  var _req$body19 = req.body,
+      onsale = _req$body19.onsale,
+      user = _req$body19.user;
 
   var offers = _ds_conn.OFFERS.read({
     onsale: onsale,
@@ -960,9 +997,9 @@ var onsale_offers = function onsale_offers(req, res) {
 exports.onsale_offers = onsale_offers;
 
 var accept_offer = function accept_offer(req, res) {
-  var _req$body18 = req.body,
-      onsale = _req$body18.onsale,
-      offer = _req$body18.offer;
+  var _req$body20 = req.body,
+      onsale = _req$body20.onsale,
+      offer = _req$body20.offer;
 
   var result = _ds_conn.OFFERS.update({
     _id: offer,
@@ -1003,9 +1040,9 @@ var accept_offer = function accept_offer(req, res) {
 exports.accept_offer = accept_offer;
 
 var decline_offer = function decline_offer(req, res) {
-  var _req$body19 = req.body,
-      onsale = _req$body19.onsale,
-      offer = _req$body19.offer;
+  var _req$body21 = req.body,
+      onsale = _req$body21.onsale,
+      offer = _req$body21.offer;
 
   var result = _ds_conn.OFFERS.update({
     _id: offer,
@@ -1046,9 +1083,9 @@ var decline_offer = function decline_offer(req, res) {
 exports.decline_offer = decline_offer;
 
 var remove_offer = function remove_offer(req, res) {
-  var _req$body20 = req.body,
-      offer = _req$body20.offer,
-      onsale = _req$body20.onsale;
+  var _req$body22 = req.body,
+      offer = _req$body22.offer,
+      onsale = _req$body22.onsale;
 
   var result = _ds_conn.OFFERS.remove({
     _id: offer,
@@ -1078,11 +1115,11 @@ var remove_offer = function remove_offer(req, res) {
 exports.remove_offer = remove_offer;
 
 var fulfil_offer = function fulfil_offer(req, res) {
-  var _req$body21 = req.body,
-      offer = _req$body21.offer,
-      buyer = _req$body21.buyer,
-      seller = _req$body21.seller,
-      onsale = _req$body21.onsale,
+  var _req$body23 = req.body,
+      offer = _req$body23.offer,
+      buyer = _req$body23.buyer,
+      seller = _req$body23.seller,
+      onsale = _req$body23.onsale,
       timestamp = Date.now();
 
   var offer_ = _ds_conn.OFFERS.update({
@@ -1163,11 +1200,11 @@ var forward_message = /*#__PURE__*/function () {
 }();
 
 var deposit_to_escrow = function deposit_to_escrow(req, res) {
-  var _req$body22 = req.body,
-      offer = _req$body22.offer,
-      seller = _req$body22.seller,
-      onsale = _req$body22.onsale,
-      buyer_wallet = _req$body22.buyer_wallet;
+  var _req$body24 = req.body,
+      offer = _req$body24.offer,
+      seller = _req$body24.seller,
+      onsale = _req$body24.onsale,
+      buyer_wallet = _req$body24.buyer_wallet;
 
   var offer_ = _ds_conn.OFFERS.readone({
     _id: offer,
@@ -1176,6 +1213,7 @@ var deposit_to_escrow = function deposit_to_escrow(req, res) {
 
   var cost = offer_.amount * offer_.offer_rate,
       timestamp = Date.now();
+  if (offer_ && offer_.status === "in-escrow") return res.end();
 
   _ds_conn.OFFERS.update({
     _id: offer,
@@ -1185,15 +1223,16 @@ var deposit_to_escrow = function deposit_to_escrow(req, res) {
     timestamp: timestamp
   });
 
-  var wallet_update = _ds_conn.WALLETS.update(buyer_wallet, {
+  var wallet_update;
+  if (buyer_wallet) wallet_update = _ds_conn.WALLETS.update(buyer_wallet, {
     naira: {
-      $dec: cost
+      $dec: Number(cost)
     }
   });
 
   _ds_conn.WALLETS.update(platform_wallet, {
     naira: {
-      $inc: cost
+      $inc: Number(cost)
     }
   });
 
@@ -1241,11 +1280,11 @@ var deposit_to_escrow = function deposit_to_escrow(req, res) {
 exports.deposit_to_escrow = deposit_to_escrow;
 
 var confirm_offer = function confirm_offer(req, res) {
-  var _req$body23 = req.body,
-      offer = _req$body23.offer,
-      onsale = _req$body23.onsale,
-      seller = _req$body23.seller,
-      seller_wallet = _req$body23.seller_wallet;
+  var _req$body25 = req.body,
+      offer = _req$body25.offer,
+      onsale = _req$body25.onsale,
+      seller = _req$body25.seller,
+      seller_wallet = _req$body25.seller_wallet;
 
   var offer_ = _ds_conn.OFFERS.readone({
     _id: offer,
@@ -1253,18 +1292,26 @@ var confirm_offer = function confirm_offer(req, res) {
   });
 
   var cost = Number(offer_.offer_rate) * Number(offer_.amount);
+  if (offer_ && offer_.status === "completed") return res.end();
 
   _ds_conn.OFFERS.update({
     _id: offer,
     onsale: onsale
   }, {
     status: "completed",
-    timestamp: 0
+    timestamp: Date.now()
   });
 
-  var wallet_update = _ds_conn.WALLETS.update(seller_wallet, {
+  var wallet_update;
+
+  if (!seller_wallet) {
+    seller_wallet = _ds_conn.USERS.readone(seller);
+    seller_wallet = seller_wallet.wallet;
+  }
+
+  if (seller_wallet) wallet_update = _ds_conn.WALLETS.update(seller_wallet, {
     naira: {
-      $inc: cost * COMMISSION
+      $inc: Number(cost * COMMISSION)
     }
   });
 
@@ -1316,6 +1363,16 @@ var confirm_offer = function confirm_offer(req, res) {
       onsale: onsale
     }
   });
+  create_transaction({
+    title: "offer confirmed",
+    wallet: wallet_update && wallet_update._id,
+    user: wallet_update.user,
+    from_value: cost,
+    data: {
+      offer: offer,
+      onsale: onsale
+    }
+  });
   res.json({
     ok: true,
     message: "offer confirmed",
@@ -1324,10 +1381,11 @@ var confirm_offer = function confirm_offer(req, res) {
       onsale: onsale,
       seller: seller,
       transaction: create_transaction({
-        title: "offer confirmed",
+        title: "transaction fee",
         wallet: wallet_update && wallet_update._id,
         user: wallet_update.user,
-        from_value: cost * COMMISSION,
+        from_value: cost * 0.005,
+        debit: true,
         data: {
           offer: offer,
           onsale: onsale
@@ -1340,9 +1398,9 @@ var confirm_offer = function confirm_offer(req, res) {
 exports.confirm_offer = confirm_offer;
 
 var extend_time = function extend_time(req, res) {
-  var _req$body24 = req.body,
-      offer = _req$body24.offer,
-      onsale = _req$body24.onsale;
+  var _req$body26 = req.body,
+      offer = _req$body26.offer,
+      onsale = _req$body26.onsale;
   var timestamp = Date.now();
 
   _ds_conn.OFFERS.update({
@@ -1365,9 +1423,9 @@ var extend_time = function extend_time(req, res) {
 exports.extend_time = extend_time;
 
 var request_time_extension = function request_time_extension(req, res) {
-  var _req$body25 = req.body,
-      offer = _req$body25.offer,
-      onsale = _req$body25.onsale;
+  var _req$body27 = req.body,
+      offer = _req$body27.offer,
+      onsale = _req$body27.onsale;
 
   _ds_conn.OFFERS.update({
     _id: offer,
@@ -1388,16 +1446,16 @@ exports.request_time_extension = request_time_extension;
 var offer_in_dispute = function offer_in_dispute(req, res) {
   var _ONSALE$update;
 
-  var _req$body26 = req.body,
-      offer = _req$body26.offer,
-      initiator = _req$body26.initiator,
-      onsale = _req$body26.onsale,
-      prior_offer_status = _req$body26.prior_offer_status,
-      seller = _req$body26.seller,
-      buyer = _req$body26.buyer,
-      title = _req$body26.title,
-      details = _req$body26.details,
-      currency = _req$body26.currency;
+  var _req$body28 = req.body,
+      offer = _req$body28.offer,
+      initiator = _req$body28.initiator,
+      onsale = _req$body28.onsale,
+      prior_offer_status = _req$body28.prior_offer_status,
+      seller = _req$body28.seller,
+      buyer = _req$body28.buyer,
+      title = _req$body28.title,
+      details = _req$body28.details,
+      currency = _req$body28.currency;
 
   var result = _ds_conn.DISPUTES.write({
     offer: offer,
@@ -1453,9 +1511,9 @@ exports.offer_in_dispute = offer_in_dispute;
 var resolve_dispute = function resolve_dispute(req, res) {
   var _ONSALE$update2;
 
-  var _req$body27 = req.body,
-      offer = _req$body27.offer,
-      onsale = _req$body27.onsale,
+  var _req$body29 = req.body,
+      offer = _req$body29.offer,
+      onsale = _req$body29.onsale,
       timestamp = Date.now();
 
   var offer_ = _ds_conn.OFFERS.readone({
@@ -1530,9 +1588,9 @@ var dispute = function dispute(req, res) {
 exports.dispute = dispute;
 
 var disputes = function disputes(req, res) {
-  var _req$body28 = req.body,
-      skip = _req$body28.skip,
-      limit = _req$body28.limit;
+  var _req$body30 = req.body,
+      skip = _req$body30.skip,
+      limit = _req$body30.limit;
 
   var disputes = _ds_conn.DISPUTES.read(null, {
     skip: skip,
@@ -1576,9 +1634,9 @@ var disputes = function disputes(req, res) {
 exports.disputes = disputes;
 
 var refund_buyer = function refund_buyer(req, res) {
-  var _req$body29 = req.body,
-      offer = _req$body29.offer,
-      onsale = _req$body29.onsale;
+  var _req$body31 = req.body,
+      offer = _req$body31.offer,
+      onsale = _req$body31.onsale;
 
   var offer_ = _ds_conn.OFFERS.readone({
     _id: offer,
@@ -1705,13 +1763,13 @@ exports.get_banks = get_banks;
 
 var resolve_bank_account_name = /*#__PURE__*/function () {
   var _ref12 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee9(req, res) {
-    var _req$body30, account_number, bank, details;
+    var _req$body32, account_number, bank, details;
 
     return _regeneratorRuntime().wrap(function _callee9$(_context9) {
       while (1) {
         switch (_context9.prev = _context9.next) {
           case 0:
-            _req$body30 = req.body, account_number = _req$body30.account_number, bank = _req$body30.bank;
+            _req$body32 = req.body, account_number = _req$body32.account_number, bank = _req$body32.bank;
             _context9.prev = 1;
             _context9.next = 4;
             return (0, _axios["default"])({
@@ -1774,14 +1832,14 @@ var bank_accounts = function bank_accounts(req, res) {
 exports.bank_accounts = bank_accounts;
 
 var add_bank_account = function add_bank_account(req, res) {
-  var _req$body31 = req.body,
-      bank = _req$body31.bank,
-      bank_name = _req$body31.bank_name,
-      bank_id = _req$body31.bank_id,
-      user = _req$body31.user,
-      wallet = _req$body31.wallet,
-      account_name = _req$body31.account_name,
-      account_number = _req$body31.account_number;
+  var _req$body33 = req.body,
+      bank = _req$body33.bank,
+      bank_name = _req$body33.bank_name,
+      bank_id = _req$body33.bank_id,
+      user = _req$body33.user,
+      wallet = _req$body33.wallet,
+      account_name = _req$body33.account_name,
+      account_number = _req$body33.account_number;
 
   var result = _ds_conn.BANK_ACCOUNTS.write({
     bank: bank,
@@ -1811,10 +1869,10 @@ var add_bank_account = function add_bank_account(req, res) {
 exports.add_bank_account = add_bank_account;
 
 var remove_bank_account = function remove_bank_account(req, res) {
-  var _req$body32 = req.body,
-      user = _req$body32.user,
-      account = _req$body32.account,
-      wallet = _req$body32.wallet;
+  var _req$body34 = req.body,
+      user = _req$body34.user,
+      account = _req$body34.account,
+      wallet = _req$body34.wallet;
 
   _ds_conn.BANK_ACCOUNTS.remove({
     user: user,
@@ -1874,8 +1932,6 @@ var brass_callback = function brass_callback(req, res) {
   //   return res.status(401).json({ message: "Unau
   // do something with event
 
-  _ds_conn.LOGS.write(event_);
-
   var event = event_.event,
       data = event_.data;
 
@@ -1893,26 +1949,17 @@ var brass_callback = function brass_callback(req, res) {
     user = _ds_conn.USERS.update(user, {
       brass_account: result._id
     });
-
-    _ds_conn.WALLETS.update(user.wallet, {
+    user.wallet && _ds_conn.WALLETS.update(user.wallet, {
       brass_account: result._id
     });
   } else if (event === "account.credited") {
     var _user2 = _ds_conn.USERS.readone(data.account && data.account.data.customer_reference && data.account && data.account.data.customer_reference.replace(/_/g, "~"));
 
-    _ds_conn.LOGS.write({
-      user: _user2,
-      wallet: _user2 && _user2.wallet,
-      use: data.account && data.account.data.customer_reference && data.account && data.account.data.customer_reference.replace(/_/g, "~"),
-      raw_use: data.account.data.customer_reference,
-      amount: Number(data.amount.raw) / 100,
-      walL_det: _ds_conn.WALLETS.update(_user2 && _user2.wallet, {
-        naira: {
-          $inc: Number(data.amount.raw) / 100
-        }
-      })
+    _user2 && _user2.wallet && _ds_conn.WALLETS.update(_user2.wallet, {
+      naira: {
+        $inc: Number(data.amount.raw) / 100
+      }
     });
-
     create_transaction({
       wallet: _user2.wallet,
       user: _user2._id,
@@ -1938,8 +1985,7 @@ var brass_callback = function brass_callback(req, res) {
         title: memo,
         debit: true
       });
-
-      _ds_conn.WALLETS.update(wallet._id, {
+      wallet._id && _ds_conn.WALLETS.update(wallet._id, {
         naira: {
           $dec: Number(amount.raw) / 100
         }
@@ -1972,7 +2018,7 @@ var brass_callback = function brass_callback(req, res) {
         title: "Withdraw Successful"
       });
     } else {
-      _ds_conn.WALLETS.update(_wallet._id, {
+      _wallet._id && _ds_conn.WALLETS.update(_wallet._id, {
         naira: {
           $inc: Number(_amount.raw) / 100
         }
