@@ -1,3 +1,4 @@
+import { admins, create_admin, remove_admin } from "./route_handlers/admins";
 import {
   chat,
   messages,
@@ -16,6 +17,7 @@ import {
   update_password,
   update_phone,
   update_user_data,
+  user_by_email,
   user_refresh,
   verify_account,
   verify_email,
@@ -86,6 +88,9 @@ import {
   paycheck_bank_account,
   ready_for_transaction,
   not_ready_for_transaction,
+  wallet,
+  print_transactions,
+  any_new_notifications,
 } from "./route_handlers/wallet";
 
 const routes = (app) => {
@@ -102,12 +107,16 @@ const routes = (app) => {
   app.get("/onsale_offers/:onsale/:status", onsale_offers);
   app.get("/conversion_rates", get_conversion_rates);
   app.get("/get_banks", get_banks);
+  app.get("/admins", admins);
+  app.get("/wallet/:wallet_id", wallet);
+  app.get("/user_by_email/:email", user_by_email);
   app.get("/paycheck_bank_account", paycheck_bank_account);
   app.get("/user_brass_account/:user", user_brass_account);
   app.get("/get_verification_detail/:user", get_verification_detail);
   app.get("/get_code_by_country/:country", get_code_by_country);
 
   /* POST */
+  app.post("/any_new_notifications", any_new_notifications);
   app.post("/add_bank_account", add_bank_account);
   app.post("/remove_bank_account", remove_bank_account);
   app.post("/request_otp", request_otp);
@@ -123,11 +132,14 @@ const routes = (app) => {
   app.post("/topup", topup);
   app.post("/dislike_sale", dislike_sale);
   app.post("/like_sale", like_sale);
+  app.post("/print_transactions", print_transactions);
   app.post("/withdraw", withdraw);
   app.post("/place_sale", place_sale);
   app.post("/make_offer", make_offer);
   app.post("/offer", offer);
   app.post("/remove_offer", remove_offer);
+  app.post("/create_admin", create_admin);
+  app.post("/remove_admin/:admin", remove_admin);
   app.post("/chat", chat);
   app.post("/new_chat", new_chat);
   app.post("/messages", messages);

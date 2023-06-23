@@ -9,6 +9,7 @@ let USERS,
   CHATS,
   MESSAGES,
   ONBOARDINGS,
+  ADMINS,
   UTILS,
   PAYMENT_ACCOUNTS,
   FIAT_ACCOUNTS,
@@ -36,6 +37,7 @@ let ds_conn = () => {
   HASHES = gds.folder("hashes", "user");
   ONBOARDINGS = gds.folder("onboardings");
   MY_OFFERS = gds.folder("my_offers", "user", new Array("onsale", "offer"));
+  ADMINS = gds.folder("admins", null, "user");
   ONSALE = gds.folder("onsale", "currency", "seller");
   OFFERS = gds.folder("offers", "onsale", ["user", "offer_need"]);
   DISPUTES = gds.folder("disputes", "offer", "offer");
@@ -58,6 +60,7 @@ export {
   WALLETS,
   TRANSACTIONS,
   HASHES,
+  ADMINS,
   ONBOARDINGS,
   NOTIFICATIONS,
   CHATS,

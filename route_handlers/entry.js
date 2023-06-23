@@ -19,6 +19,7 @@ import {
   brass_personal_access_token,
   new_notification,
   platform_user,
+  platform_wallet,
 } from "./wallet";
 import axios from "axios";
 
@@ -194,15 +195,15 @@ const update_user_data = (req, res) => {
 };
 
 const request_otp = async (req, res) => {
-  let { email } = req.body;
+  let { email, relogin } = req.body;
 
   if (!email || !email_regex.test(email))
-    return res.json({ ok: false, message: "email field missing" });
+    return res.json({ ok: false, data: { message: "email field missing" } });
 
   email = email.trim().toLowerCase();
   let user = USERS.readone({ email });
 
-  if (user)
+  if (user && !relogin)
     return res.json({ ok: false, message: "email already used", data: email });
 
   let code = generate_random_string(6);
@@ -211,7 +212,9 @@ const request_otp = async (req, res) => {
   try {
     send_mail({
       recipient: email,
-      subject: "[Udara Links] Please verify your email",
+      subject: `[Udara Links] ${
+        relogin ? "Authenticate Your Login" : "Please verify your email"
+      }`,
       sender: "signup@udaralinksapp.com",
       sender_name: "Udara Links",
       sender_pass: "signupudaralinks",
@@ -312,8 +315,6 @@ const generate_reference_number = () =>
 const update_password = async (req, res) => {
   let { user, key, new_user } = req.body;
 
-  console.log(user, key, new_user);
-
   if (!user || !key)
     return res.json({ ok: false, message: "invalid credentials", data: user });
 
@@ -332,7 +333,7 @@ const update_password = async (req, res) => {
 };
 
 const logging_in = async (req, res) => {
-  let { email, key } = req.body;
+  let { email, key, relogin } = req.body;
 
   email = email.toLowerCase().trim();
 
@@ -347,12 +348,31 @@ const logging_in = async (req, res) => {
   if (!pass || pass.hash !== key)
     return res.json({ ok: false, data: "Invalid password" });
 
+  if (user.wallet === platform_wallet && !user.is_admin)
+    return res.json({ ok: false, data: "Invalid user" });
+
   USERS.update(user._id, { last_login: Date.now() });
   let wallet = WALLETS.readone(user.wallet);
   wallet.conversion_rates = conversion_rates;
   wallet.currencies = load_operating_currencies();
 
   if (!wallet) return res.json({ ok: false, data: "Cannot fetch wallet" });
+
+  if (!relogin) {
+    let code = generate_random_string(6);
+    pending_otps[email] = code;
+
+    try {
+      send_mail({
+        recipient: email,
+        subject: "[Udara Links] Authenticate Your Login",
+        sender: "signup@udaralinksapp.com",
+        sender_name: "Udara Links",
+        sender_pass: "signupudaralinks",
+        html: verification(code, null, true),
+      });
+    } catch (e) {}
+  }
 
   res.json({ ok: true, message: "loggedin", data: { user, wallet } });
 };
@@ -475,6 +495,12 @@ const verify_email = (req, res) => {
   } else res.json({ ok: false, data: { message: "OTP does not match" } });
 };
 
+const user_by_email = (req, res) => {
+  let { email } = req.params;
+
+  res.json({ ok: true, data: USERS.readone({ email }) });
+};
+
 export {
   onboardings,
   request_otp,
@@ -482,6 +508,7 @@ export {
   user_refresh,
   update_password,
   update_phone,
+  user_by_email,
   unverified_details,
   forgot_password,
   verify_email,

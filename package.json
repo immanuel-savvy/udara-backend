@@ -4,7 +4,7 @@
   "description": "Udara backend",
   "main": "Udara.js",
   "scripts": {
-    "build": "babel ./route_handlers/entry.js ./route_handlers/wallet.js ./routes.js -d build",
+    "build": "babel ./route_handlers/starter.js -d build",
     "start": "nodemon -r esm Udara.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -18,7 +18,7 @@
     "crypto": "^1.0.1",
     "express": "^4.18.1",
     "formidable": "^2.0.1",
-    "generalised-datastore": "^1.7.83",
+    "generalised-datastore": "^1.7.85",
     "js-sha512": "^0.8.0",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.8.0",
@@ -31,6 +31,7 @@
     "@babel/cli": "^7.18.10",
     "@babel/core": "^7.19.1",
     "babel-preset-env": "^1.7.0",
-    "esm": "^3.2.25"
+    "esm": "^3.2.25",
+    "nodemon": "^2.0.22"
   }
 }

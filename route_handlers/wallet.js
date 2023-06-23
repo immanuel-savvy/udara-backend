@@ -22,10 +22,12 @@ import {
   generate_reference_number,
   load_operating_currencies,
   operating_currencies,
+  send_mail,
 } from "./entry";
 
 import sha512 from "js-sha512";
 import { generate_random_string } from "../utils/functions";
+import { transactions_report } from "./email";
 
 const COMMISSION = 0.995;
 
@@ -34,6 +36,7 @@ const platform_user = `users~platform_user~3000`;
 const platform_bank_account = `bank_account~platform_user~3000`;
 
 let acceptable_payment_method = "BANK_TRANSFER";
+let user_notifications = new Object();
 
 const request_account_details = async (req, res) => {
   let { user, amount } = req.body;
@@ -85,7 +88,7 @@ const request_account_details = async (req, res) => {
 };
 
 const new_notification = (user, title, data, metadata) => {
-  NOTIFICATIONS.write({
+  let res = NOTIFICATIONS.write({
     user,
     title,
     data,
@@ -93,6 +96,11 @@ const new_notification = (user, title, data, metadata) => {
     unseen: true,
   });
   USERS.update(user, { new_notification: { $inc: 1 } });
+
+  let nots = user_notifications[user];
+  if (!nots) nots = new Array();
+
+  nots.push(NOTIFICATIONS.readone({ _id: res._id, user }));
 };
 
 const create_transaction = ({
@@ -418,6 +426,12 @@ const my_sales = (req, res) => {
   res.json({ ok: true, message: "seller sales", data: seller_sales });
 };
 
+const wallet = (req, res) => {
+  let { wallet_id } = req.params;
+
+  res.json({ ok: false, data: WALLETS.readone(wallet_id) });
+};
+
 const onsale_currency = (req, res) => {
   let { onsale } = req.params;
 
@@ -429,8 +443,10 @@ const onsale_currency = (req, res) => {
 const transaction_offer = (req, res) => {
   let { offer: offer_id, onsale: onsale_id } = req.body;
 
-  let offer = OFFERS.readone({ _id: offer_id, onsale_id }),
-    onsale = ONSALE.readone({ _id: onsale_id, currency: offer.currency });
+  let offer = OFFERS.readone({ _id: offer_id, onsale_id });
+  if (!offer) return res.end();
+
+  let onsale = ONSALE.readone({ _id: onsale_id, currency: offer.currency });
 
   res.json({ ok: true, message: "fetched data", data: { offer, onsale } });
 };
@@ -1263,11 +1279,46 @@ const paycheck_bank_account = (req, res) => {
   });
 };
 
+const print_transactions = (req, res) => {
+  let { start_date, end_date, admin, user } = req.body;
+
+  user = USERS.readone(user);
+  if (!user) return res.end();
+
+  let wallet = WALLETS.readone(user.wallet);
+  if (!wallet) return res.end();
+
+  let transactions = TRANSACTIONS.read({
+    wallet: wallet._id,
+    created: {
+      $superquery: (line, val, prop) => val <= end_date && val >= start_date,
+    },
+  });
+
+  send_mail({
+    recipient: admin,
+    subject: "[Udara Links] Transaction Report Data",
+    sender: "signup@udaralinksapp.com",
+    sender_name: "Udara Links",
+    sender_pass: "signupudaralinks",
+    html: transactions_report({ wallet, transactions }),
+  });
+
+  res.end();
+};
+
+const any_new_notifications = (req, res) => {
+  res.json({ data: user_notifications, ok: true });
+  user_notifications = new Object();
+};
+
 export {
   brass_personal_access_token,
+  print_transactions,
   brass_callback,
   get_banks,
   bank_accounts,
+  any_new_notifications,
   add_bank_account,
   user_brass_account,
   remove_bank_account,
@@ -1291,6 +1342,7 @@ export {
   offer,
   my_offers,
   onsale_offers,
+  wallet,
   accept_offer,
   decline_offer,
   remove_offer,
