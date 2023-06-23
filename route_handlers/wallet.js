@@ -537,9 +537,27 @@ const ready_for_transaction = (req, res) => {
 };
 
 const buyer_offers = (req, res) => {
-  let { buyer, skip, limit } = req.body;
+  let { buyer, skip, limit, ongoing } = req.body;
 
-  let offers = MY_OFFERS.read({ user: buyer }, { skip, limit });
+  let offers = MY_OFFERS.read(
+    ongoing
+      ? {
+          user: buyer,
+          created: {
+            $superquery: (line, val, prop) => {
+              let offer = OFFERS.readone(line.offer, {
+                subfolder: line.onsale,
+              });
+              if (new Array("closed", "completed").includes(offer.status))
+                return;
+
+              return true;
+            },
+          },
+        }
+      : { user: buyer },
+    { skip, limit }
+  );
 
   let offers_id = new Array(),
     onsale_ids = new Array(),

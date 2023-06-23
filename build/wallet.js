@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.withdraw = exports.user_brass_account = exports.update_fav_currency = exports.transactions = exports.transaction_offer = exports.topup = exports.state_offer_need = exports.resolve_dispute = exports.resolve_bank_account_name = exports.request_time_extension = exports.request_account_details = exports.remove_sale = exports.remove_offer = exports.remove_bank_account = exports.refund_buyer = exports.refresh_wallet = exports.ready_for_transaction = exports.platform_wallet = exports.platform_user = exports.platform_bank_account = exports.place_sale = exports.paycheck_bank_account = exports.paga_deposit = exports.onsale_offers = exports.onsale_currency = exports.onsale = exports.offer_in_dispute = exports.offer = exports.not_ready_for_transaction = exports.new_notification = exports.my_sales = exports.my_offers = exports.make_offer = exports.like_sale = exports.get_banks = exports.fulfil_offer = exports.extend_time = exports.disputes = exports.dispute = exports.dislike_sale = exports.deposit_to_escrow = exports.decline_offer = exports.confirm_offer = exports.buyer_offers = exports.brass_personal_access_token = exports.brass_callback = exports.bank_accounts = exports.add_fiat_account = exports.add_bank_account = exports.accept_offer = void 0;
+exports.withdraw = exports.wallet = exports.user_brass_account = exports.update_fav_currency = exports.transactions = exports.transaction_offer = exports.topup = exports.state_offer_need = exports.resolve_dispute = exports.resolve_bank_account_name = exports.request_time_extension = exports.request_account_details = exports.remove_sale = exports.remove_offer = exports.remove_bank_account = exports.refund_buyer = exports.refresh_wallet = exports.ready_for_transaction = exports.print_transactions = exports.platform_wallet = exports.platform_user = exports.platform_bank_account = exports.place_sale = exports.paycheck_bank_account = exports.paga_deposit = exports.onsale_offers = exports.onsale_currency = exports.onsale = exports.offer_in_dispute = exports.offer = exports.not_ready_for_transaction = exports.new_notification = exports.my_sales = exports.my_offers = exports.make_offer = exports.like_sale = exports.get_banks = exports.fulfil_offer = exports.extend_time = exports.disputes = exports.dispute = exports.dislike_sale = exports.deposit_to_escrow = exports.decline_offer = exports.confirm_offer = exports.buyer_offers = exports.brass_personal_access_token = exports.brass_callback = exports.bank_accounts = exports.any_new_notifications = exports.add_fiat_account = exports.add_bank_account = exports.accept_offer = void 0;
 
 var _axios = _interopRequireDefault(require("axios"));
 
@@ -17,13 +17,15 @@ var _jsSha = _interopRequireDefault(require("js-sha512"));
 
 var _functions = require("../utils/functions");
 
+var _email = require("./email");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
-function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return exports; }; var exports = {}, Op = Object.prototype, hasOwn = Op.hasOwnProperty, $Symbol = "function" == typeof Symbol ? Symbol : {}, iteratorSymbol = $Symbol.iterator || "@@iterator", asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator", toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag"; function define(obj, key, value) { return Object.defineProperty(obj, key, { value: value, enumerable: !0, configurable: !0, writable: !0 }), obj[key]; } try { define({}, ""); } catch (err) { define = function define(obj, key, value) { return obj[key] = value; }; } function wrap(innerFn, outerFn, self, tryLocsList) { var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator, generator = Object.create(protoGenerator.prototype), context = new Context(tryLocsList || []); return generator._invoke = function (innerFn, self, context) { var state = "suspendedStart"; return function (method, arg) { if ("executing" === state) throw new Error("Generator is already running"); if ("completed" === state) { if ("throw" === method) throw arg; return doneResult(); } for (context.method = method, context.arg = arg;;) { var delegate = context.delegate; if (delegate) { var delegateResult = maybeInvokeDelegate(delegate, context); if (delegateResult) { if (delegateResult === ContinueSentinel) continue; return delegateResult; } } if ("next" === context.method) context.sent = context._sent = context.arg;else if ("throw" === context.method) { if ("suspendedStart" === state) throw state = "completed", context.arg; context.dispatchException(context.arg); } else "return" === context.method && context.abrupt("return", context.arg); state = "executing"; var record = tryCatch(innerFn, self, context); if ("normal" === record.type) { if (state = context.done ? "completed" : "suspendedYield", record.arg === ContinueSentinel) continue; return { value: record.arg, done: context.done }; } "throw" === record.type && (state = "completed", context.method = "throw", context.arg = record.arg); } }; }(innerFn, self, context), generator; } function tryCatch(fn, obj, arg) { try { return { type: "normal", arg: fn.call(obj, arg) }; } catch (err) { return { type: "throw", arg: err }; } } exports.wrap = wrap; var ContinueSentinel = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var IteratorPrototype = {}; define(IteratorPrototype, iteratorSymbol, function () { return this; }); var getProto = Object.getPrototypeOf, NativeIteratorPrototype = getProto && getProto(getProto(values([]))); NativeIteratorPrototype && NativeIteratorPrototype !== Op && hasOwn.call(NativeIteratorPrototype, iteratorSymbol) && (IteratorPrototype = NativeIteratorPrototype); var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype); function defineIteratorMethods(prototype) { ["next", "throw", "return"].forEach(function (method) { define(prototype, method, function (arg) { return this._invoke(method, arg); }); }); } function AsyncIterator(generator, PromiseImpl) { function invoke(method, arg, resolve, reject) { var record = tryCatch(generator[method], generator, arg); if ("throw" !== record.type) { var result = record.arg, value = result.value; return value && "object" == _typeof(value) && hasOwn.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function (value) { invoke("next", value, resolve, reject); }, function (err) { invoke("throw", err, resolve, reject); }) : PromiseImpl.resolve(value).then(function (unwrapped) { result.value = unwrapped, resolve(result); }, function (error) { return invoke("throw", error, resolve, reject); }); } reject(record.arg); } var previousPromise; this._invoke = function (method, arg) { function callInvokeWithMethodAndArg() { return new PromiseImpl(function (resolve, reject) { invoke(method, arg, resolve, reject); }); } return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); }; } function maybeInvokeDelegate(delegate, context) { var method = delegate.iterator[context.method]; if (undefined === method) { if (context.delegate = null, "throw" === context.method) { if (delegate.iterator["return"] && (context.method = "return", context.arg = undefined, maybeInvokeDelegate(delegate, context), "throw" === context.method)) return ContinueSentinel; context.method = "throw", context.arg = new TypeError("The iterator does not provide a 'throw' method"); } return ContinueSentinel; } var record = tryCatch(method, delegate.iterator, context.arg); if ("throw" === record.type) return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel; var info = record.arg; return info ? info.done ? (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, "return" !== context.method && (context.method = "next", context.arg = undefined), context.delegate = null, ContinueSentinel) : info : (context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel); } function pushTryEntry(locs) { var entry = { tryLoc: locs[0] }; 1 in locs && (entry.catchLoc = locs[1]), 2 in locs && (entry.finallyLoc = locs[2], entry.afterLoc = locs[3]), this.tryEntries.push(entry); } function resetTryEntry(entry) { var record = entry.completion || {}; record.type = "normal", delete record.arg, entry.completion = record; } function Context(tryLocsList) { this.tryEntries = [{ tryLoc: "root" }], tryLocsList.forEach(pushTryEntry, this), this.reset(!0); } function values(iterable) { if (iterable) { var iteratorMethod = iterable[iteratorSymbol]; if (iteratorMethod) return iteratorMethod.call(iterable); if ("function" == typeof iterable.next) return iterable; if (!isNaN(iterable.length)) { var i = -1, next = function next() { for (; ++i < iterable.length;) { if (hasOwn.call(iterable, i)) return next.value = iterable[i], next.done = !1, next; } return next.value = undefined, next.done = !0, next; }; return next.next = next; } } return { next: doneResult }; } function doneResult() { return { value: undefined, done: !0 }; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, define(Gp, "constructor", GeneratorFunctionPrototype), define(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"), exports.isGeneratorFunction = function (genFun) { var ctor = "function" == typeof genFun && genFun.constructor; return !!ctor && (ctor === GeneratorFunction || "GeneratorFunction" === (ctor.displayName || ctor.name)); }, exports.mark = function (genFun) { return Object.setPrototypeOf ? Object.setPrototypeOf(genFun, GeneratorFunctionPrototype) : (genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction")), genFun.prototype = Object.create(Gp), genFun; }, exports.awrap = function (arg) { return { __await: arg }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function () { return this; }), exports.AsyncIterator = AsyncIterator, exports.async = function (innerFn, outerFn, self, tryLocsList, PromiseImpl) { void 0 === PromiseImpl && (PromiseImpl = Promise); var iter = new AsyncIterator(wrap(innerFn, outerFn, self, tryLocsList), PromiseImpl); return exports.isGeneratorFunction(outerFn) ? iter : iter.next().then(function (result) { return result.done ? result.value : iter.next(); }); }, defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function () { return this; }), define(Gp, "toString", function () { return "[object Generator]"; }), exports.keys = function (object) { var keys = []; for (var key in object) { keys.push(key); } return keys.reverse(), function next() { for (; keys.length;) { var key = keys.pop(); if (key in object) return next.value = key, next.done = !1, next; } return next.done = !0, next; }; }, exports.values = values, Context.prototype = { constructor: Context, reset: function reset(skipTempReset) { if (this.prev = 0, this.next = 0, this.sent = this._sent = undefined, this.done = !1, this.delegate = null, this.method = "next", this.arg = undefined, this.tryEntries.forEach(resetTryEntry), !skipTempReset) for (var name in this) { "t" === name.charAt(0) && hasOwn.call(this, name) && !isNaN(+name.slice(1)) && (this[name] = undefined); } }, stop: function stop() { this.done = !0; var rootRecord = this.tryEntries[0].completion; if ("throw" === rootRecord.type) throw rootRecord.arg; return this.rval; }, dispatchException: function dispatchException(exception) { if (this.done) throw exception; var context = this; function handle(loc, caught) { return record.type = "throw", record.arg = exception, context.next = loc, caught && (context.method = "next", context.arg = undefined), !!caught; } for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i], record = entry.completion; if ("root" === entry.tryLoc) return handle("end"); if (entry.tryLoc <= this.prev) { var hasCatch = hasOwn.call(entry, "catchLoc"), hasFinally = hasOwn.call(entry, "finallyLoc"); if (hasCatch && hasFinally) { if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0); if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc); } else if (hasCatch) { if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0); } else { if (!hasFinally) throw new Error("try statement without catch or finally"); if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc); } } } }, abrupt: function abrupt(type, arg) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.tryLoc <= this.prev && hasOwn.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) { var finallyEntry = entry; break; } } finallyEntry && ("break" === type || "continue" === type) && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc && (finallyEntry = null); var record = finallyEntry ? finallyEntry.completion : {}; return record.type = type, record.arg = arg, finallyEntry ? (this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel) : this.complete(record); }, complete: function complete(record, afterLoc) { if ("throw" === record.type) throw record.arg; return "break" === record.type || "continue" === record.type ? this.next = record.arg : "return" === record.type ? (this.rval = this.arg = record.arg, this.method = "return", this.next = "end") : "normal" === record.type && afterLoc && (this.next = afterLoc), ContinueSentinel; }, finish: function finish(finallyLoc) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.finallyLoc === finallyLoc) return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel; } }, "catch": function _catch(tryLoc) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.tryLoc === tryLoc) { var record = entry.completion; if ("throw" === record.type) { var thrown = record.arg; resetTryEntry(entry); } return thrown; } } throw new Error("illegal catch attempt"); }, delegateYield: function delegateYield(iterable, resultName, nextLoc) { return this.delegate = { iterator: values(iterable), resultName: resultName, nextLoc: nextLoc }, "next" === this.method && (this.arg = undefined), ContinueSentinel; } }, exports; }
+function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return exports; }; var exports = {}, Op = Object.prototype, hasOwn = Op.hasOwnProperty, $Symbol = "function" == typeof Symbol ? Symbol : {}, iteratorSymbol = $Symbol.iterator || "@@iterator", asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator", toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag"; function define(obj, key, value) { return Object.defineProperty(obj, key, { value: value, enumerable: !0, configurable: !0, writable: !0 }), obj[key]; } try { define({}, ""); } catch (err) { define = function define(obj, key, value) { return obj[key] = value; }; } function wrap(innerFn, outerFn, self, tryLocsList) { var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator, generator = Object.create(protoGenerator.prototype), context = new Context(tryLocsList || []); return generator._invoke = function (innerFn, self, context) { var state = "suspendedStart"; return function (method, arg) { if ("executing" === state) throw new Error("Generator is already running"); if ("completed" === state) { if ("throw" === method) throw arg; return doneResult(); } for (context.method = method, context.arg = arg;;) { var delegate = context.delegate; if (delegate) { var delegateResult = maybeInvokeDelegate(delegate, context); if (delegateResult) { if (delegateResult === ContinueSentinel) continue; return delegateResult; } } if ("next" === context.method) context.sent = context._sent = context.arg;else if ("throw" === context.method) { if ("suspendedStart" === state) throw state = "completed", context.arg; context.dispatchException(context.arg); } else "return" === context.method && context.abrupt("return", context.arg); state = "executing"; var record = tryCatch(innerFn, self, context); if ("normal" === record.type) { if (state = context.done ? "completed" : "suspendedYield", record.arg === ContinueSentinel) continue; return { value: record.arg, done: context.done }; } "throw" === record.type && (state = "completed", context.method = "throw", context.arg = record.arg); } }; }(innerFn, self, context), generator; } function tryCatch(fn, obj, arg) { try { return { type: "normal", arg: fn.call(obj, arg) }; } catch (err) { return { type: "throw", arg: err }; } } exports.wrap = wrap; var ContinueSentinel = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var IteratorPrototype = {}; define(IteratorPrototype, iteratorSymbol, function () { return this; }); var getProto = Object.getPrototypeOf, NativeIteratorPrototype = getProto && getProto(getProto(values([]))); NativeIteratorPrototype && NativeIteratorPrototype !== Op && hasOwn.call(NativeIteratorPrototype, iteratorSymbol) && (IteratorPrototype = NativeIteratorPrototype); var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype); function defineIteratorMethods(prototype) { ["next", "throw", "return"].forEach(function (method) { define(prototype, method, function (arg) { return this._invoke(method, arg); }); }); } function AsyncIterator(generator, PromiseImpl) { function invoke(method, arg, resolve, reject) { var record = tryCatch(generator[method], generator, arg); if ("throw" !== record.type) { var result = record.arg, value = result.value; return value && "object" == _typeof(value) && hasOwn.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function (value) { invoke("next", value, resolve, reject); }, function (err) { invoke("throw", err, resolve, reject); }) : PromiseImpl.resolve(value).then(function (unwrapped) { result.value = unwrapped, resolve(result); }, function (error) { return invoke("throw", error, resolve, reject); }); } reject(record.arg); } var previousPromise; this._invoke = function (method, arg) { function callInvokeWithMethodAndArg() { return new PromiseImpl(function (resolve, reject) { invoke(method, arg, resolve, reject); }); } return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); }; } function maybeInvokeDelegate(delegate, context) { var method = delegate.iterator[context.method]; if (undefined === method) { if (context.delegate = null, "throw" === context.method) { if (delegate.iterator["return"] && (context.method = "return", context.arg = undefined, maybeInvokeDelegate(delegate, context), "throw" === context.method)) return ContinueSentinel; context.method = "throw", context.arg = new TypeError("The iterator does not provide a 'throw' method"); } return ContinueSentinel; } var record = tryCatch(method, delegate.iterator, context.arg); if ("throw" === record.type) return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel; var info = record.arg; return info ? info.done ? (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, "return" !== context.method && (context.method = "next", context.arg = undefined), context.delegate = null, ContinueSentinel) : info : (context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel); } function pushTryEntry(locs) { var entry = { tryLoc: locs[0] }; 1 in locs && (entry.catchLoc = locs[1]), 2 in locs && (entry.finallyLoc = locs[2], entry.afterLoc = locs[3]), this.tryEntries.push(entry); } function resetTryEntry(entry) { var record = entry.completion || {}; record.type = "normal", delete record.arg, entry.completion = record; } function Context(tryLocsList) { this.tryEntries = [{ tryLoc: "root" }], tryLocsList.forEach(pushTryEntry, this), this.reset(!0); } function values(iterable) { if (iterable) { var iteratorMethod = iterable[iteratorSymbol]; if (iteratorMethod) return iteratorMethod.call(iterable); if ("function" == typeof iterable.next) return iterable; if (!isNaN(iterable.length)) { var i = -1, next = function next() { for (; ++i < iterable.length;) if (hasOwn.call(iterable, i)) return next.value = iterable[i], next.done = !1, next; return next.value = undefined, next.done = !0, next; }; return next.next = next; } } return { next: doneResult }; } function doneResult() { return { value: undefined, done: !0 }; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, define(Gp, "constructor", GeneratorFunctionPrototype), define(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"), exports.isGeneratorFunction = function (genFun) { var ctor = "function" == typeof genFun && genFun.constructor; return !!ctor && (ctor === GeneratorFunction || "GeneratorFunction" === (ctor.displayName || ctor.name)); }, exports.mark = function (genFun) { return Object.setPrototypeOf ? Object.setPrototypeOf(genFun, GeneratorFunctionPrototype) : (genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction")), genFun.prototype = Object.create(Gp), genFun; }, exports.awrap = function (arg) { return { __await: arg }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function () { return this; }), exports.AsyncIterator = AsyncIterator, exports.async = function (innerFn, outerFn, self, tryLocsList, PromiseImpl) { void 0 === PromiseImpl && (PromiseImpl = Promise); var iter = new AsyncIterator(wrap(innerFn, outerFn, self, tryLocsList), PromiseImpl); return exports.isGeneratorFunction(outerFn) ? iter : iter.next().then(function (result) { return result.done ? result.value : iter.next(); }); }, defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function () { return this; }), define(Gp, "toString", function () { return "[object Generator]"; }), exports.keys = function (object) { var keys = []; for (var key in object) keys.push(key); return keys.reverse(), function next() { for (; keys.length;) { var key = keys.pop(); if (key in object) return next.value = key, next.done = !1, next; } return next.done = !0, next; }; }, exports.values = values, Context.prototype = { constructor: Context, reset: function reset(skipTempReset) { if (this.prev = 0, this.next = 0, this.sent = this._sent = undefined, this.done = !1, this.delegate = null, this.method = "next", this.arg = undefined, this.tryEntries.forEach(resetTryEntry), !skipTempReset) for (var name in this) "t" === name.charAt(0) && hasOwn.call(this, name) && !isNaN(+name.slice(1)) && (this[name] = undefined); }, stop: function stop() { this.done = !0; var rootRecord = this.tryEntries[0].completion; if ("throw" === rootRecord.type) throw rootRecord.arg; return this.rval; }, dispatchException: function dispatchException(exception) { if (this.done) throw exception; var context = this; function handle(loc, caught) { return record.type = "throw", record.arg = exception, context.next = loc, caught && (context.method = "next", context.arg = undefined), !!caught; } for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i], record = entry.completion; if ("root" === entry.tryLoc) return handle("end"); if (entry.tryLoc <= this.prev) { var hasCatch = hasOwn.call(entry, "catchLoc"), hasFinally = hasOwn.call(entry, "finallyLoc"); if (hasCatch && hasFinally) { if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0); if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc); } else if (hasCatch) { if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0); } else { if (!hasFinally) throw new Error("try statement without catch or finally"); if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc); } } } }, abrupt: function abrupt(type, arg) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.tryLoc <= this.prev && hasOwn.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) { var finallyEntry = entry; break; } } finallyEntry && ("break" === type || "continue" === type) && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc && (finallyEntry = null); var record = finallyEntry ? finallyEntry.completion : {}; return record.type = type, record.arg = arg, finallyEntry ? (this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel) : this.complete(record); }, complete: function complete(record, afterLoc) { if ("throw" === record.type) throw record.arg; return "break" === record.type || "continue" === record.type ? this.next = record.arg : "return" === record.type ? (this.rval = this.arg = record.arg, this.method = "return", this.next = "end") : "normal" === record.type && afterLoc && (this.next = afterLoc), ContinueSentinel; }, finish: function finish(finallyLoc) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.finallyLoc === finallyLoc) return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel; } }, "catch": function _catch(tryLoc) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.tryLoc === tryLoc) { var record = entry.completion; if ("throw" === record.type) { var thrown = record.arg; resetTryEntry(entry); } return thrown; } } throw new Error("illegal catch attempt"); }, delegateYield: function delegateYield(iterable, resultName, nextLoc) { return this.delegate = { iterator: values(iterable), resultName: resultName, nextLoc: nextLoc }, "next" === this.method && (this.arg = undefined), ContinueSentinel; } }, exports; }
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
@@ -37,67 +39,66 @@ exports.platform_user = platform_user;
 var platform_bank_account = "bank_account~platform_user~3000";
 exports.platform_bank_account = platform_bank_account;
 var acceptable_payment_method = "BANK_TRANSFER";
+var user_notifications = new Object();
 
 var request_account_details = /*#__PURE__*/function () {
   var _ref = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(req, res) {
     var _req$body, user, amount, _user, email, _id, response, account_details;
 
     return _regeneratorRuntime().wrap(function _callee$(_context) {
-      while (1) {
-        switch (_context.prev = _context.next) {
-          case 0:
-            _req$body = req.body, user = _req$body.user, amount = _req$body.amount;
-            user = _ds_conn.USERS.readone(user);
-            _user = user, email = _user.email, _id = _user._id;
-            _context.next = 5;
-            return _Udara.paga_collection_client.paymentRequest({
-              referenceNumber: (0, _entry.generate_reference_number)(),
-              amount: amount,
-              callBackUrl: "https://mobile.udaralinksapp.com/paga_deposit/".concat(_id),
-              currency: "NGN",
-              isAllowPartialPayments: false,
-              isSuppressMessages: true,
-              payee: {
-                name: "Admin"
-              },
-              payer: {
-                name: "".concat(_id),
-                email: email.trim().toLowerCase()
-              },
-              payerCollectionFeeShare: 1.0,
-              recipientCollectionFeeShare: 0.0,
-              paymentMethods: [acceptable_payment_method]
+      while (1) switch (_context.prev = _context.next) {
+        case 0:
+          _req$body = req.body, user = _req$body.user, amount = _req$body.amount;
+          user = _ds_conn.USERS.readone(user);
+          _user = user, email = _user.email, _id = _user._id;
+          _context.next = 5;
+          return _Udara.paga_collection_client.paymentRequest({
+            referenceNumber: (0, _entry.generate_reference_number)(),
+            amount: amount,
+            callBackUrl: "https://mobile.udaralinksapp.com/paga_deposit/".concat(_id),
+            currency: "NGN",
+            isAllowPartialPayments: false,
+            isSuppressMessages: true,
+            payee: {
+              name: "Admin"
+            },
+            payer: {
+              name: "".concat(_id),
+              email: email.trim().toLowerCase()
+            },
+            payerCollectionFeeShare: 1.0,
+            recipientCollectionFeeShare: 0.0,
+            paymentMethods: [acceptable_payment_method]
+          });
+
+        case 5:
+          response = _context.sent;
+
+          if (!response.error) {
+            response = response.response;
+            account_details = response.paymentMethods.find(function (method) {
+              return method.name === acceptable_payment_method;
             });
-
-          case 5:
-            response = _context.sent;
-
-            if (!response.error) {
-              response = response.response;
-              account_details = response.paymentMethods.find(function (method) {
-                return method.name === acceptable_payment_method;
-              });
-              account_details = {
-                account_number: account_details.properties.AccountNumber,
-                bank: "paga"
-              };
-              res.json({
-                ok: true,
-                message: "account details generated",
-                data: account_details
-              });
-            } else res.json({
-              ok: false,
-              data: {
-                message: "could not generate account details at this time",
-                reason: response.response.statusMessage
-              }
+            account_details = {
+              account_number: account_details.properties.AccountNumber,
+              bank: "paga"
+            };
+            res.json({
+              ok: true,
+              message: "account details generated",
+              data: account_details
             });
+          } else res.json({
+            ok: false,
+            data: {
+              message: "could not generate account details at this time",
+              reason: response.response.statusMessage
+            }
+          });
 
-          case 7:
-          case "end":
-            return _context.stop();
-        }
+        case 7:
+        case "end":
+          return _context.stop();
       }
     }, _callee);
   }));
@@ -110,7 +111,7 @@ var request_account_details = /*#__PURE__*/function () {
 exports.request_account_details = request_account_details;
 
 var new_notification = function new_notification(user, title, data, metadata) {
-  _ds_conn.NOTIFICATIONS.write({
+  var res = _ds_conn.NOTIFICATIONS.write({
     user: user,
     title: title,
     data: data,
@@ -123,6 +124,13 @@ var new_notification = function new_notification(user, title, data, metadata) {
       $inc: 1
     }
   });
+
+  var nots = user_notifications[user];
+  if (!nots) nots = new Array();
+  nots.push(_ds_conn.NOTIFICATIONS.readone({
+    _id: res._id,
+    user: user
+  }));
 };
 
 exports.new_notification = new_notification;
@@ -243,38 +251,36 @@ var paga_deposit = /*#__PURE__*/function () {
     var user, _req$body5, paymentAmount, collectionFee, event, statusCode, amount;
 
     return _regeneratorRuntime().wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
-          case 0:
-            user = req.params.user;
-            _req$body5 = req.body, paymentAmount = _req$body5.paymentAmount, collectionFee = _req$body5.collectionFee, event = _req$body5.event, statusCode = _req$body5.statusCode;
+      while (1) switch (_context2.prev = _context2.next) {
+        case 0:
+          user = req.params.user;
+          _req$body5 = req.body, paymentAmount = _req$body5.paymentAmount, collectionFee = _req$body5.collectionFee, event = _req$body5.event, statusCode = _req$body5.statusCode;
 
-            _ds_conn.LOGS.write({
-              data: req.body,
-              user: user,
-              route: "paga deposit"
+          _ds_conn.LOGS.write({
+            data: req.body,
+            user: user,
+            route: "paga deposit"
+          });
+
+          if (statusCode === "0" && event === "PAYMENT_COMPLETE") {
+            amount = paymentAmount - collectionFee;
+            user = _ds_conn.USERS.readone(user);
+            user && topup({
+              body: {
+                value: amount,
+                user: user._id,
+                wallet: user.wallet
+              }
+            }, {
+              json: function json() {}
             });
+          }
 
-            if (statusCode === "0" && event === "PAYMENT_COMPLETE") {
-              amount = paymentAmount - collectionFee;
-              user = _ds_conn.USERS.readone(user);
-              user && topup({
-                body: {
-                  value: amount,
-                  user: user._id,
-                  wallet: user.wallet
-                }
-              }, {
-                json: function json() {}
-              });
-            }
+          res.end();
 
-            res.end();
-
-          case 5:
-          case "end":
-            return _context2.stop();
-        }
+        case 5:
+        case "end":
+          return _context2.stop();
       }
     }, _callee2);
   }));
@@ -291,46 +297,44 @@ var topup = /*#__PURE__*/function () {
     var _req$body6, value, user, wallet;
 
     return _regeneratorRuntime().wrap(function _callee3$(_context3) {
-      while (1) {
-        switch (_context3.prev = _context3.next) {
-          case 0:
-            _req$body6 = req.body, value = _req$body6.value, user = _req$body6.user, wallet = _req$body6.wallet;
+      while (1) switch (_context3.prev = _context3.next) {
+        case 0:
+          _req$body6 = req.body, value = _req$body6.value, user = _req$body6.user, wallet = _req$body6.wallet;
 
-            if (Number(value)) {
-              _context3.next = 3;
-              break;
+          if (Number(value)) {
+            _context3.next = 3;
+            break;
+          }
+
+          return _context3.abrupt("return", res.json({
+            ok: false,
+            message: "invalid transaction value"
+          }));
+
+        case 3:
+          wallet && _ds_conn.WALLETS.update(wallet, {
+            naira: {
+              $inc: value
             }
-
-            return _context3.abrupt("return", res.json({
-              ok: false,
-              message: "invalid transaction value"
-            }));
-
-          case 3:
-            wallet && _ds_conn.WALLETS.update(wallet, {
-              naira: {
-                $inc: value
-              }
-            });
-            res.json({
+          });
+          res.json({
+            ok: true,
+            message: "transaction successful",
+            data: {
               ok: true,
-              message: "transaction successful",
-              data: {
-                ok: true,
-                message: "topup",
-                transaction: create_transaction({
-                  wallet: wallet,
-                  user: user,
-                  from_value: value,
-                  title: "topup"
-                })
-              }
-            });
+              message: "topup",
+              transaction: create_transaction({
+                wallet: wallet,
+                user: user,
+                from_value: value,
+                title: "topup"
+              })
+            }
+          });
 
-          case 5:
-          case "end":
-            return _context3.stop();
-        }
+        case 5:
+        case "end":
+          return _context3.stop();
       }
     }, _callee3);
   }));
@@ -369,53 +373,51 @@ var make_payment = /*#__PURE__*/function () {
   var _ref6 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee4(_ref5, amount) {
     var bank, account_number, referenceNumber, destinationBankUUID, destinationBankAccountNumber, hash, response;
     return _regeneratorRuntime().wrap(function _callee4$(_context4) {
-      while (1) {
-        switch (_context4.prev = _context4.next) {
-          case 0:
-            bank = _ref5.bank, account_number = _ref5.account_number;
-            referenceNumber = "".concat((0, _functions.generate_random_string)(14, "alnum")).concat(Date.now()), destinationBankUUID = bank, destinationBankAccountNumber = account_number, hash = _Udara.api_key;
-            _context4.prev = 2;
-            _context4.next = 5;
-            return (0, _axios["default"])({
-              url: "https://beta.mypaga.com/paga-webservices/business-rest/secured/depositToBank",
-              method: "post",
-              headers: {
-                "Content-Type": "application/json",
-                principal: _Udara.client_id,
-                credentials: _Udara.password,
-                hash: (0, _jsSha["default"])(referenceNumber + Number(amount).toFixed(2) + destinationBankUUID + destinationBankAccountNumber + hash)
-              },
-              data: {
-                referenceNumber: referenceNumber,
-                amount: Number(amount).toFixed(2),
-                currency: "NGN",
-                destinationBankUUID: destinationBankUUID,
-                destinationBankAccountNumber: destinationBankAccountNumber,
-                remarks: "Udara wallet withdrawal ".concat(amount)
-              }
-            });
+      while (1) switch (_context4.prev = _context4.next) {
+        case 0:
+          bank = _ref5.bank, account_number = _ref5.account_number;
+          referenceNumber = "".concat((0, _functions.generate_random_string)(14, "alnum")).concat(Date.now()), destinationBankUUID = bank, destinationBankAccountNumber = account_number, hash = _Udara.api_key;
+          _context4.prev = 2;
+          _context4.next = 5;
+          return (0, _axios["default"])({
+            url: "https://beta.mypaga.com/paga-webservices/business-rest/secured/depositToBank",
+            method: "post",
+            headers: {
+              "Content-Type": "application/json",
+              principal: _Udara.client_id,
+              credentials: _Udara.password,
+              hash: (0, _jsSha["default"])(referenceNumber + Number(amount).toFixed(2) + destinationBankUUID + destinationBankAccountNumber + hash)
+            },
+            data: {
+              referenceNumber: referenceNumber,
+              amount: Number(amount).toFixed(2),
+              currency: "NGN",
+              destinationBankUUID: destinationBankUUID,
+              destinationBankAccountNumber: destinationBankAccountNumber,
+              remarks: "Udara wallet withdrawal ".concat(amount)
+            }
+          });
 
-          case 5:
-            response = _context4.sent;
-            response = response.data;
-            _context4.next = 12;
-            break;
+        case 5:
+          response = _context4.sent;
+          response = response.data;
+          _context4.next = 12;
+          break;
 
-          case 9:
-            _context4.prev = 9;
-            _context4.t0 = _context4["catch"](2);
-            console.log(_context4.t0);
+        case 9:
+          _context4.prev = 9;
+          _context4.t0 = _context4["catch"](2);
+          console.log(_context4.t0);
 
-          case 12:
-            return _context4.abrupt("return", {
-              response: response,
-              reference_number: referenceNumber
-            });
+        case 12:
+          return _context4.abrupt("return", {
+            response: response,
+            reference_number: referenceNumber
+          });
 
-          case 13:
-          case "end":
-            return _context4.stop();
-        }
+        case 13:
+        case "end":
+          return _context4.stop();
       }
     }, _callee4, null, [[2, 9]]);
   }));
@@ -429,102 +431,100 @@ var make_brass_payment = /*#__PURE__*/function () {
   var _ref8 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee5(bank_account, amount, source_account, _ref7) {
     var res, wallet, user, paycheck, account_name, bank_id, account_number, reference_number, response;
     return _regeneratorRuntime().wrap(function _callee5$(_context5) {
-      while (1) {
-        switch (_context5.prev = _context5.next) {
-          case 0:
-            res = _ref7.res, wallet = _ref7.wallet, user = _ref7.user, paycheck = _ref7.paycheck;
-            account_name = bank_account.account_name, bank_id = bank_account.bank_id, account_number = bank_account.account_number;
+      while (1) switch (_context5.prev = _context5.next) {
+        case 0:
+          res = _ref7.res, wallet = _ref7.wallet, user = _ref7.user, paycheck = _ref7.paycheck;
+          account_name = bank_account.account_name, bank_id = bank_account.bank_id, account_number = bank_account.account_number;
 
-            _ds_conn.LOGS.write({
-              account_name: account_name,
-              bank_id: bank_id,
-              account_number: account_number,
-              amount: amount,
-              source_account: source_account
-            });
+          _ds_conn.LOGS.write({
+            account_name: account_name,
+            bank_id: bank_id,
+            account_number: account_number,
+            amount: amount,
+            source_account: source_account
+          });
 
-            reference_number = (0, _entry.generate_reference_number)();
+          reference_number = (0, _entry.generate_reference_number)();
 
-            _ds_conn.LOGS.write({
-              account_name: account_name,
-              bank_id: bank_id,
-              account_number: account_number,
-              amount: amount,
-              source_account: source_account,
-              reference_number: reference_number
-            });
+          _ds_conn.LOGS.write({
+            account_name: account_name,
+            bank_id: bank_id,
+            account_number: account_number,
+            amount: amount,
+            source_account: source_account,
+            reference_number: reference_number
+          });
 
-            _context5.prev = 5;
-            _context5.next = 8;
-            return (0, _axios["default"])({
-              url: "https://sandbox-api.getbrass.co/banking/payments",
-              method: "post",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer ".concat(brass_personal_access_token)
+          _context5.prev = 5;
+          _context5.next = 8;
+          return (0, _axios["default"])({
+            url: "https://sandbox-api.getbrass.co/banking/payments",
+            method: "post",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer ".concat(brass_personal_access_token)
+            },
+            data: {
+              title: "withdrawal",
+              amount: Number(amount) * 100,
+              to: {
+                name: account_name,
+                bank: bank_id,
+                account_number: account_number
               },
-              data: {
-                title: "withdrawal",
-                amount: Number(amount) * 100,
-                to: {
-                  name: account_name,
-                  bank: bank_id,
-                  account_number: account_number
-                },
-                source_account: source_account,
-                customer_reference: reference_number
-              }
-            });
+              source_account: source_account,
+              customer_reference: reference_number
+            }
+          });
 
-          case 8:
-            response = _context5.sent;
-            response = response && response.data;
-            wallet._id && _ds_conn.WALLETS.update(wallet._id, paycheck ? {
-              profits: {
-                $dec: Number(amount)
-              }
-            } : {
-              naira: {
-                $dec: Number(amount)
-              }
-            });
-            res.json({
+        case 8:
+          response = _context5.sent;
+          response = response && response.data;
+          wallet._id && _ds_conn.WALLETS.update(wallet._id, paycheck ? {
+            profits: {
+              $dec: Number(amount)
+            }
+          } : {
+            naira: {
+              $dec: Number(amount)
+            }
+          });
+          res.json({
+            ok: true,
+            message: "transaction successful",
+            data: {
               ok: true,
-              message: "transaction successful",
-              data: {
-                ok: true,
-                message: "topup",
-                transaction: create_transaction({
-                  wallet: wallet._id,
-                  user: user,
-                  from_value: Number(amount),
-                  title: "pending-withdrawal",
-                  debit: true,
-                  reference_number: reference_number
-                })
-              }
-            });
-            _context5.next = 18;
-            break;
+              message: "topup",
+              transaction: create_transaction({
+                wallet: wallet._id,
+                user: user,
+                from_value: Number(amount),
+                title: "pending-withdrawal",
+                debit: true,
+                reference_number: reference_number
+              })
+            }
+          });
+          _context5.next = 18;
+          break;
 
-          case 14:
-            _context5.prev = 14;
-            _context5.t0 = _context5["catch"](5);
+        case 14:
+          _context5.prev = 14;
+          _context5.t0 = _context5["catch"](5);
 
-            _ds_conn.LOGS.write(_context5.t0);
+          _ds_conn.LOGS.write(_context5.t0);
 
-            res.json({
-              ok: false,
-              message: "withdrawal failed",
-              data: {
-                ok: false
-              }
-            });
+          res.json({
+            ok: false,
+            message: "withdrawal failed",
+            data: {
+              ok: false
+            }
+          });
 
-          case 18:
-          case "end":
-            return _context5.stop();
-        }
+        case 18:
+        case "end":
+          return _context5.stop();
       }
     }, _callee5, null, [[5, 14]]);
   }));
@@ -539,77 +539,75 @@ var withdraw = /*#__PURE__*/function () {
     var _req$body8, user, amount, bank_account, paycheck, wallet, user_obj;
 
     return _regeneratorRuntime().wrap(function _callee6$(_context6) {
-      while (1) {
-        switch (_context6.prev = _context6.next) {
-          case 0:
-            _req$body8 = req.body, user = _req$body8.user, amount = _req$body8.amount, bank_account = _req$body8.bank_account, paycheck = _req$body8.paycheck, wallet = _req$body8.wallet;
+      while (1) switch (_context6.prev = _context6.next) {
+        case 0:
+          _req$body8 = req.body, user = _req$body8.user, amount = _req$body8.amount, bank_account = _req$body8.bank_account, paycheck = _req$body8.paycheck, wallet = _req$body8.wallet;
 
-            if (Number(amount)) {
-              _context6.next = 3;
-              break;
-            }
+          if (Number(amount)) {
+            _context6.next = 3;
+            break;
+          }
 
-            return _context6.abrupt("return", res.json({
-              ok: false,
-              message: "invalid transaction amount"
-            }));
+          return _context6.abrupt("return", res.json({
+            ok: false,
+            message: "invalid transaction amount"
+          }));
 
-          case 3:
-            wallet = _ds_conn.WALLETS.readone(wallet);
-            user_obj = _ds_conn.USERS.readone(user);
+        case 3:
+          wallet = _ds_conn.WALLETS.readone(wallet);
+          user_obj = _ds_conn.USERS.readone(user);
 
-            if (!(!user_obj || !wallet)) {
-              _context6.next = 7;
-              break;
-            }
+          if (!(!user_obj || !wallet)) {
+            _context6.next = 7;
+            break;
+          }
 
-            return _context6.abrupt("return", res.end());
+          return _context6.abrupt("return", res.end());
 
-          case 7:
-            if (!paycheck) {
-              _context6.next = 12;
-              break;
-            }
+        case 7:
+          if (!paycheck) {
+            _context6.next = 12;
+            break;
+          }
 
-            if (!(wallet.profits < Number(amount))) {
-              _context6.next = 10;
-              break;
-            }
+          if (!(wallet.profits < Number(amount))) {
+            _context6.next = 10;
+            break;
+          }
 
-            return _context6.abrupt("return", res.end());
+          return _context6.abrupt("return", res.end());
 
-          case 10:
+        case 10:
+          _context6.next = 14;
+          break;
+
+        case 12:
+          if (!(wallet.naira < Number(amount))) {
             _context6.next = 14;
             break;
+          }
 
-          case 12:
-            if (!(wallet.naira < Number(amount))) {
-              _context6.next = 14;
-              break;
-            }
+          return _context6.abrupt("return", res.end());
 
-            return _context6.abrupt("return", res.end());
+        case 14:
+          _context6.next = 16;
+          return make_brass_payment(_typeof(bank_account) === "object" ? bank_account : _ds_conn.BANK_ACCOUNTS.readone(paycheck ? {
+            user: platform_user,
+            _id: platform_bank_account
+          } : {
+            user: user,
+            _id: bank_account
+          }), amount, _ds_conn.BRASS_SUBACCOUNTS.readone(wallet.brass_account).account_id, {
+            req: req,
+            res: res,
+            wallet: wallet,
+            user: user,
+            paycheck: paycheck
+          });
 
-          case 14:
-            _context6.next = 16;
-            return make_brass_payment(_typeof(bank_account) === "object" ? bank_account : _ds_conn.BANK_ACCOUNTS.readone(paycheck ? {
-              user: platform_user,
-              _id: platform_bank_account
-            } : {
-              user: user,
-              _id: bank_account
-            }), amount, _ds_conn.BRASS_SUBACCOUNTS.readone(wallet.brass_account).account_id, {
-              req: req,
-              res: res,
-              wallet: wallet,
-              user: user,
-              paycheck: paycheck
-            });
-
-          case 16:
-          case "end":
-            return _context6.stop();
-        }
+        case 16:
+        case "end":
+          return _context6.stop();
       }
     }, _callee6);
   }));
@@ -682,6 +680,16 @@ var my_sales = function my_sales(req, res) {
 
 exports.my_sales = my_sales;
 
+var wallet = function wallet(req, res) {
+  var wallet_id = req.params.wallet_id;
+  res.json({
+    ok: false,
+    data: _ds_conn.WALLETS.readone(wallet_id)
+  });
+};
+
+exports.wallet = wallet;
+
 var onsale_currency = function onsale_currency(req, res) {
   var onsale = req.params.onsale;
 
@@ -707,8 +715,11 @@ var transaction_offer = function transaction_offer(req, res) {
   var offer = _ds_conn.OFFERS.readone({
     _id: offer_id,
     onsale_id: onsale_id
-  }),
-      onsale = _ds_conn.ONSALE.readone({
+  });
+
+  if (!offer) return res.end();
+
+  var onsale = _ds_conn.ONSALE.readone({
     _id: onsale_id,
     currency: offer.currency
   });
@@ -896,9 +907,22 @@ var buyer_offers = function buyer_offers(req, res) {
   var _req$body17 = req.body,
       buyer = _req$body17.buyer,
       skip = _req$body17.skip,
-      limit = _req$body17.limit;
+      limit = _req$body17.limit,
+      ongoing = _req$body17.ongoing;
 
-  var offers = _ds_conn.MY_OFFERS.read({
+  var offers = _ds_conn.MY_OFFERS.read(ongoing ? {
+    user: buyer,
+    created: {
+      $superquery: function $superquery(line, val, prop) {
+        var offer = _ds_conn.OFFERS.readone(line.offer, {
+          subfolder: line.onsale
+        });
+
+        if (new Array("closed", "completed").includes(offer.state)) return;
+        return true;
+      }
+    }
+  } : {
     user: buyer
   }, {
     skip: skip,
@@ -1165,31 +1189,29 @@ var forward_message = /*#__PURE__*/function () {
   var _ref10 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee7(from, to, offer, meta) {
     var chat, message, result;
     return _regeneratorRuntime().wrap(function _callee7$(_context7) {
-      while (1) {
-        switch (_context7.prev = _context7.next) {
-          case 0:
-            chat = _ds_conn.CHATS.readone({
+      while (1) switch (_context7.prev = _context7.next) {
+        case 0:
+          chat = _ds_conn.CHATS.readone({
+            offer: offer
+          });
+
+          if (chat) {
+            message = {
+              from: from,
+              to: to,
+              attachment: new Array(offer),
+              attachment_meta: meta,
+              chat: chat._id,
               offer: offer
-            });
+            };
+            result = _ds_conn.MESSAGES.write(message);
+            message._id = result._id;
+            message.created = result.created;
+          }
 
-            if (chat) {
-              message = {
-                from: from,
-                to: to,
-                attachment: new Array(offer),
-                attachment_meta: meta,
-                chat: chat._id,
-                offer: offer
-              };
-              result = _ds_conn.MESSAGES.write(message);
-              message._id = result._id;
-              message.created = result.created;
-            }
-
-          case 2:
-          case "end":
-            return _context7.stop();
-        }
+        case 2:
+        case "end":
+          return _context7.stop();
       }
     }, _callee7);
   }));
@@ -1711,45 +1733,43 @@ var get_banks = /*#__PURE__*/function () {
   var _ref11 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee8(req, res) {
     var banks;
     return _regeneratorRuntime().wrap(function _callee8$(_context8) {
-      while (1) {
-        switch (_context8.prev = _context8.next) {
-          case 0:
-            _context8.prev = 0;
-            _context8.next = 3;
-            return (0, _axios["default"])({
-              method: "get",
-              url: "https://sandbox-api.getbrass.co/banking/banks?page=1&limit=95",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer ".concat(brass_personal_access_token)
-              }
-            });
+      while (1) switch (_context8.prev = _context8.next) {
+        case 0:
+          _context8.prev = 0;
+          _context8.next = 3;
+          return (0, _axios["default"])({
+            method: "get",
+            url: "https://sandbox-api.getbrass.co/banking/banks?page=1&limit=95",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer ".concat(brass_personal_access_token)
+            }
+          });
 
-          case 3:
-            banks = _context8.sent;
-            _context8.next = 8;
-            break;
+        case 3:
+          banks = _context8.sent;
+          _context8.next = 8;
+          break;
 
-          case 6:
-            _context8.prev = 6;
-            _context8.t0 = _context8["catch"](0);
+        case 6:
+          _context8.prev = 6;
+          _context8.t0 = _context8["catch"](0);
 
-          case 8:
-            banks = banks && banks.data;
-            banks && banks.data ? res.json({
-              ok: true,
-              message: "get banks endpoint",
-              data: banks.data
-            }) : res.json({
-              ok: false,
-              message: "cannot get banks",
-              data: new Array()
-            });
+        case 8:
+          banks = banks && banks.data;
+          banks && banks.data ? res.json({
+            ok: true,
+            message: "get banks endpoint",
+            data: banks.data
+          }) : res.json({
+            ok: false,
+            message: "cannot get banks",
+            data: new Array()
+          });
 
-          case 10:
-          case "end":
-            return _context8.stop();
-        }
+        case 10:
+        case "end":
+          return _context8.stop();
       }
     }, _callee8, null, [[0, 6]]);
   }));
@@ -1766,44 +1786,42 @@ var resolve_bank_account_name = /*#__PURE__*/function () {
     var _req$body32, account_number, bank, details;
 
     return _regeneratorRuntime().wrap(function _callee9$(_context9) {
-      while (1) {
-        switch (_context9.prev = _context9.next) {
-          case 0:
-            _req$body32 = req.body, account_number = _req$body32.account_number, bank = _req$body32.bank;
-            _context9.prev = 1;
-            _context9.next = 4;
-            return (0, _axios["default"])({
-              method: "get",
-              url: "https://sandbox-api.getbrass.co/banking/banks/account-name?bank=".concat(bank, "&account_number=").concat(account_number),
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer ".concat(brass_personal_access_token)
-              }
-            });
+      while (1) switch (_context9.prev = _context9.next) {
+        case 0:
+          _req$body32 = req.body, account_number = _req$body32.account_number, bank = _req$body32.bank;
+          _context9.prev = 1;
+          _context9.next = 4;
+          return (0, _axios["default"])({
+            method: "get",
+            url: "https://sandbox-api.getbrass.co/banking/banks/account-name?bank=".concat(bank, "&account_number=").concat(account_number),
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer ".concat(brass_personal_access_token)
+            }
+          });
 
-          case 4:
-            details = _context9.sent;
-            details = details && details.data;
-            if (details && details.data) res.json({
-              ok: true,
-              message: "Account name resolved",
-              data: details.data
-            });else res.json({
-              ok: false,
-              message: "Cannot resolve account name at the moment",
-              data: details.error
-            });
-            _context9.next = 11;
-            break;
+        case 4:
+          details = _context9.sent;
+          details = details && details.data;
+          if (details && details.data) res.json({
+            ok: true,
+            message: "Account name resolved",
+            data: details.data
+          });else res.json({
+            ok: false,
+            message: "Cannot resolve account name at the moment",
+            data: details.error
+          });
+          _context9.next = 11;
+          break;
 
-          case 9:
-            _context9.prev = 9;
-            _context9.t0 = _context9["catch"](1);
+        case 9:
+          _context9.prev = 9;
+          _context9.t0 = _context9["catch"](1);
 
-          case 11:
-          case "end":
-            return _context9.stop();
-        }
+        case 11:
+        case "end":
+          return _context9.stop();
       }
     }, _callee9, null, [[1, 9]]);
   }));
@@ -1932,6 +1950,8 @@ var brass_callback = function brass_callback(req, res) {
   //   return res.status(401).json({ message: "Unau
   // do something with event
 
+  _ds_conn.LOGS.write(event_);
+
   var event = event_.event,
       data = event_.data;
 
@@ -1975,17 +1995,17 @@ var brass_callback = function brass_callback(req, res) {
 
     _user3 = _ds_conn.USERS.readone(_user3);
 
-    var wallet = _ds_conn.WALLETS.readone(_user3.wallet);
+    var _wallet = _ds_conn.WALLETS.readone(_user3.wallet);
 
     if (memo !== "withdrawal") {
       create_transaction({
-        wallet: wallet._id,
+        wallet: _wallet._id,
         user: _user3._id,
         from_value: Number(Number(amount.raw) / 100),
         title: memo,
         debit: true
       });
-      wallet._id && _ds_conn.WALLETS.update(wallet._id, {
+      _wallet._id && _ds_conn.WALLETS.update(_wallet._id, {
         naira: {
           $dec: Number(amount.raw) / 100
         }
@@ -2001,11 +2021,11 @@ var brass_callback = function brass_callback(req, res) {
 
     _user4 = _ds_conn.USERS.readone(_user4);
 
-    var _wallet = _ds_conn.WALLETS.readone(_user4.wallet);
+    var _wallet2 = _ds_conn.WALLETS.readone(_user4.wallet);
 
     _ds_conn.LOGS.write({
       user: _user4 && _user4._id,
-      wallet: _wallet && _wallet._id,
+      wallet: _wallet2 && _wallet2._id,
       acc: _account.data.customer_reference,
       amt: Number(_amount.raw)
     });
@@ -2013,12 +2033,12 @@ var brass_callback = function brass_callback(req, res) {
     if (status === "success") {
       _ds_conn.TRANSACTIONS.update({
         reference_number: customer_reference,
-        wallet: _wallet._id
+        wallet: _wallet2._id
       }, {
         title: "Withdraw Successful"
       });
     } else {
-      _wallet._id && _ds_conn.WALLETS.update(_wallet._id, {
+      _wallet2._id && _ds_conn.WALLETS.update(_wallet2._id, {
         naira: {
           $inc: Number(_amount.raw) / 100
         }
@@ -2026,7 +2046,7 @@ var brass_callback = function brass_callback(req, res) {
 
       _ds_conn.TRANSACTIONS.update({
         reference_number: customer_reference,
-        wallet: _wallet._id
+        wallet: _wallet2._id
       }, {
         title: "Withdrawal Failed"
       });
@@ -2062,3 +2082,51 @@ var paycheck_bank_account = function paycheck_bank_account(req, res) {
 };
 
 exports.paycheck_bank_account = paycheck_bank_account;
+
+var print_transactions = function print_transactions(req, res) {
+  var _req$body35 = req.body,
+      start_date = _req$body35.start_date,
+      end_date = _req$body35.end_date,
+      admin = _req$body35.admin,
+      user = _req$body35.user;
+  user = _ds_conn.USERS.readone(user);
+  if (!user) return res.end();
+
+  var wallet = _ds_conn.WALLETS.readone(user.wallet);
+
+  if (!wallet) return res.end();
+
+  var transactions = _ds_conn.TRANSACTIONS.read({
+    wallet: wallet._id,
+    created: {
+      $superquery: function $superquery(line, val, prop) {
+        return val <= end_date && val >= start_date;
+      }
+    }
+  });
+
+  (0, _entry.send_mail)({
+    recipient: admin,
+    subject: "[Udara Links] Transaction Report Data",
+    sender: "signup@udaralinksapp.com",
+    sender_name: "Udara Links",
+    sender_pass: "signupudaralinks",
+    html: (0, _email.transactions_report)({
+      wallet: wallet,
+      transactions: transactions
+    })
+  });
+  res.end();
+};
+
+exports.print_transactions = print_transactions;
+
+var any_new_notifications = function any_new_notifications(req, res) {
+  res.json({
+    data: user_notifications,
+    ok: true
+  });
+  user_notifications = new Object();
+};
+
+exports.any_new_notifications = any_new_notifications;

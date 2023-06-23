@@ -4,7 +4,7 @@
   "description": "Udara backend",
   "main": "Udara.js",
   "scripts": {
-    "build": "babel ./route_handlers/starter.js -d build",
+    "build": "babel ./cv.js ./route_handlers/wallet.js -d build",
     "start": "nodemon -r esm Udara.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
