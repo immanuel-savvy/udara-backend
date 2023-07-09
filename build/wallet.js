@@ -710,11 +710,12 @@ exports.onsale_currency = onsale_currency;
 var transaction_offer = function transaction_offer(req, res) {
   var _req$body10 = req.body,
       offer_id = _req$body10.offer,
-      onsale_id = _req$body10.onsale;
+      onsale_id = _req$body10.onsale,
+      party = _req$body10.party;
 
   var offer = _ds_conn.OFFERS.readone({
     _id: offer_id,
-    onsale_id: onsale_id
+    onsale: onsale_id
   });
 
   if (!offer) return res.end();
@@ -724,12 +725,15 @@ var transaction_offer = function transaction_offer(req, res) {
     currency: offer.currency
   });
 
+  var parties = party && party.length && _ds_conn.USERS.read(party);
+
   res.json({
     ok: true,
     message: "fetched data",
     data: {
       offer: offer,
-      onsale: onsale
+      onsale: onsale,
+      parties: parties
     }
   });
 };
@@ -918,7 +922,7 @@ var buyer_offers = function buyer_offers(req, res) {
           subfolder: line.onsale
         });
 
-        if (new Array("closed", "completed").includes(offer.state)) return;
+        if (new Array("closed", "completed").includes(offer.status)) return;
         return true;
       }
     }
@@ -1276,6 +1280,18 @@ var deposit_to_escrow = function deposit_to_escrow(req, res) {
   new_notification(seller, "buyer deposited to escrow", new Array(onsale, offer), {
     currency: offer_.currency
   });
+  create_transaction({
+    title: "deposit in escrow",
+    wallet: platform_wallet,
+    user: platform_user,
+    from_value: offer_.amount * offer_.offer_rate,
+    debit: true,
+    data: {
+      offer: offer,
+      onsale: onsale,
+      party: new Array(offer_.user._id, seller)
+    }
+  });
   res.json({
     ok: true,
     message: "deposited to escrow",
@@ -1292,7 +1308,8 @@ var deposit_to_escrow = function deposit_to_escrow(req, res) {
         debit: true,
         data: {
           offer: offer,
-          onsale: onsale
+          onsale: onsale,
+          party: new Array(offer_.user._id, seller)
         }
       })
     }
@@ -1371,7 +1388,8 @@ var confirm_offer = function confirm_offer(req, res) {
     from_value: cost * 0.005,
     data: {
       offer: offer,
-      onsale: onsale
+      onsale: onsale,
+      party: new Array(seller, offer_.user._id)
     }
   });
   create_transaction({
@@ -1382,7 +1400,8 @@ var confirm_offer = function confirm_offer(req, res) {
     debit: true,
     data: {
       offer: offer,
-      onsale: onsale
+      onsale: onsale,
+      party: new Array(seller, offer_.user._id)
     }
   });
   create_transaction({
@@ -1392,7 +1411,8 @@ var confirm_offer = function confirm_offer(req, res) {
     from_value: cost,
     data: {
       offer: offer,
-      onsale: onsale
+      onsale: onsale,
+      party: new Array(seller, offer_.user._id)
     }
   });
   res.json({
@@ -1410,7 +1430,8 @@ var confirm_offer = function confirm_offer(req, res) {
         debit: true,
         data: {
           offer: offer,
-          onsale: onsale
+          onsale: onsale,
+          party: new Array(seller, offer_.user._id)
         }
       })
     }
@@ -1720,7 +1741,8 @@ var refund_buyer = function refund_buyer(req, res) {
         from_value: cost,
         data: {
           offer: offer,
-          onsale: onsale
+          onsale: onsale,
+          party: new Array(offer_.user._id, onsale_update.seller)
         }
       })
     }
@@ -2089,6 +2111,11 @@ var print_transactions = function print_transactions(req, res) {
       end_date = _req$body35.end_date,
       admin = _req$body35.admin,
       user = _req$body35.user;
+  var all = start_date === end_date;
+  start_date = new Date(start_date);
+  end_date = new Date(end_date);
+  start_date = new Date("".concat(start_date.getMonth() + 1, "-").concat(start_date.getDate(), "-").concat(start_date.getFullYear())).getTime();
+  end_date = new Date("".concat(end_date.getMonth() + 1, "-").concat(end_date.getDate(), "-").concat(end_date.getFullYear())).getTime() + 60 * 60 * 24 * 1000;
   user = _ds_conn.USERS.readone(user);
   if (!user) return res.end();
 
@@ -2096,11 +2123,13 @@ var print_transactions = function print_transactions(req, res) {
 
   if (!wallet) return res.end();
 
-  var transactions = _ds_conn.TRANSACTIONS.read({
+  var transactions = _ds_conn.TRANSACTIONS.read(all ? {
+    wallet: wallet._id
+  } : {
     wallet: wallet._id,
     created: {
       $superquery: function $superquery(line, val, prop) {
-        return val <= end_date && val >= start_date;
+        return val < end_date && val >= start_date;
       }
     }
   });

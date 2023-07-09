@@ -1,4 +1,4 @@
-import { ADMINS, BANK_ACCOUNTS, HASHES, USERS } from "../conn/ds_conn";
+import { ADMINS, HASHES, USERS } from "../conn/ds_conn";
 import { admin_created_email } from "./email";
 import { send_mail } from "./entry";
 import { platform_wallet } from "./wallet";

@@ -441,14 +441,20 @@ const onsale_currency = (req, res) => {
 };
 
 const transaction_offer = (req, res) => {
-  let { offer: offer_id, onsale: onsale_id } = req.body;
+  let { offer: offer_id, onsale: onsale_id, party } = req.body;
 
-  let offer = OFFERS.readone({ _id: offer_id, onsale_id });
+  let offer = OFFERS.readone({ _id: offer_id, onsale: onsale_id });
   if (!offer) return res.end();
 
   let onsale = ONSALE.readone({ _id: onsale_id, currency: offer.currency });
 
-  res.json({ ok: true, message: "fetched data", data: { offer, onsale } });
+  let parties = party && party.length && USERS.read(party);
+
+  res.json({
+    ok: true,
+    message: "fetched data",
+    data: { offer, onsale, parties },
+  });
 };
 
 const remove_sale = (req, res) => {
@@ -746,6 +752,15 @@ const deposit_to_escrow = (req, res) => {
     { currency: offer_.currency }
   );
 
+  create_transaction({
+    title: "deposit in escrow",
+    wallet: platform_wallet,
+    user: platform_user,
+    from_value: offer_.amount * offer_.offer_rate,
+    debit: true,
+    data: { offer, onsale, party: new Array(offer_.user._id, seller) },
+  });
+
   res.json({
     ok: true,
     message: "deposited to escrow",
@@ -760,7 +775,7 @@ const deposit_to_escrow = (req, res) => {
         user: offer_.user._id,
         from_value: offer_.amount * offer_.offer_rate,
         debit: true,
-        data: { offer, onsale },
+        data: { offer, onsale, party: new Array(offer_.user._id, seller) },
       }),
     },
   });
@@ -815,7 +830,7 @@ const confirm_offer = (req, res) => {
     wallet: platform_wallet,
     user: platform_user,
     from_value: cost * 0.005,
-    data: { offer, onsale },
+    data: { offer, onsale, party: new Array(seller, offer_.user._id) },
   });
   create_transaction({
     title: "confirmed offer",
@@ -823,14 +838,14 @@ const confirm_offer = (req, res) => {
     user: platform_user,
     from_value: cost,
     debit: true,
-    data: { offer, onsale },
+    data: { offer, onsale, party: new Array(seller, offer_.user._id) },
   });
   create_transaction({
     title: "offer confirmed",
     wallet: wallet_update && wallet_update._id,
     user: wallet_update.user,
     from_value: cost,
-    data: { offer, onsale },
+    data: { offer, onsale, party: new Array(seller, offer_.user._id) },
   });
 
   res.json({
@@ -846,7 +861,7 @@ const confirm_offer = (req, res) => {
         user: wallet_update.user,
         from_value: cost * 0.005,
         debit: true,
-        data: { offer, onsale },
+        data: { offer, onsale, party: new Array(seller, offer_.user._id) },
       }),
     },
   });
@@ -1045,7 +1060,11 @@ const refund_buyer = (req, res) => {
         wallet: wallet_update && wallet_update._id,
         user: wallet_update.user,
         from_value: cost,
-        data: { offer, onsale },
+        data: {
+          offer,
+          onsale,
+          party: new Array(offer_.user._id, onsale_update.seller),
+        },
       }),
     },
   });
@@ -1300,18 +1319,41 @@ const paycheck_bank_account = (req, res) => {
 const print_transactions = (req, res) => {
   let { start_date, end_date, admin, user } = req.body;
 
+  let all = start_date === end_date;
+  start_date = new Date(start_date);
+  end_date = new Date(end_date);
+
+  start_date = new Date(
+    `${
+      start_date.getMonth() + 1
+    }-${start_date.getDate()}-${start_date.getFullYear()}`
+  ).getTime();
+
+  end_date =
+    new Date(
+      `${
+        end_date.getMonth() + 1
+      }-${end_date.getDate()}-${end_date.getFullYear()}`
+    ).getTime() +
+    60 * 60 * 24 * 1000;
+
   user = USERS.readone(user);
   if (!user) return res.end();
 
   let wallet = WALLETS.readone(user.wallet);
   if (!wallet) return res.end();
 
-  let transactions = TRANSACTIONS.read({
-    wallet: wallet._id,
-    created: {
-      $superquery: (line, val, prop) => val <= end_date && val >= start_date,
-    },
-  });
+  let transactions = TRANSACTIONS.read(
+    all
+      ? { wallet: wallet._id }
+      : {
+          wallet: wallet._id,
+          created: {
+            $superquery: (line, val, prop) =>
+              val < end_date && val >= start_date,
+          },
+        }
+  );
 
   send_mail({
     recipient: admin,
