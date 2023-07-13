@@ -1304,16 +1304,23 @@ const brass_callback = (req, res) => {
         { title: "Withdraw Successful" }
       );
     } else {
-      wallet._id &&
-        WALLETS.update(wallet._id, {
-          naira: { $inc: Number(amount.raw) / 100 },
-        });
-      TRANSACTIONS.update(
-        { reference_number: customer_reference, wallet: wallet._id },
-        {
-          title: "Withdrawal Failed",
-        }
-      );
+      let tx = TRANSACTIONS.readone({
+        reference_number: customer_reference,
+        wallet: wallet._id,
+      });
+
+      if (tx && tx.title !== "Withdrawal Failed") {
+        wallet._id &&
+          WALLETS.update(wallet._id, {
+            naira: { $inc: Number(amount.raw) / 100 },
+          });
+        TRANSACTIONS.update(
+          { reference_number: customer_reference, wallet: wallet._id },
+          {
+            title: "Withdrawal Failed",
+          }
+        );
+      }
     }
   }
 

@@ -2092,18 +2092,25 @@ var brass_callback = function brass_callback(req, res) {
         title: "Withdraw Successful"
       });
     } else {
-      _wallet2._id && _ds_conn.WALLETS.update(_wallet2._id, {
-        naira: {
-          $inc: Number(_amount.raw) / 100
-        }
-      });
-
-      _ds_conn.TRANSACTIONS.update({
+      var tx = _ds_conn.TRANSACTIONS.readone({
         reference_number: customer_reference,
         wallet: _wallet2._id
-      }, {
-        title: "Withdrawal Failed"
       });
+
+      if (tx && tx.title !== "Withdrawal Failed") {
+        _wallet2._id && _ds_conn.WALLETS.update(_wallet2._id, {
+          naira: {
+            $inc: Number(_amount.raw) / 100
+          }
+        });
+
+        _ds_conn.TRANSACTIONS.update({
+          reference_number: customer_reference,
+          wallet: _wallet2._id
+        }, {
+          title: "Withdrawal Failed"
+        });
+      }
     }
   }
 
