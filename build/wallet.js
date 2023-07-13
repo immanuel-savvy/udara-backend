@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.withdraw = exports.wallet = exports.user_brass_account = exports.update_fav_currency = exports.transactions = exports.transaction_offer = exports.topup = exports.state_offer_need = exports.resolve_dispute = exports.resolve_bank_account_name = exports.request_time_extension = exports.request_account_details = exports.remove_sale = exports.remove_offer = exports.remove_bank_account = exports.refund_buyer = exports.refresh_wallet = exports.ready_for_transaction = exports.print_transactions = exports.platform_wallet = exports.platform_user = exports.platform_bank_account = exports.place_sale = exports.paycheck_bank_account = exports.paga_deposit = exports.onsale_offers = exports.onsale_currency = exports.onsale = exports.offer_in_dispute = exports.offer = exports.not_ready_for_transaction = exports.new_notification = exports.my_sales = exports.my_offers = exports.make_offer = exports.like_sale = exports.get_banks = exports.fulfil_offer = exports.extend_time = exports.disputes = exports.dispute = exports.dislike_sale = exports.deposit_to_escrow = exports.decline_offer = exports.confirm_offer = exports.buyer_offers = exports.brass_personal_access_token = exports.brass_callback = exports.bank_accounts = exports.any_new_notifications = exports.add_fiat_account = exports.add_bank_account = exports.accept_offer = void 0;
+exports.withdraw = exports.wallet = exports.user_brass_account = exports.update_fav_currency = exports.transactions = exports.transaction_offer = exports.topup = exports.state_offer_need = exports.resolve_dispute = exports.resolve_bank_account_name = exports.request_time_extension = exports.request_account_details = exports.remove_sale = exports.remove_offer = exports.remove_bank_account = exports.refund_buyer = exports.refresh_wallet = exports.ready_for_transaction = exports.print_transactions = exports.previous_sales = exports.platform_wallet = exports.platform_user = exports.platform_bank_account = exports.place_sale = exports.paycheck_bank_account = exports.paga_deposit = exports.onsale_offers = exports.onsale_currency = exports.onsale = exports.offer_in_dispute = exports.offer = exports.not_ready_for_transaction = exports.new_notification = exports.my_sales = exports.my_offers = exports.make_offer = exports.like_sale = exports.get_banks = exports.fulfil_offer = exports.extend_time = exports.disputes = exports.dispute = exports.dislike_sale = exports.deposit_to_escrow = exports.decline_offer = exports.confirm_offer = exports.buyer_offers = exports.brass_personal_access_token = exports.brass_callback = exports.bank_accounts = exports.any_new_notifications = exports.add_fiat_account = exports.add_bank_account = exports.accept_offer = void 0;
 
 var _axios = _interopRequireDefault(require("axios"));
 
@@ -458,7 +458,7 @@ var make_brass_payment = /*#__PURE__*/function () {
           _context5.prev = 5;
           _context5.next = 8;
           return (0, _axios["default"])({
-            url: "https://sandbox-api.getbrass.co/banking/payments",
+            url: "https://api.getbrass.co/banking/payments",
             method: "post",
             headers: {
               "Content-Type": "application/json",
@@ -656,11 +656,39 @@ var place_sale = function place_sale(req, res) {
 
 exports.place_sale = place_sale;
 
+var previous_sales = function previous_sales(req, res) {
+  var seller = req.params.seller;
+
+  var seller_sales = _ds_conn.ONSALE.read({
+    seller: seller,
+    not_ready_for_transaction: true
+  }, {
+    subfolder: _entry.operating_currencies && _entry.operating_currencies.length ? _entry.operating_currencies.map(function (curr) {
+      return curr.name;
+    }) : _ds_conn.UTILS.read({
+      util: "operating_currencies"
+    }).map(function (curr) {
+      return curr.name;
+    })
+  });
+
+  res.json({
+    ok: true,
+    message: "seller sales",
+    data: seller_sales
+  });
+};
+
+exports.previous_sales = previous_sales;
+
 var my_sales = function my_sales(req, res) {
   var seller = req.params.seller;
 
   var seller_sales = _ds_conn.ONSALE.read({
-    seller: seller
+    seller: seller,
+    not_ready_for_transaction: {
+      $ne: true
+    }
   }, {
     subfolder: _entry.operating_currencies && _entry.operating_currencies.length ? _entry.operating_currencies.map(function (curr) {
       return curr.name;
@@ -1346,7 +1374,9 @@ var confirm_offer = function confirm_offer(req, res) {
   if (!seller_wallet) {
     seller_wallet = _ds_conn.USERS.readone(seller);
     seller_wallet = seller_wallet.wallet;
-  }
+  } // INITIATE TRANSFER FROM BUYER'S SUBACCOUNT
+  // TO SELLER'S SUBACCOUNT.
+
 
   if (seller_wallet) wallet_update = _ds_conn.WALLETS.update(seller_wallet, {
     naira: {
@@ -1761,7 +1791,7 @@ var get_banks = /*#__PURE__*/function () {
           _context8.next = 3;
           return (0, _axios["default"])({
             method: "get",
-            url: "https://sandbox-api.getbrass.co/banking/banks?page=1&limit=95",
+            url: "https://api.getbrass.co/banking/banks?page=1&limit=95",
             headers: {
               "Content-Type": "application/json",
               Authorization: "Bearer ".concat(brass_personal_access_token)
@@ -1815,7 +1845,7 @@ var resolve_bank_account_name = /*#__PURE__*/function () {
           _context9.next = 4;
           return (0, _axios["default"])({
             method: "get",
-            url: "https://sandbox-api.getbrass.co/banking/banks/account-name?bank=".concat(bank, "&account_number=").concat(account_number),
+            url: "https://api.getbrass.co/banking/banks/account-name?bank=".concat(bank, "&account_number=").concat(account_number),
             headers: {
               "Content-Type": "application/json",
               Authorization: "Bearer ".concat(brass_personal_access_token)
@@ -1958,7 +1988,7 @@ var state_offer_need = function state_offer_need(req, res) {
 
 exports.state_offer_need = state_offer_need;
 var brass_webhook_secret = "udara_brass_webhook_secreet";
-var brass_personal_access_token = "335|pat-L1yPwtp5HyylGgNWbN9kUjhcQ6W7784h6IydqlIP";
+var brass_personal_access_token = "11105|pat-xO2vMdqUN6X7Jd0V6FdOiyHwwRvtWBc0aWBZ63oi" || "335|pat-L1yPwtp5HyylGgNWbN9kUjhcQ6W7784h6IydqlIP";
 exports.brass_personal_access_token = brass_personal_access_token;
 
 var brass_callback = function brass_callback(req, res) {
@@ -1985,6 +2015,8 @@ var brass_callback = function brass_callback(req, res) {
       name: data.name,
       alias: data.alias,
       account_id: data.id,
+      bank_id: data.bank.data.id,
+      bank_name: data.bank.data.name,
       user: user
     });
 

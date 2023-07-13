@@ -91,6 +91,7 @@ import {
   wallet,
   print_transactions,
   any_new_notifications,
+  previous_sales,
 } from "./route_handlers/wallet";
 
 const routes = (app) => {
@@ -163,6 +164,7 @@ const routes = (app) => {
   app.post("/username_updated", username_updated);
   app.post("/change_password/:user", change_password);
   app.post("/my_sales/:seller", my_sales);
+  app.post("/previous_sales/:seller", previous_sales);
   app.post("/add_fiat_account", add_fiat_account);
   app.post("/new_message", new_message);
   app.post("/direct_message", direct_message);

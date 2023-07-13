@@ -291,7 +291,7 @@ const make_brass_payment = async (
 
   try {
     response = await axios({
-      url: "https://sandbox-api.getbrass.co/banking/payments",
+      url: "https://api.getbrass.co/banking/payments",
       method: "post",
       headers: {
         "Content-Type": "application/json",
@@ -408,11 +408,29 @@ const place_sale = (req, res) => {
   });
 };
 
+const previous_sales = (req, res) => {
+  let { seller } = req.params;
+
+  let seller_sales = ONSALE.read(
+    { seller, not_ready_for_transaction: true },
+    {
+      subfolder:
+        operating_currencies && operating_currencies.length
+          ? operating_currencies.map((curr) => curr.name)
+          : UTILS.read({ util: "operating_currencies" }).map(
+              (curr) => curr.name
+            ),
+    }
+  );
+
+  res.json({ ok: true, message: "seller sales", data: seller_sales });
+};
+
 const my_sales = (req, res) => {
   let { seller } = req.params;
 
   let seller_sales = ONSALE.read(
-    { seller },
+    { seller, not_ready_for_transaction: { $ne: true } },
     {
       subfolder:
         operating_currencies && operating_currencies.length
@@ -802,6 +820,9 @@ const confirm_offer = (req, res) => {
     seller_wallet = seller_wallet.wallet;
   }
 
+  // INITIATE TRANSFER FROM BUYER'S SUBACCOUNT
+  // TO SELLER'S SUBACCOUNT.
+
   if (seller_wallet)
     wallet_update = WALLETS.update(seller_wallet, {
       naira: { $inc: Number(cost * COMMISSION) },
@@ -1075,7 +1096,7 @@ const get_banks = async (req, res) => {
   try {
     banks = await axios({
       method: "get",
-      url: "https://sandbox-api.getbrass.co/banking/banks?page=1&limit=95",
+      url: "https://api.getbrass.co/banking/banks?page=1&limit=95",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${brass_personal_access_token}`,
@@ -1101,7 +1122,7 @@ const resolve_bank_account_name = async (req, res) => {
   try {
     details = await axios({
       method: "get",
-      url: `https://sandbox-api.getbrass.co/banking/banks/account-name?bank=${bank}&account_number=${account_number}`,
+      url: `https://api.getbrass.co/banking/banks/account-name?bank=${bank}&account_number=${account_number}`,
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${brass_personal_access_token}`,
@@ -1188,6 +1209,7 @@ const state_offer_need = (req, res) => {
 const brass_webhook_secret = "udara_brass_webhook_secreet";
 
 const brass_personal_access_token =
+  "11105|pat-xO2vMdqUN6X7Jd0V6FdOiyHwwRvtWBc0aWBZ63oi" ||
   "335|pat-L1yPwtp5HyylGgNWbN9kUjhcQ6W7784h6IydqlIP";
 
 const brass_callback = (req, res) => {
@@ -1215,6 +1237,8 @@ const brass_callback = (req, res) => {
       name: data.name,
       alias: data.alias,
       account_id: data.id,
+      bank_id: data.bank.data.id,
+      bank_name: data.bank.data.name,
       user,
     });
     user = USERS.update(user, { brass_account: result._id });
@@ -1425,5 +1449,6 @@ export {
   new_notification,
   platform_bank_account,
   request_account_details,
+  previous_sales,
   resolve_bank_account_name,
 };

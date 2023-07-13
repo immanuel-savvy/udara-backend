@@ -168,7 +168,7 @@ const send_mail = ({
 
 const create_brass_subaccount = (username, user) => {
   axios({
-    url: "https://sandbox-api.getbrass.co/banking/accounts",
+    url: "https://api.getbrass.co/banking/accounts",
     method: "post",
     headers: {
       accept: "application/json",

@@ -1,0 +1,146 @@
+{
+  "event": "account.created",
+  "data": {
+    "embeds": ["bank", "customer", "total_outgoing", "signatories"],
+    "id": "acc_1iEoccJHCRamPeqIs7v5pW",
+    "provider": "Paga",
+    "provider_reference": "acc_1iEoccJHCRamPeqIs7v5pW",
+    "customer_reference": "users_platform_user_3000",
+    "number": "1075156052",
+    "name": "Udaralinks Limited - admin",
+    "currency": "NGN",
+    "ledger_balance": {
+      "raw": "0",
+      "formatted": "0.00",
+      "formatted_display": "₦0.00"
+    },
+    "available_balance": {
+      "raw": "0",
+      "formatted": "0.00",
+      "formatted_display": "₦0.00"
+    },
+    "is_default": false,
+    "is_virtual": true,
+    "is_partner_managed": false,
+    "is_wallet": true,
+    "wallet_type": "cash-collection",
+    "callback_time_minutes": 0,
+    "locked_reason": null,
+    "locked_at": null,
+    "disable_reason": null,
+    "disabled_at": null,
+    "is_trashed": false,
+    "deleted_at": null,
+    "created_at": "2023-07-12T23:16:56+01:00",
+    "updated_at": "2023-07-12T23:16:57+01:00",
+    "alias": "admin",
+    "masked_number": "10*****052",
+    "preferences": {
+      "monthly_budget": {
+        "raw": "1000000000",
+        "formatted": "10000000.00",
+        "formatted_display": "₦10,000,000.00"
+      },
+      "monthly_limit": null
+    },
+    "qr_codes": {
+      "green": "https://s3.eu-west-1.amazonaws.com/private.getbrass.co/cus_5Eq7b28GnswrGVZty2wJt6/public-files/qr-codes/acc_1iEoccJHCRamPeqIs7v5pW-bog.svg",
+      "white": "https://s3.eu-west-1.amazonaws.com/private.getbrass.co/cus_5Eq7b28GnswrGVZty2wJt6/public-files/qr-codes/acc_1iEoccJHCRamPeqIs7v5pW-bow.svg"
+    },
+    "titan_reference": "384d1ffa-b68d-4cda-b898-cc9d9cea2af6",
+    "titan_id": null,
+    "bank": {
+      "data": {
+        "embeds": ["country"],
+        "id": "bnk_s4q4WUJUmoi835gQmK7dl",
+        "code": "327",
+        "name": "Paga",
+        "type": "nuban",
+        "is_visible": true,
+        "is_trashed": false,
+        "deleted_at": null,
+        "created_at": "2021-11-09T12:49:42+01:00",
+        "updated_at": "2023-07-12T13:35:09+01:00",
+        "alternate_names": ["paga"]
+      }
+    },
+    "customer": {
+      "data": {
+        "embeds": [
+          "account_manager",
+          "addresses",
+          "country",
+          "customer_type",
+          "industry",
+          "onboarding_agent",
+          "partner"
+        ],
+        "id": "cus_5Eq7b28GnswrGVZty2wJt6",
+        "domain_slug": null,
+        "name": "Udaralinks Limited",
+        "registered_name": "Udaralinks Limited",
+        "description": "INTERNET SERVICES, INFORMATION TECHNOLOGY SERVICES AND GENERAL CONTRACTS",
+        "contact_firstname": "Emmanuel",
+        "contact_lastname": "Ariwodo",
+        "contact_phone": "+2348060324082",
+        "contact_email": "info@udaralinks.com",
+        "channel": "growth-anthonia",
+        "logo_url": null,
+        "is_registered": true,
+        "is_onboarding_completed": true,
+        "onboarding_completed_at": "2023-03-13T18:34:37+01:00",
+        "approved_auto_verification_at": "2023-03-15T08:54:12+01:00",
+        "kyc_verified_at": "2023-03-15T09:05:19+01:00",
+        "legal_search_started_at": "2023-03-15T12:31:00+01:00",
+        "kyc_completed_at": null,
+        "disabled_at": null,
+        "is_trashed": false,
+        "deleted_at": null,
+        "created_at": "2023-03-12T04:28:38+01:00",
+        "updated_at": "2023-07-12T23:01:54+01:00",
+        "customer_id": "055363",
+        "scoped_customer_id": 53674,
+        "welcome_tracker": [],
+        "preferences": {
+          "webhook_enabled": true,
+          "webhook_url": "https://mobile.udaralinksapp.com/brass_callback",
+          "cashflow_questionnaire_submitted": false,
+          "lien_enabled": false
+        },
+        "country": {
+          "data": {
+            "embeds": ["customer_types", "gateways", "states"],
+            "id": "cnt_aFgT1ejemOQWldZ5ZVwDZ",
+            "name": "Nigeria",
+            "iso_code": "NG",
+            "dialing_code": "234",
+            "default_currency": "NGN",
+            "allows_onboarding": true,
+            "allows_intl_transfers": false,
+            "is_visible": true,
+            "is_trashed": false,
+            "deleted_at": null,
+            "created_at": "2020-03-23T20:28:41+01:00",
+            "updated_at": "2020-03-23T20:28:41+01:00",
+            "states_count": 38
+          }
+        },
+        "customer_type": {
+          "data": {
+            "embeds": ["country"],
+            "id": "cty_21FX4Th8lbexB6fKE4Pq5P",
+            "label": "limited liability",
+            "display_name": "Limited Liability",
+            "is_trashed": false,
+            "deleted_at": null,
+            "created_at": "2020-03-23T20:29:18+01:00",
+            "updated_at": "2020-03-23T20:29:18+01:00"
+          }
+        }
+      }
+    }
+  },
+  "_id": "logs~3jRssrEOw1QHdL578GojBR5E~1689200333419",
+  "created": 1689200333419,
+  "updated": 1689200333419
+}
