@@ -1370,7 +1370,7 @@ const brass_callback = (req, res) => {
     );
 
     if (
-      new Array(
+      !new Array(
         "Offer confirmed",
         "Deposit to Escrow",
         "Buyer Refunded"
