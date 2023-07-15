@@ -586,7 +586,7 @@ var withdraw = /*#__PURE__*/function () {
           break;
 
         case 12:
-          if (!(wallet.naira < Number(amount))) {
+          if (!(wallet.available_balance < Number(amount))) {
             _context6.next = 14;
             break;
           }
@@ -1381,7 +1381,7 @@ exports.deposit_to_escrow = deposit_to_escrow;
 
 var confirm_offer = /*#__PURE__*/function () {
   var _ref11 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee8(req, res) {
-    var _req$body25, offer, onsale, seller, seller_wallet, offer_, cost, wallet_update, buyer, sell_wallet, reference_number, p_wallet, r;
+    var _req$body25, offer, onsale, seller, seller_wallet, offer_, cost, sell_wallet, reference_number, p_wallet, r, wallet_update;
 
     return _regeneratorRuntime().wrap(function _callee8$(_context8) {
       while (1) switch (_context8.prev = _context8.next) {
@@ -1408,8 +1408,6 @@ var confirm_offer = /*#__PURE__*/function () {
             status: "completed",
             timestamp: Date.now()
           });
-
-          buyer = _ds_conn.USERS.readone(offer_.user && offer_.user._id || offer_.user);
 
           if (!seller_wallet) {
             seller_wallet = _ds_conn.USERS.readone(seller);
@@ -1564,7 +1562,7 @@ var confirm_offer = /*#__PURE__*/function () {
             }
           });
 
-        case 21:
+        case 20:
         case "end":
           return _context8.stop();
       }
@@ -1924,7 +1922,7 @@ var get_banks = /*#__PURE__*/function () {
           _context9.next = 3;
           return (0, _axios["default"])({
             method: "get",
-            url: "https://api.getbrass.co/banking/banks?page=1&limit=95",
+            url: "https://api.getbrass.co/banking/banks?page=1&limit=105",
             headers: {
               "Content-Type": "application/json",
               Authorization: "Bearer ".concat(brass_personal_access_token)
@@ -2093,14 +2091,44 @@ var remove_bank_account = function remove_bank_account(req, res) {
 
 exports.remove_bank_account = remove_bank_account;
 
-var refresh_wallet = function refresh_wallet(req, res) {
-  var wallet = req.params.wallet;
-  res.json({
-    ok: true,
-    message: "wallet refreshed",
-    data: _ds_conn.WALLETS.readone(wallet)
-  });
-};
+var refresh_wallet = /*#__PURE__*/function () {
+  var _ref14 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee11(req, res) {
+    var wallet;
+    return _regeneratorRuntime().wrap(function _callee11$(_context11) {
+      while (1) switch (_context11.prev = _context11.next) {
+        case 0:
+          wallet = req.params.wallet;
+          wallet = _ds_conn.WALLETS.readone(wallet);
+          _context11.prev = 2;
+          _context11.next = 5;
+          return (0, _entry.fetch_wallet_brass_account)(wallet);
+
+        case 5:
+          _context11.next = 9;
+          break;
+
+        case 7:
+          _context11.prev = 7;
+          _context11.t0 = _context11["catch"](2);
+
+        case 9:
+          res.json({
+            ok: true,
+            message: "wallet refreshed",
+            data: wallet
+          });
+
+        case 10:
+        case "end":
+          return _context11.stop();
+      }
+    }, _callee11, null, [[2, 7]]);
+  }));
+
+  return function refresh_wallet(_x25, _x26) {
+    return _ref14.apply(this, arguments);
+  };
+}();
 
 exports.refresh_wallet = refresh_wallet;
 
@@ -2168,7 +2196,7 @@ var brass_callback = function brass_callback(req, res) {
   } else if (event === "account.credited") {
     var _user2 = _ds_conn.USERS.readone(data.account && data.account.data.customer_reference && data.account && data.account.data.customer_reference.replace(/_/g, "~"));
 
-    if (new Array("Offer confirmed", "Deposit to Escrow", "Buyer Refunded").includes(data.memo)) {
+    if (!new Array("Offer confirmed", "Deposit to Escrow", "Buyer Refunded").includes(data.memo)) {
       _user2 && _user2.wallet && _ds_conn.WALLETS.update(_user2.wallet, {
         naira: {
           $inc: Number(data.amount.raw) / 100

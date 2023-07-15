@@ -20,6 +20,7 @@ import {
 } from "../conn/ds_conn";
 import { api_key, client_id, paga_collection_client, password } from "../Udara";
 import {
+  fetch_wallet_brass_account,
   generate_reference_number,
   load_operating_currencies,
   operating_currencies,
@@ -360,7 +361,7 @@ const withdraw = async (req, res) => {
 
   if (paycheck) {
     if (wallet.profits < Number(amount)) return res.end();
-  } else if (wallet.naira < Number(amount)) return res.end();
+  } else if (wallet.available_balance < Number(amount)) return res.end();
 
   await make_brass_payment(
     typeof bank_account === "object"
@@ -845,9 +846,6 @@ const confirm_offer = async (req, res) => {
     { status: "completed", timestamp: Date.now() }
   );
 
-  let wallet_update;
-  let buyer = USERS.readone((offer_.user && offer_.user._id) || offer_.user);
-
   if (!seller_wallet) {
     seller_wallet = USERS.readone(seller);
 
@@ -919,7 +917,7 @@ const confirm_offer = async (req, res) => {
     profits: { $inc: cost * 0.005 },
   });
 
-  wallet_update = WALLETS.update(seller_wallet, {
+  let wallet_update = WALLETS.update(seller_wallet, {
     naira: { $inc: cost * COMMISSION },
   });
 
@@ -1211,7 +1209,7 @@ const get_banks = async (req, res) => {
   try {
     banks = await axios({
       method: "get",
-      url: "https://api.getbrass.co/banking/banks?page=1&limit=95",
+      url: "https://api.getbrass.co/banking/banks?page=1&limit=105",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${brass_personal_access_token}`,
@@ -1299,13 +1297,19 @@ const remove_bank_account = (req, res) => {
   res.end();
 };
 
-const refresh_wallet = (req, res) => {
+const refresh_wallet = async (req, res) => {
   let { wallet } = req.params;
+
+  wallet = WALLETS.readone(wallet);
+
+  try {
+    await fetch_wallet_brass_account(wallet);
+  } catch (e) {}
 
   res.json({
     ok: true,
     message: "wallet refreshed",
-    data: WALLETS.readone(wallet),
+    data: wallet,
   });
 };
 

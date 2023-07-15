@@ -198,13 +198,17 @@ const request_otp = async (req, res) => {
   let { email, relogin } = req.body;
 
   if (!email || !email_regex.test(email))
-    return res.json({ ok: false, data: { message: "email field missing" } });
+    return res.json({ ok: false, data: { message: "Email field missing" } });
 
   email = email.trim().toLowerCase();
   let user = USERS.readone({ email });
 
   if (user && !relogin)
-    return res.json({ ok: false, message: "email already used", data: email });
+    return res.json({
+      ok: false,
+      message: "email already used",
+      data: { message: "Email already exist" },
+    });
 
   let code = generate_random_string(6);
   pending_otps[email] = code;
@@ -228,7 +232,11 @@ const request_otp = async (req, res) => {
 const verify_otp = async (req, res) => {
   let { code, country, country_code, email } = req.body;
   if (!!USERS.readone({ email }))
-    return res.json({ ok: false, message: "email already used", data: email });
+    return res.json({
+      ok: false,
+      message: "email already used",
+      data: { message: "Email already used", email },
+    });
 
   email = email.toLowerCase().trim();
   let otp_code = pending_otps[email];
@@ -269,7 +277,7 @@ const verify_otp = async (req, res) => {
     res.json({
       ok: false,
       message: "verification failed",
-      data: { email, code },
+      data: { message: "Incorrect verification code", email, code },
     });
 };
 
@@ -379,7 +387,31 @@ const logging_in = async (req, res) => {
     } catch (e) {}
   }
 
+  try {
+    await fetch_wallet_brass_account(wallet);
+  } catch (e) {}
+
   res.json({ ok: true, message: "loggedin", data: { user, wallet } });
+};
+
+const fetch_wallet_brass_account = async (wallet) => {
+  let d;
+  if (wallet.brass_account && wallet.brass_account.account_id)
+    try {
+      d = await axios({
+        url: `https://api.getbrass.co/banking/accounts/${wallet.brass_account.account_id}`,
+        method: "get",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${brass_personal_access_token}`,
+        },
+      });
+      d = d.data;
+
+      wallet.available_balance = Number(d.data.ledger_balance.raw) / 100;
+    } catch (e) {}
+
+  return d;
 };
 
 const UTIL_verification_details = "verification_details";
@@ -518,6 +550,7 @@ export {
   forgot_password,
   verify_email,
   verify_account,
+  fetch_wallet_brass_account,
   account_verification,
   update_email,
   logging_in,

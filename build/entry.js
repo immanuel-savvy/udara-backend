@@ -5,7 +5,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" =
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.verify_otp = exports.verify_email = exports.verify_account = exports.user_refresh = exports.user_by_email = exports.update_user_data = exports.update_phone = exports.update_password = exports.update_email = exports.unverified_details = exports.send_mail = exports.request_otp = exports.operating_currencies = exports.onboardings = exports.logging_in = exports.load_operating_currencies = exports.get_verification_detail = exports.generate_reference_number = exports.forgot_password = exports.create_brass_subaccount = exports.account_verification = void 0;
+exports.verify_otp = exports.verify_email = exports.verify_account = exports.user_refresh = exports.user_by_email = exports.update_user_data = exports.update_phone = exports.update_password = exports.update_email = exports.unverified_details = exports.send_mail = exports.request_otp = exports.operating_currencies = exports.onboardings = exports.logging_in = exports.load_operating_currencies = exports.get_verification_detail = exports.generate_reference_number = exports.forgot_password = exports.fetch_wallet_brass_account = exports.create_brass_subaccount = exports.account_verification = void 0;
 
 var _ds_conn = require("../conn/ds_conn");
 
@@ -229,7 +229,7 @@ var create_brass_subaccount = function create_brass_subaccount(username, user) {
     },
     data: {
       alias: "".concat(username),
-      monthly_budget: 1000000000,
+      monthly_budget: 4000000000,
       debit_wait_time_in_minutes: 0,
       customer_reference: user.replace(/~/g, "_")
     }
@@ -636,6 +636,19 @@ var logging_in = /*#__PURE__*/function () {
             } catch (e) {}
           }
 
+          _context5.prev = 22;
+          _context5.next = 25;
+          return fetch_wallet_brass_account(wallet);
+
+        case 25:
+          _context5.next = 29;
+          break;
+
+        case 27:
+          _context5.prev = 27;
+          _context5.t0 = _context5["catch"](22);
+
+        case 29:
           res.json({
             ok: true,
             message: "loggedin",
@@ -645,11 +658,11 @@ var logging_in = /*#__PURE__*/function () {
             }
           });
 
-        case 23:
+        case 30:
         case "end":
           return _context5.stop();
       }
-    }, _callee5);
+    }, _callee5, null, [[22, 27]]);
   }));
 
   return function logging_in(_x9, _x10) {
@@ -658,6 +671,56 @@ var logging_in = /*#__PURE__*/function () {
 }();
 
 exports.logging_in = logging_in;
+
+var fetch_wallet_brass_account = /*#__PURE__*/function () {
+  var _ref7 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee6(wallet) {
+    var d;
+    return _regeneratorRuntime().wrap(function _callee6$(_context6) {
+      while (1) switch (_context6.prev = _context6.next) {
+        case 0:
+          if (!(wallet.brass_account && wallet.brass_account.account_id)) {
+            _context6.next = 11;
+            break;
+          }
+
+          _context6.prev = 1;
+          _context6.next = 4;
+          return (0, _axios["default"])({
+            url: "https://api.getbrass.co/banking/accounts/".concat(wallet.brass_account.account_id),
+            method: "get",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer ".concat(_wallet.brass_personal_access_token)
+            }
+          });
+
+        case 4:
+          d = _context6.sent;
+          d = d.data;
+          wallet.available_balance = Number(d.data.ledger_balance.raw) / 100;
+          _context6.next = 11;
+          break;
+
+        case 9:
+          _context6.prev = 9;
+          _context6.t0 = _context6["catch"](1);
+
+        case 11:
+          return _context6.abrupt("return", d);
+
+        case 12:
+        case "end":
+          return _context6.stop();
+      }
+    }, _callee6, null, [[1, 9]]);
+  }));
+
+  return function fetch_wallet_brass_account(_x11) {
+    return _ref7.apply(this, arguments);
+  };
+}();
+
+exports.fetch_wallet_brass_account = fetch_wallet_brass_account;
 var UTIL_verification_details = "verification_details";
 
 var unverified_details = function unverified_details(req, res) {
