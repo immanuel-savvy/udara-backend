@@ -21,6 +21,10 @@ var _email = require("./email");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
@@ -1265,7 +1269,7 @@ var deposit_to_escrow = function deposit_to_escrow(req, res) {
     onsale: onsale
   });
 
-  var cost = offer_.amount * offer_.offer_rate,
+  var cost = Number(offer_.amount) * Number(offer_.offer_rate),
       timestamp = Date.now();
   if (offer_ && offer_.status === "in-escrow") return res.end();
 
@@ -1277,8 +1281,9 @@ var deposit_to_escrow = function deposit_to_escrow(req, res) {
     timestamp: timestamp
   });
 
-  var wallet_update;
-  if (buyer_wallet) wallet_update = _ds_conn.WALLETS.update(buyer_wallet, {
+  if (!buyer_wallet) buyer_wallet = offer_.user.wallet;
+
+  var wallet_update = _ds_conn.WALLETS.update(buyer_wallet, {
     naira: {
       $dec: Number(cost)
     }
@@ -1289,6 +1294,34 @@ var deposit_to_escrow = function deposit_to_escrow(req, res) {
       $inc: Number(cost)
     }
   });
+
+  var b_wallet = _ds_conn.WALLETS.readone(offer_.user.wallet);
+
+  var p_wallet = _ds_conn.WALLETS.readone(platform_wallet);
+
+  var reference_number = (0, _entry.generate_reference_number)();
+
+  try {
+    (0, _axios["default"])({
+      url: "https://api.getbrass.co/banking/payments",
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer ".concat(brass_personal_access_token)
+      },
+      data: {
+        title: "Deposit to Escrow",
+        amount: String(cost * 100),
+        to: {
+          name: p_wallet.brass_account.name,
+          bank: p_wallet.brass_account.bank_id,
+          account_number: p_wallet.brass_account.number
+        },
+        source_account: b_wallet.brass_account.account_id,
+        customer_reference: reference_number
+      }
+    }).then(function (reslt) {})["catch"](function (e) {}); // response = response && response.data;
+  } catch (e) {}
 
   _ds_conn.ONSALE.update({
     _id: onsale,
@@ -1346,127 +1379,202 @@ var deposit_to_escrow = function deposit_to_escrow(req, res) {
 
 exports.deposit_to_escrow = deposit_to_escrow;
 
-var confirm_offer = function confirm_offer(req, res) {
-  var _req$body25 = req.body,
-      offer = _req$body25.offer,
-      onsale = _req$body25.onsale,
-      seller = _req$body25.seller,
-      seller_wallet = _req$body25.seller_wallet;
+var confirm_offer = /*#__PURE__*/function () {
+  var _ref11 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee8(req, res) {
+    var _req$body25, offer, onsale, seller, seller_wallet, offer_, cost, wallet_update, buyer, sell_wallet, reference_number, p_wallet, r;
 
-  var offer_ = _ds_conn.OFFERS.readone({
-    _id: offer,
-    onsale: onsale
-  });
+    return _regeneratorRuntime().wrap(function _callee8$(_context8) {
+      while (1) switch (_context8.prev = _context8.next) {
+        case 0:
+          _req$body25 = req.body, offer = _req$body25.offer, onsale = _req$body25.onsale, seller = _req$body25.seller, seller_wallet = _req$body25.seller_wallet;
+          offer_ = _ds_conn.OFFERS.readone({
+            _id: offer,
+            onsale: onsale
+          });
+          cost = Number(offer_.offer_rate) * Number(offer_.amount);
 
-  var cost = Number(offer_.offer_rate) * Number(offer_.amount);
-  if (offer_ && offer_.status === "completed") return res.end();
+          if (!(offer_ && offer_.status === "completed")) {
+            _context8.next = 5;
+            break;
+          }
 
-  _ds_conn.OFFERS.update({
-    _id: offer,
-    onsale: onsale
-  }, {
-    status: "completed",
-    timestamp: Date.now()
-  });
+          return _context8.abrupt("return", res.end());
 
-  var wallet_update;
+        case 5:
+          _ds_conn.OFFERS.update({
+            _id: offer,
+            onsale: onsale
+          }, {
+            status: "completed",
+            timestamp: Date.now()
+          });
 
-  if (!seller_wallet) {
-    seller_wallet = _ds_conn.USERS.readone(seller);
-    seller_wallet = seller_wallet.wallet;
-  } // INITIATE TRANSFER FROM BUYER'S SUBACCOUNT
-  // TO SELLER'S SUBACCOUNT.
+          buyer = _ds_conn.USERS.readone(offer_.user && offer_.user._id || offer_.user);
 
+          if (!seller_wallet) {
+            seller_wallet = _ds_conn.USERS.readone(seller);
+            seller_wallet = seller_wallet.wallet;
+          }
 
-  if (seller_wallet) wallet_update = _ds_conn.WALLETS.update(seller_wallet, {
-    naira: {
-      $inc: Number(cost * COMMISSION)
-    }
-  });
+          sell_wallet = _ds_conn.WALLETS.readone(seller_wallet);
+          reference_number = (0, _entry.generate_reference_number)();
+          p_wallet = _ds_conn.WALLETS.readone(platform_wallet);
 
-  _ds_conn.ONSALE.update({
-    _id: onsale,
-    currency: offer_.currency
-  }, {
-    awaiting_confirmation: {
-      $dec: 1
-    },
-    completed: {
-      $inc: 1
-    }
-  });
+          if (cost * COMMISSION >= 100) {
+            r = _ds_conn.LOGS.write({
+              reference_number: reference_number,
+              sell_wallet: JSON.stringify(sell_wallet)
+            });
 
-  _ds_conn.WALLETS.update(platform_wallet, {
-    naira: {
-      $dec: cost
-    },
-    profits: {
-      $inc: cost * 0.005
-    }
-  });
+            try {
+              (0, _axios["default"])({
+                url: "https://api.getbrass.co/banking/payments",
+                method: "post",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: "Bearer ".concat(brass_personal_access_token)
+                },
+                data: {
+                  title: "Offer confirmed",
+                  amount: String(cost * COMMISSION * 100),
+                  to: {
+                    name: sell_wallet.brass_account.name,
+                    bank: sell_wallet.brass_account.bank_id,
+                    account_number: sell_wallet.brass_account.number
+                  },
+                  source_account: p_wallet.brass_account.account_id,
+                  customer_reference: reference_number
+                }
+              }).then(function (reslt) {
+                _ds_conn.LOGS.update(r._id, {
+                  data: reslt.data
+                });
+              })["catch"](function (e) {
+                _ds_conn.LOGS.update(r._id, {
+                  e: JSON.stringify(e),
+                  err: true
+                });
+              }); // response = response && response.data;
+            } catch (e) {
+              _ds_conn.LOGS.update(r._id, {
+                e: JSON.stringify(e),
+                err: "meme"
+              });
+            }
+          } else {
+            _ds_conn.PENDING_TRANSACTIONS.write({
+              reference_number: reference_number,
+              reason: "Transaction value too low",
+              value: cost * COMMISSION,
+              source_account: p_wallet.brass_account.account_id,
+              brass_account: p_wallet.brass_account._id,
+              wallet: p_wallet._id,
+              recipient_wallet: sell_wallet._id,
+              recipient_brass_account: sell_wallet.brass_account._id,
+              recipient_account_id: sell_wallet.brass_account.account_id
+            });
+          }
 
-  new_notification(seller, "buyer confirmed transaction successful", new Array(onsale, offer), {
-    currency: offer_.currency
-  });
-  forward_message(offer_.user._id, seller, offer, {
-    status: "completed"
-  });
-  create_transaction({
-    title: "Admin Balance",
-    wallet: platform_wallet,
-    user: platform_user,
-    from_value: cost * 0.005,
-    data: {
-      offer: offer,
-      onsale: onsale,
-      party: new Array(seller, offer_.user._id)
-    }
-  });
-  create_transaction({
-    title: "confirmed offer",
-    wallet: platform_wallet,
-    user: platform_user,
-    from_value: cost,
-    debit: true,
-    data: {
-      offer: offer,
-      onsale: onsale,
-      party: new Array(seller, offer_.user._id)
-    }
-  });
-  create_transaction({
-    title: "offer confirmed",
-    wallet: wallet_update && wallet_update._id,
-    user: wallet_update.user,
-    from_value: cost,
-    data: {
-      offer: offer,
-      onsale: onsale,
-      party: new Array(seller, offer_.user._id)
-    }
-  });
-  res.json({
-    ok: true,
-    message: "offer confirmed",
-    data: {
-      offer: offer,
-      onsale: onsale,
-      seller: seller,
-      transaction: create_transaction({
-        title: "transaction fee",
-        wallet: wallet_update && wallet_update._id,
-        user: wallet_update.user,
-        from_value: cost * 0.005,
-        debit: true,
-        data: {
-          offer: offer,
-          onsale: onsale,
-          party: new Array(seller, offer_.user._id)
-        }
-      })
-    }
-  });
-};
+          _ds_conn.ONSALE.update({
+            _id: onsale,
+            currency: offer_.currency
+          }, {
+            awaiting_confirmation: {
+              $dec: 1
+            },
+            completed: {
+              $inc: 1
+            }
+          });
+
+          _ds_conn.WALLETS.update(platform_wallet, {
+            naira: {
+              $dec: cost
+            },
+            profits: {
+              $inc: cost * 0.005
+            }
+          });
+
+          wallet_update = _ds_conn.WALLETS.update(seller_wallet, {
+            naira: {
+              $inc: cost * COMMISSION
+            }
+          });
+          new_notification(seller, "buyer confirmed transaction successful", new Array(onsale, offer), {
+            currency: offer_.currency
+          });
+          forward_message(offer_.user._id, seller, offer, {
+            status: "completed"
+          });
+          create_transaction({
+            title: "Platform Commission",
+            wallet: platform_wallet,
+            user: platform_user,
+            from_value: cost * 0.005,
+            data: {
+              offer: offer,
+              onsale: onsale,
+              party: new Array(seller, offer_.user._id)
+            }
+          });
+          create_transaction({
+            title: "confirmed offer",
+            wallet: platform_wallet,
+            user: platform_user,
+            from_value: cost,
+            debit: true,
+            data: {
+              offer: offer,
+              onsale: onsale,
+              party: new Array(seller, offer_.user._id)
+            }
+          });
+          create_transaction({
+            title: "offer confirmed",
+            wallet: wallet_update && wallet_update._id,
+            user: wallet_update.user,
+            from_value: cost,
+            reference_number: reference_number,
+            data: {
+              offer: offer,
+              onsale: onsale,
+              party: new Array(seller, offer_.user._id)
+            }
+          });
+          res.json({
+            ok: true,
+            message: "offer confirmed",
+            data: {
+              offer: offer,
+              onsale: onsale,
+              seller: seller,
+              transaction: create_transaction({
+                title: "transaction fee",
+                wallet: wallet_update && wallet_update._id,
+                user: wallet_update.user,
+                from_value: cost * 0.005,
+                debit: true,
+                data: {
+                  offer: offer,
+                  onsale: onsale,
+                  party: new Array(seller, offer_.user._id)
+                }
+              })
+            }
+          });
+
+        case 21:
+        case "end":
+          return _context8.stop();
+      }
+    }, _callee8);
+  }));
+
+  return function confirm_offer(_x19, _x20) {
+    return _ref11.apply(this, arguments);
+  };
+}();
 
 exports.confirm_offer = confirm_offer;
 
@@ -1720,7 +1828,7 @@ var refund_buyer = function refund_buyer(req, res) {
     ok: false,
     message: "cannot find offer"
   });
-  var cost = offer_.amount * offer_.offer_rate;
+  var cost = Number(offer_.amount) * Number(offer_.offer_rate);
 
   _ds_conn.WALLETS.update(platform_wallet, {
     naira: {
@@ -1733,6 +1841,8 @@ var refund_buyer = function refund_buyer(req, res) {
       $inc: cost
     }
   });
+
+  var b_wallet = _ds_conn.WALLETS.readone(offer_.user.wallet);
 
   _ds_conn.OFFERS.update({
     _id: offer,
@@ -1759,6 +1869,29 @@ var refund_buyer = function refund_buyer(req, res) {
   forward_message(offer_.user._id, onsale_update.seller, offer, {
     status: "closed"
   });
+
+  try {
+    (0, _axios["default"])({
+      url: "https://api.getbrass.co/banking/payments",
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer ".concat(brass_personal_access_token)
+      },
+      data: {
+        title: "Buyer Refunded",
+        amount: String(cost * 100),
+        to: {
+          name: b_wallet.brass_account.name,
+          bank: b_wallet.brass_account.bank_id,
+          account_number: b_wallet.brass_account.number
+        },
+        source_account: _ds_conn.WALLETS.readone(platform_wallet).brass_account.account_id,
+        customer_reference: (0, _entry.generate_reference_number)()
+      }
+    }).then(function (reslt) {})["catch"](function (e) {}); // response = response && response.data;
+  } catch (e) {}
+
   res.json({
     ok: true,
     message: "buyer refunded",
@@ -1782,13 +1915,13 @@ var refund_buyer = function refund_buyer(req, res) {
 exports.refund_buyer = refund_buyer;
 
 var get_banks = /*#__PURE__*/function () {
-  var _ref11 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee8(req, res) {
+  var _ref12 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee9(req, res) {
     var banks;
-    return _regeneratorRuntime().wrap(function _callee8$(_context8) {
-      while (1) switch (_context8.prev = _context8.next) {
+    return _regeneratorRuntime().wrap(function _callee9$(_context9) {
+      while (1) switch (_context9.prev = _context9.next) {
         case 0:
-          _context8.prev = 0;
-          _context8.next = 3;
+          _context9.prev = 0;
+          _context9.next = 3;
           return (0, _axios["default"])({
             method: "get",
             url: "https://api.getbrass.co/banking/banks?page=1&limit=95",
@@ -1799,13 +1932,13 @@ var get_banks = /*#__PURE__*/function () {
           });
 
         case 3:
-          banks = _context8.sent;
-          _context8.next = 8;
+          banks = _context9.sent;
+          _context9.next = 8;
           break;
 
         case 6:
-          _context8.prev = 6;
-          _context8.t0 = _context8["catch"](0);
+          _context9.prev = 6;
+          _context9.t0 = _context9["catch"](0);
 
         case 8:
           banks = banks && banks.data;
@@ -1821,28 +1954,28 @@ var get_banks = /*#__PURE__*/function () {
 
         case 10:
         case "end":
-          return _context8.stop();
+          return _context9.stop();
       }
-    }, _callee8, null, [[0, 6]]);
+    }, _callee9, null, [[0, 6]]);
   }));
 
-  return function get_banks(_x19, _x20) {
-    return _ref11.apply(this, arguments);
+  return function get_banks(_x21, _x22) {
+    return _ref12.apply(this, arguments);
   };
 }();
 
 exports.get_banks = get_banks;
 
 var resolve_bank_account_name = /*#__PURE__*/function () {
-  var _ref12 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee9(req, res) {
+  var _ref13 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee10(req, res) {
     var _req$body32, account_number, bank, details;
 
-    return _regeneratorRuntime().wrap(function _callee9$(_context9) {
-      while (1) switch (_context9.prev = _context9.next) {
+    return _regeneratorRuntime().wrap(function _callee10$(_context10) {
+      while (1) switch (_context10.prev = _context10.next) {
         case 0:
           _req$body32 = req.body, account_number = _req$body32.account_number, bank = _req$body32.bank;
-          _context9.prev = 1;
-          _context9.next = 4;
+          _context10.prev = 1;
+          _context10.next = 4;
           return (0, _axios["default"])({
             method: "get",
             url: "https://api.getbrass.co/banking/banks/account-name?bank=".concat(bank, "&account_number=").concat(account_number),
@@ -1853,7 +1986,7 @@ var resolve_bank_account_name = /*#__PURE__*/function () {
           });
 
         case 4:
-          details = _context9.sent;
+          details = _context10.sent;
           details = details && details.data;
           if (details && details.data) res.json({
             ok: true,
@@ -1864,22 +1997,22 @@ var resolve_bank_account_name = /*#__PURE__*/function () {
             message: "Cannot resolve account name at the moment",
             data: details.error
           });
-          _context9.next = 11;
+          _context10.next = 11;
           break;
 
         case 9:
-          _context9.prev = 9;
-          _context9.t0 = _context9["catch"](1);
+          _context10.prev = 9;
+          _context10.t0 = _context10["catch"](1);
 
         case 11:
         case "end":
-          return _context9.stop();
+          return _context10.stop();
       }
-    }, _callee9, null, [[1, 9]]);
+    }, _callee10, null, [[1, 9]]);
   }));
 
-  return function resolve_bank_account_name(_x21, _x22) {
-    return _ref12.apply(this, arguments);
+  return function resolve_bank_account_name(_x23, _x24) {
+    return _ref13.apply(this, arguments);
   };
 }();
 
@@ -2002,7 +2135,13 @@ var brass_callback = function brass_callback(req, res) {
   //   return res.status(401).json({ message: "Unau
   // do something with event
 
-  _ds_conn.LOGS.write(event_);
+  if (_ds_conn.LOGS.readone({
+    led_id: event_ && event_.data.id
+  })) return res.json(200);
+
+  _ds_conn.LOGS.write(_objectSpread(_objectSpread({}, event_), {}, {
+    led_id: event_ && event_.data && event_.data.id
+  }));
 
   var event = event_.event,
       data = event_.data;
@@ -2029,17 +2168,19 @@ var brass_callback = function brass_callback(req, res) {
   } else if (event === "account.credited") {
     var _user2 = _ds_conn.USERS.readone(data.account && data.account.data.customer_reference && data.account && data.account.data.customer_reference.replace(/_/g, "~"));
 
-    _user2 && _user2.wallet && _ds_conn.WALLETS.update(_user2.wallet, {
-      naira: {
-        $inc: Number(data.amount.raw) / 100
-      }
-    });
-    create_transaction({
-      wallet: _user2.wallet,
-      user: _user2._id,
-      from_value: Number(Number(data.amount.raw) / 100),
-      title: "Top Up - ".concat(data.memo)
-    });
+    if (new Array("Offer confirmed", "Deposit to Escrow", "Buyer Refunded").includes(data.memo)) {
+      _user2 && _user2.wallet && _ds_conn.WALLETS.update(_user2.wallet, {
+        naira: {
+          $inc: Number(data.amount.raw) / 100
+        }
+      });
+      create_transaction({
+        wallet: _user2.wallet,
+        user: _user2._id,
+        from_value: Number(Number(data.amount.raw) / 100),
+        title: data.memo && data.memo.startsWith("offer") ? data.memo : "Top Up - ".concat(data.memo)
+      });
+    }
   } else if (event === "account.debited") {
     var amount = data.amount,
         memo = data.memo,
@@ -2051,7 +2192,7 @@ var brass_callback = function brass_callback(req, res) {
 
     var _wallet = _ds_conn.WALLETS.readone(_user3.wallet);
 
-    if (memo !== "withdrawal") {
+    if (!new Array("withdrawal", "Offer confirmed", "Deposit to Escrow", "Buyer Refunded").includes(memo)) {
       create_transaction({
         wallet: _wallet._id,
         user: _user3._id,
@@ -2069,6 +2210,7 @@ var brass_callback = function brass_callback(req, res) {
     var _amount = data.amount,
         status = data.status,
         customer_reference = data.customer_reference,
+        title = data.title,
         _account = data.source_account;
 
     var _user4 = _account.data.customer_reference.replace(/_/g, "~");
@@ -2097,7 +2239,7 @@ var brass_callback = function brass_callback(req, res) {
         wallet: _wallet2._id
       });
 
-      if (tx && tx.title !== "Withdrawal Failed") {
+      if (tx && tx.title === "pending-withdrawal") {
         _wallet2._id && _ds_conn.WALLETS.update(_wallet2._id, {
           naira: {
             $inc: Number(_amount.raw) / 100
@@ -2110,6 +2252,18 @@ var brass_callback = function brass_callback(req, res) {
         }, {
           title: "Withdrawal Failed"
         });
+      } else if (tx && tx.title === "Withdrawal Failed") {} else {
+        if (title === "Offer confirmed") {
+          _ds_conn.PENDING_TRANSACTIONS.write({
+            reference_number: customer_reference,
+            reason: "Transfer failed",
+            value: Number(_amount.raw) / 100,
+            source_balance: Number(_account.data.available_balance.raw) / 100,
+            source_account: _wallet2.brass_account.account_id,
+            brass_account: _wallet2.brass_account._id,
+            wallet: _wallet2._id
+          });
+        }
       }
     }
   }

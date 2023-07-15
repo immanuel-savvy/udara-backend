@@ -13,7 +13,7 @@ import {
 } from "../utils/functions";
 import { conversion_rates } from "./starter";
 import nodemailer from "nodemailer";
-import { forgot_password_email, verification } from "./email";
+import { forgot_password_email, verification, welcome_email } from "./email";
 import fs from "fs";
 import {
   brass_personal_access_token,
@@ -177,7 +177,7 @@ const create_brass_subaccount = (username, user) => {
     },
     data: {
       alias: `${username}`,
-      monthly_budget: 1000000000,
+      monthly_budget: 4000000000,
       debit_wait_time_in_minutes: 0,
       customer_reference: user.replace(/~/g, "_"),
     },
@@ -333,7 +333,7 @@ const update_password = async (req, res) => {
 };
 
 const logging_in = async (req, res) => {
-  let { email, key, relogin } = req.body;
+  let { email, key, new_user, relogin } = req.body;
 
   email = email.toLowerCase().trim();
 
@@ -359,17 +359,22 @@ const logging_in = async (req, res) => {
   if (!wallet) return res.json({ ok: false, data: "Cannot fetch wallet" });
 
   if (!relogin) {
-    let code = generate_random_string(6);
-    pending_otps[email] = code;
+    let code;
+    if (!new_user) {
+      code = generate_random_string(6);
+      pending_otps[email] = code;
+    }
 
     try {
       send_mail({
         recipient: email,
-        subject: "[Udara Links] Authenticate Your Login",
+        subject: `[Udara Links] ${
+          new_user ? "Welcome to Udara Links" : "Authenticate Your Login"
+        }`,
         sender: "signup@udaralinksapp.com",
         sender_name: "Udara Links",
         sender_pass: "signupudaralinks",
-        html: verification(code, null, true),
+        html: new_user ? welcome_email(user) : verification(code, null, true),
       });
     } catch (e) {}
   }

@@ -12,6 +12,7 @@ import {
   OFFERS,
   OFFER_NEED,
   ONSALE,
+  PENDING_TRANSACTIONS,
   TRANSACTIONS,
   USERS,
   UTILS,
@@ -743,18 +744,50 @@ const forward_message = async (from, to, offer, meta) => {
 const deposit_to_escrow = (req, res) => {
   let { offer, seller, onsale, buyer_wallet } = req.body;
   let offer_ = OFFERS.readone({ _id: offer, onsale });
-  let cost = offer_.amount * offer_.offer_rate,
+  let cost = Number(offer_.amount) * Number(offer_.offer_rate),
     timestamp = Date.now();
 
   if (offer_ && offer_.status === "in-escrow") return res.end();
 
   OFFERS.update({ _id: offer, onsale }, { status: "in-escrow", timestamp });
-  let wallet_update;
-  if (buyer_wallet)
-    wallet_update = WALLETS.update(buyer_wallet, {
-      naira: { $dec: Number(cost) },
-    });
+
+  if (!buyer_wallet) buyer_wallet = offer_.user.wallet;
+
+  let wallet_update = WALLETS.update(buyer_wallet, {
+    naira: { $dec: Number(cost) },
+  });
+
   WALLETS.update(platform_wallet, { naira: { $inc: Number(cost) } });
+
+  let b_wallet = WALLETS.readone(offer_.user.wallet);
+  let p_wallet = WALLETS.readone(platform_wallet);
+  let reference_number = generate_reference_number();
+
+  try {
+    axios({
+      url: "https://api.getbrass.co/banking/payments",
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${brass_personal_access_token}`,
+      },
+      data: {
+        title: "Deposit to Escrow",
+        amount: String(cost * 100),
+        to: {
+          name: p_wallet.brass_account.name,
+          bank: p_wallet.brass_account.bank_id,
+          account_number: p_wallet.brass_account.number,
+        },
+        source_account: b_wallet.brass_account.account_id,
+        customer_reference: reference_number,
+      },
+    })
+      .then((reslt) => {})
+      .catch((e) => {});
+
+    // response = response && response.data;
+  } catch (e) {}
 
   ONSALE.update(
     { _id: onsale, currency: offer_.currency },
@@ -799,7 +832,7 @@ const deposit_to_escrow = (req, res) => {
   });
 };
 
-const confirm_offer = (req, res) => {
+const confirm_offer = async (req, res) => {
   let { offer, onsale, seller, seller_wallet } = req.body;
 
   let offer_ = OFFERS.readone({ _id: offer, onsale });
@@ -813,20 +846,69 @@ const confirm_offer = (req, res) => {
   );
 
   let wallet_update;
+  let buyer = USERS.readone((offer_.user && offer_.user._id) || offer_.user);
 
   if (!seller_wallet) {
     seller_wallet = USERS.readone(seller);
 
     seller_wallet = seller_wallet.wallet;
   }
+  let sell_wallet = WALLETS.readone(seller_wallet);
 
-  // INITIATE TRANSFER FROM BUYER'S SUBACCOUNT
-  // TO SELLER'S SUBACCOUNT.
+  let reference_number = generate_reference_number();
+  let p_wallet = WALLETS.readone(platform_wallet);
 
-  if (seller_wallet)
-    wallet_update = WALLETS.update(seller_wallet, {
-      naira: { $inc: Number(cost * COMMISSION) },
+  if (cost * COMMISSION >= 100) {
+    let r = LOGS.write({
+      reference_number,
+      sell_wallet: JSON.stringify(sell_wallet),
     });
+
+    try {
+      axios({
+        url: "https://api.getbrass.co/banking/payments",
+        method: "post",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${brass_personal_access_token}`,
+        },
+        data: {
+          title: "Offer confirmed",
+          amount: String(cost * COMMISSION * 100),
+          to: {
+            name: sell_wallet.brass_account.name,
+            bank: sell_wallet.brass_account.bank_id,
+            account_number: sell_wallet.brass_account.number,
+          },
+          source_account: p_wallet.brass_account.account_id,
+          customer_reference: reference_number,
+        },
+      })
+        .then((reslt) => {
+          LOGS.update(r._id, { data: reslt.data });
+        })
+        .catch((e) => {
+          LOGS.update(r._id, { e: JSON.stringify(e), err: true });
+        });
+
+      // response = response && response.data;
+    } catch (e) {
+      LOGS.update(r._id, { e: JSON.stringify(e), err: "meme" });
+    }
+  } else {
+    PENDING_TRANSACTIONS.write({
+      reference_number,
+      reason: "Transaction value too low",
+      value: cost * COMMISSION,
+      source_account: p_wallet.brass_account.account_id,
+      brass_account: p_wallet.brass_account._id,
+      wallet: p_wallet._id,
+      recipient_wallet: sell_wallet._id,
+      recipient_brass_account: sell_wallet.brass_account._id,
+      recipient_account_id: sell_wallet.brass_account.account_id,
+    });
+  }
+
   ONSALE.update(
     { _id: onsale, currency: offer_.currency },
     { awaiting_confirmation: { $dec: 1 }, completed: { $inc: 1 } }
@@ -835,6 +917,10 @@ const confirm_offer = (req, res) => {
   WALLETS.update(platform_wallet, {
     naira: { $dec: cost },
     profits: { $inc: cost * 0.005 },
+  });
+
+  wallet_update = WALLETS.update(seller_wallet, {
+    naira: { $inc: cost * COMMISSION },
   });
 
   new_notification(
@@ -847,7 +933,7 @@ const confirm_offer = (req, res) => {
   forward_message(offer_.user._id, seller, offer, { status: "completed" });
 
   create_transaction({
-    title: "Admin Balance",
+    title: "Platform Commission",
     wallet: platform_wallet,
     user: platform_user,
     from_value: cost * 0.005,
@@ -866,6 +952,7 @@ const confirm_offer = (req, res) => {
     wallet: wallet_update && wallet_update._id,
     user: wallet_update.user,
     from_value: cost,
+    reference_number,
     data: { offer, onsale, party: new Array(seller, offer_.user._id) },
   });
 
@@ -1045,12 +1132,13 @@ const refund_buyer = (req, res) => {
   let offer_ = OFFERS.readone({ _id: offer, onsale });
   if (!offer_ || (offer_ && offer_.status !== "in-dispute"))
     return res.json({ ok: false, message: "cannot find offer" });
-  let cost = offer_.amount * offer_.offer_rate;
+  let cost = Number(offer_.amount) * Number(offer_.offer_rate);
 
   WALLETS.update(platform_wallet, { naira: { $dec: cost } });
   let wallet_update = WALLETS.update(offer_.user.wallet, {
     naira: { $inc: cost },
   });
+  let b_wallet = WALLETS.readone(offer_.user.wallet);
 
   OFFERS.update({ _id: offer, onsale }, { status: "closed" });
   let onsale_update = ONSALE.update(
@@ -1070,6 +1158,33 @@ const refund_buyer = (req, res) => {
   forward_message(offer_.user._id, onsale_update.seller, offer, {
     status: "closed",
   });
+
+  try {
+    axios({
+      url: "https://api.getbrass.co/banking/payments",
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${brass_personal_access_token}`,
+      },
+      data: {
+        title: "Buyer Refunded",
+        amount: String(cost * 100),
+        to: {
+          name: b_wallet.brass_account.name,
+          bank: b_wallet.brass_account.bank_id,
+          account_number: b_wallet.brass_account.number,
+        },
+        source_account:
+          WALLETS.readone(platform_wallet).brass_account.account_id,
+        customer_reference: generate_reference_number(),
+      },
+    })
+      .then((reslt) => {})
+      .catch((e) => {});
+
+    // response = response && response.data;
+  } catch (e) {}
 
   res.json({
     ok: true,
@@ -1226,7 +1341,10 @@ const brass_callback = (req, res) => {
 
   //   return res.status(401).json({ message: "Unau
   // do something with event
-  LOGS.write(event_);
+
+  if (LOGS.readone({ led_id: event_ && event_.data.id })) return res.json(200);
+
+  LOGS.write({ ...event_, led_id: event_ && event_.data && event_.data.id });
   let { event, data } = event_;
 
   if (event === "account.created") {
@@ -1251,18 +1369,29 @@ const brass_callback = (req, res) => {
         data.account.data.customer_reference.replace(/_/g, "~")
     );
 
-    user &&
-      user.wallet &&
-      WALLETS.update(user.wallet, {
-        naira: { $inc: Number(data.amount.raw) / 100 },
-      });
+    if (
+      new Array(
+        "Offer confirmed",
+        "Deposit to Escrow",
+        "Buyer Refunded"
+      ).includes(data.memo)
+    ) {
+      user &&
+        user.wallet &&
+        WALLETS.update(user.wallet, {
+          naira: { $inc: Number(data.amount.raw) / 100 },
+        });
 
-    create_transaction({
-      wallet: user.wallet,
-      user: user._id,
-      from_value: Number(Number(data.amount.raw) / 100),
-      title: `Top Up - ${data.memo}`,
-    });
+      create_transaction({
+        wallet: user.wallet,
+        user: user._id,
+        from_value: Number(Number(data.amount.raw) / 100),
+        title:
+          data.memo && data.memo.startsWith("offer")
+            ? data.memo
+            : `Top Up - ${data.memo}`,
+      });
+    }
   } else if (event === "account.debited") {
     let { amount, memo, account } = data;
     let user = account.data.customer_reference.replace(/_/g, "~");
@@ -1270,7 +1399,14 @@ const brass_callback = (req, res) => {
     user = USERS.readone(user);
     let wallet = WALLETS.readone(user.wallet);
 
-    if (memo !== "withdrawal") {
+    if (
+      !new Array(
+        "withdrawal",
+        "Offer confirmed",
+        "Deposit to Escrow",
+        "Buyer Refunded"
+      ).includes(memo)
+    ) {
       create_transaction({
         wallet: wallet._id,
         user: user._id,
@@ -1285,7 +1421,13 @@ const brass_callback = (req, res) => {
         });
     }
   } else if (event === "payable.completed") {
-    let { amount, status, customer_reference, source_account: account } = data;
+    let {
+      amount,
+      status,
+      customer_reference,
+      title,
+      source_account: account,
+    } = data;
     let user = account.data.customer_reference.replace(/_/g, "~");
     user = USERS.readone(user);
 
@@ -1309,7 +1451,7 @@ const brass_callback = (req, res) => {
         wallet: wallet._id,
       });
 
-      if (tx && tx.title !== "Withdrawal Failed") {
+      if (tx && tx.title === "pending-withdrawal") {
         wallet._id &&
           WALLETS.update(wallet._id, {
             naira: { $inc: Number(amount.raw) / 100 },
@@ -1320,6 +1462,19 @@ const brass_callback = (req, res) => {
             title: "Withdrawal Failed",
           }
         );
+      } else if (tx && tx.title === "Withdrawal Failed") {
+      } else {
+        if (title === "Offer confirmed") {
+          PENDING_TRANSACTIONS.write({
+            reference_number: customer_reference,
+            reason: "Transfer failed",
+            value: Number(amount.raw) / 100,
+            source_balance: Number(account.data.available_balance.raw) / 100,
+            source_account: wallet.brass_account.account_id,
+            brass_account: wallet.brass_account._id,
+            wallet: wallet._id,
+          });
+        }
       }
     }
   }

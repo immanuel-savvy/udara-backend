@@ -539,12 +539,12 @@ exports.update_password = update_password;
 
 var logging_in = /*#__PURE__*/function () {
   var _ref6 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee5(req, res) {
-    var _req$body7, email, key, relogin, user, email_pass, pass, wallet, code;
+    var _req$body7, email, key, new_user, relogin, user, email_pass, pass, wallet, code;
 
     return _regeneratorRuntime().wrap(function _callee5$(_context5) {
       while (1) switch (_context5.prev = _context5.next) {
         case 0:
-          _req$body7 = req.body, email = _req$body7.email, key = _req$body7.key, relogin = _req$body7.relogin;
+          _req$body7 = req.body, email = _req$body7.email, key = _req$body7.key, new_user = _req$body7.new_user, relogin = _req$body7.relogin;
           email = email.toLowerCase().trim();
           user = _ds_conn.USERS.readone({
             email: email
@@ -619,17 +619,19 @@ var logging_in = /*#__PURE__*/function () {
 
         case 21:
           if (!relogin) {
-            code = (0, _functions.generate_random_string)(6);
-            pending_otps[email] = code;
+            if (!new_user) {
+              code = (0, _functions.generate_random_string)(6);
+              pending_otps[email] = code;
+            }
 
             try {
               send_mail({
                 recipient: email,
-                subject: "[Udara Links] Authenticate Your Login",
+                subject: "[Udara Links] ".concat(new_user ? "Welcome to Udara Links" : "Authenticate Your Login"),
                 sender: "signup@udaralinksapp.com",
                 sender_name: "Udara Links",
                 sender_pass: "signupudaralinks",
-                html: (0, _email.verification)(code, null, true)
+                html: new_user ? (0, _email.welcome_email)(user) : (0, _email.verification)(code, null, true)
               });
             } catch (e) {}
           }
