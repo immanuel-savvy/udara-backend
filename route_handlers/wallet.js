@@ -18,6 +18,7 @@ import {
   UTILS,
   WALLETS,
 } from "../conn/ds_conn";
+import fs from "fs";
 import { api_key, client_id, paga_collection_client, password } from "../Udara";
 import {
   fetch_wallet_brass_account,
@@ -26,12 +27,11 @@ import {
   operating_currencies,
   send_mail,
 } from "./entry";
-
 import sha512 from "js-sha512";
 import { generate_random_string } from "../utils/functions";
 import { transactions_report } from "./email";
 
-const COMMISSION = 0.995;
+const COMMISSION = 0.99;
 
 const platform_wallet = `wallets~platform_wallet~3000`;
 const platform_user = `users~platform_user~3000`;
@@ -697,12 +697,18 @@ const remove_offer = (req, res) => {
 };
 
 const fulfil_offer = (req, res) => {
-  let { offer, buyer, seller, onsale } = req.body,
+  let { offer, buyer, proof, seller, onsale } = req.body,
     timestamp = Date.now();
+
+  let filename = `${generate_reference_number()}.jpg`;
+  fs.writeFileSync(
+    `${__dirname.split("/").slice(0, -1).join("/")}/Assets/Images/${filename}`,
+    Buffer.from(`${proof}`, "base64")
+  );
 
   let offer_ = OFFERS.update(
     { _id: offer, onsale },
-    { status: "awaiting confirmation", timestamp }
+    { status: "awaiting confirmation", timestamp, proof: filename }
   );
   let onsale_res = ONSALE.update(
     { _id: onsale, currency: offer_.currency },
@@ -914,7 +920,7 @@ const confirm_offer = async (req, res) => {
 
   WALLETS.update(platform_wallet, {
     naira: { $dec: cost },
-    profits: { $inc: cost * 0.005 },
+    profits: { $inc: cost * 0.01 },
   });
 
   let wallet_update = WALLETS.update(seller_wallet, {
@@ -934,7 +940,7 @@ const confirm_offer = async (req, res) => {
     title: "Platform Commission",
     wallet: platform_wallet,
     user: platform_user,
-    from_value: cost * 0.005,
+    from_value: cost * 0.01,
     data: { offer, onsale, party: new Array(seller, offer_.user._id) },
   });
   create_transaction({
@@ -965,7 +971,7 @@ const confirm_offer = async (req, res) => {
         title: "transaction fee",
         wallet: wallet_update && wallet_update._id,
         user: wallet_update.user,
-        from_value: cost * 0.005,
+        from_value: cost * 0.01,
         debit: true,
         data: { offer, onsale, party: new Array(seller, offer_.user._id) },
       }),

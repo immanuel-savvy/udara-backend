@@ -272,7 +272,7 @@ var request_otp = /*#__PURE__*/function () {
           return _context2.abrupt("return", res.json({
             ok: false,
             data: {
-              message: "email field missing"
+              message: "Email field missing"
             }
           }));
 
@@ -290,7 +290,9 @@ var request_otp = /*#__PURE__*/function () {
           return _context2.abrupt("return", res.json({
             ok: false,
             message: "email already used",
-            data: email
+            data: {
+              message: "Email already exist"
+            }
           }));
 
         case 7:
@@ -347,7 +349,10 @@ var verify_otp = /*#__PURE__*/function () {
           return _context3.abrupt("return", res.json({
             ok: false,
             message: "email already used",
-            data: email
+            data: {
+              message: "Email already used",
+              email: email
+            }
           }));
 
         case 3:
@@ -396,6 +401,7 @@ var verify_otp = /*#__PURE__*/function () {
             ok: false,
             message: "verification failed",
             data: {
+              message: "Incorrect verification code",
               email: email,
               code: code
             }

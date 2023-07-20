@@ -9,6 +9,8 @@ var _axios = _interopRequireDefault(require("axios"));
 
 var _ds_conn = require("../conn/ds_conn");
 
+var _fs = _interopRequireDefault(require("fs"));
+
 var _Udara = require("../Udara");
 
 var _entry = require("./entry");
@@ -35,7 +37,7 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
-var COMMISSION = 0.995;
+var COMMISSION = 0.99;
 var platform_wallet = "wallets~platform_wallet~3000";
 exports.platform_wallet = platform_wallet;
 var platform_user = "users~platform_user~3000";
@@ -1178,16 +1180,21 @@ var fulfil_offer = function fulfil_offer(req, res) {
   var _req$body23 = req.body,
       offer = _req$body23.offer,
       buyer = _req$body23.buyer,
+      proof = _req$body23.proof,
       seller = _req$body23.seller,
       onsale = _req$body23.onsale,
       timestamp = Date.now();
+  var filename = "".concat((0, _entry.generate_reference_number)(), ".jpg");
+
+  _fs["default"].writeFileSync("".concat(__dirname.split("/").slice(0, -1).join("/"), "/Assets/Images/").concat(filename), Buffer.from("".concat(proof), "base64"));
 
   var offer_ = _ds_conn.OFFERS.update({
     _id: offer,
     onsale: onsale
   }, {
     status: "awaiting confirmation",
-    timestamp: timestamp
+    timestamp: timestamp,
+    proof: filename
   });
 
   var onsale_res = _ds_conn.ONSALE.update({
@@ -1490,7 +1497,7 @@ var confirm_offer = /*#__PURE__*/function () {
               $dec: cost
             },
             profits: {
-              $inc: cost * 0.005
+              $inc: cost * 0.01
             }
           });
 
@@ -1509,7 +1516,7 @@ var confirm_offer = /*#__PURE__*/function () {
             title: "Platform Commission",
             wallet: platform_wallet,
             user: platform_user,
-            from_value: cost * 0.005,
+            from_value: cost * 0.01,
             data: {
               offer: offer,
               onsale: onsale,
@@ -1551,7 +1558,7 @@ var confirm_offer = /*#__PURE__*/function () {
                 title: "transaction fee",
                 wallet: wallet_update && wallet_update._id,
                 user: wallet_update.user,
-                from_value: cost * 0.005,
+                from_value: cost * 0.01,
                 debit: true,
                 data: {
                   offer: offer,
