@@ -766,7 +766,7 @@ const deposit_to_escrow = (req, res) => {
 
   WALLETS.update(platform_wallet, { naira: { $inc: Number(cost) } });
 
-  let b_wallet = WALLETS.readone(offer_.user.wallet);
+  let b_wallet = WALLETS.readone(offer_.user.wallet || buyer_wallet);
   let p_wallet = WALLETS.readone(platform_wallet);
   let reference_number = generate_reference_number();
 
@@ -1215,7 +1215,7 @@ const get_banks = async (req, res) => {
   try {
     banks = await axios({
       method: "get",
-      url: "https://api.getbrass.co/banking/banks?page=1&limit=105",
+      url: "https://api.getbrass.co/banking/banks?page=1&limit=116",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${brass_personal_access_token}`,
