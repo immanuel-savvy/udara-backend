@@ -125,6 +125,8 @@ var new_notification = function new_notification(user, title, data, metadata) {
     unseen: true
   });
 
+  if (!res) return;
+
   _ds_conn.USERS.update(user, {
     new_notification: {
       $inc: 1
@@ -1302,7 +1304,7 @@ var deposit_to_escrow = function deposit_to_escrow(req, res) {
     }
   });
 
-  var b_wallet = _ds_conn.WALLETS.readone(offer_.user.wallet);
+  var b_wallet = _ds_conn.WALLETS.readone(offer_.user.wallet || buyer_wallet);
 
   var p_wallet = _ds_conn.WALLETS.readone(platform_wallet);
 
@@ -1929,7 +1931,7 @@ var get_banks = /*#__PURE__*/function () {
           _context9.next = 3;
           return (0, _axios["default"])({
             method: "get",
-            url: "https://api.getbrass.co/banking/banks?page=1&limit=105",
+            url: "https://api.getbrass.co/banking/banks?page=1&limit=116",
             headers: {
               "Content-Type": "application/json",
               Authorization: "Bearer ".concat(brass_personal_access_token)

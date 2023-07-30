@@ -97,6 +97,7 @@ const new_notification = (user, title, data, metadata) => {
     metadata,
     unseen: true,
   });
+  if (!res) return;
   USERS.update(user, { new_notification: { $inc: 1 } });
 
   let nots = user_notifications[user];
