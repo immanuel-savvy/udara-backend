@@ -7,7 +7,7 @@ import routes from "./routes";
 import cors from "cors";
 import bodyParser from "body-parser";
 import { create_platform_wallet } from "./route_handlers/starter";
-import { load_operating_currencies } from "./route_handlers/entry";
+import { load_operating_currencies, send_mail } from "./route_handlers/entry";
 import PagaCollectClient from "paga-collect";
 
 let api_key =

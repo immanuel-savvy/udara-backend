@@ -29,7 +29,7 @@ import {
 } from "./entry";
 import sha512 from "js-sha512";
 import { generate_random_string } from "../utils/functions";
-import { transactions_report } from "./email";
+import { transactions_report, tx_receipts } from "./email";
 
 const COMMISSION = 0.99;
 
@@ -314,14 +314,36 @@ const make_brass_payment = async (
     });
 
     response = response && response.data;
+    amount = Number(amount);
 
     wallet._id &&
       WALLETS.update(
         wallet._id,
-        paycheck
-          ? { profits: { $dec: Number(amount) } }
-          : { naira: { $dec: Number(amount) } }
+        paycheck ? { profits: { $dec: amount } } : { naira: { $dec: amount } }
       );
+
+    if (user) {
+      user = user._id ? user : USERS.readone(user);
+      send_mail({
+        recipient: user.email,
+        recipient_name: user.username,
+        subject: "[Udara Links] Debit Alert",
+        sender: "signup@udaralinksapp.online",
+        sender_name: "Udara Links",
+        sender_pass: "ogpQfn9mObWD",
+        html: tx_receipts({
+          user,
+          tx: {
+            title: "Withdrawal",
+            value: amount,
+            created: Date.now(),
+            preamble: "debited from",
+          },
+        }),
+      });
+
+      user = user._id || user;
+    }
 
     res.json({
       ok: true,
@@ -332,7 +354,7 @@ const make_brass_payment = async (
         transaction: create_transaction({
           wallet: wallet._id,
           user,
-          from_value: Number(amount),
+          from_value: amount,
           title: "pending-withdrawal",
           debit: true,
           reference_number,
@@ -761,11 +783,36 @@ const deposit_to_escrow = (req, res) => {
 
   if (!buyer_wallet) buyer_wallet = offer_.user.wallet;
 
+  cost = Number(cost);
   let wallet_update = WALLETS.update(buyer_wallet, {
-    naira: { $dec: Number(cost) },
+    naira: { $dec: cost },
   });
 
-  WALLETS.update(platform_wallet, { naira: { $inc: Number(cost) } });
+  if (offer_.user && offer_.user._id) {
+    let user = offer_.user;
+    send_mail({
+      recipient: user.email,
+      recipient_name: user.username,
+      subject: "[Udara Links] Deposit to Escrow",
+      sender: "signup@udaralinksapp.online",
+      sender_name: "Udara Links",
+      sender_pass: "ogpQfn9mObWD",
+      html: tx_receipts({
+        user,
+        tx: {
+          type: "escrow",
+          title: "Amount",
+          value: cost,
+          created: Date.now(),
+          preamble: "desposited to escrow",
+        },
+      }),
+    });
+
+    user = user._id || user;
+  }
+
+  WALLETS.update(platform_wallet, { naira: { $inc: cost } });
 
   let b_wallet = WALLETS.readone(offer_.user.wallet || buyer_wallet);
   let p_wallet = WALLETS.readone(platform_wallet);
@@ -927,6 +974,28 @@ const confirm_offer = async (req, res) => {
   let wallet_update = WALLETS.update(seller_wallet, {
     naira: { $inc: cost * COMMISSION },
   });
+
+  if (seller) {
+    let seller = seller._id ? seller : USERS.readone(seller);
+    send_mail({
+      recipient: seller.email,
+      recipient_name: seller.username,
+      subject: "[Udara Links] Transaction Completed",
+      sender: "signup@udaralinksapp.online",
+      sender_name: "Udara Links",
+      sender_pass: "ogpQfn9mObWD",
+      html: tx_receipts({
+        user: seller,
+        tx: {
+          title: "Amount",
+          value: cost,
+          fee: cost * COMMISSION,
+          created: Date.now(),
+          preamble: "credited to",
+        },
+      }),
+    });
+  }
 
   new_notification(
     seller,
@@ -1143,6 +1212,29 @@ const refund_buyer = (req, res) => {
   let wallet_update = WALLETS.update(offer_.user.wallet, {
     naira: { $inc: cost },
   });
+
+  if (offer_.user) {
+    let user = offer_.user;
+    send_mail({
+      recipient: user.email,
+      recipient_name: user.username,
+      subject: "[Udara Links] Transaction Reverted",
+      sender: "signup@udaralinksapp.online",
+      sender_name: "Udara Links",
+      sender_pass: "ogpQfn9mObWD",
+      html: tx_receipts({
+        user,
+        tx: {
+          title: "Amount",
+          value: cost,
+          type: "escrow",
+          created: Date.now(),
+          preamble: "refunded to your Udaralinks wallet",
+        },
+      }),
+    });
+  }
+
   let b_wallet = WALLETS.readone(offer_.user.wallet);
 
   OFFERS.update({ _id: offer, onsale }, { status: "closed" });
@@ -1393,6 +1485,27 @@ const brass_callback = (req, res) => {
           naira: { $inc: Number(data.amount.raw) / 100 },
         });
 
+      if (user) {
+        user = user._id ? user : USERS.readone(user);
+        send_mail({
+          recipient: user.email,
+          recipient_name: user.username,
+          subject: "[Udara Links] Credit Alert",
+          sender: "signup@udaralinksapp.online",
+          sender_name: "Udara Links",
+          sender_pass: "ogpQfn9mObWD",
+          html: tx_receipts({
+            user,
+            tx: {
+              title: "Credit",
+              value: Number(data.amount.raw) / 100,
+              created: Date.now(),
+              preamble: "credited to",
+            },
+          }),
+        });
+      }
+
       create_transaction({
         wallet: user.wallet,
         user: user._id,
@@ -1473,6 +1586,26 @@ const brass_callback = (req, res) => {
             title: "Withdrawal Failed",
           }
         );
+        if (user) {
+          user = user._id ? user : USERS.readone(user);
+          send_mail({
+            recipient: user.email,
+            recipient_name: user.username,
+            subject: "[Udara Links] Withdrawal Failed",
+            sender: "signup@udaralinksapp.online",
+            sender_name: "Udara Links",
+            sender_pass: "ogpQfn9mObWD",
+            html: tx_receipts({
+              user,
+              tx: {
+                title: "Amount",
+                value: Number(amount.raw) / 100,
+                created: Date.now(),
+                preamble: "credited to",
+              },
+            }),
+          });
+        }
       } else if (tx && tx.title === "Withdrawal Failed") {
       } else {
         if (title === "Offer confirmed") {
@@ -1553,9 +1686,9 @@ const print_transactions = (req, res) => {
   );
 
   send_mail({
-    recipient: admin,
+    to: admin,
     subject: "[Udara Links] Transaction Report Data",
-    sender: "signup@udaralinksapp.com",
+    sender: "signup@udaralinksapp.online",
     sender_name: "Udara Links",
     sender_pass: "signupudaralinks",
     html: transactions_report({ wallet, transactions }),

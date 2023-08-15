@@ -185,20 +185,21 @@ var send_mail = function send_mail(_ref2) {
       subject = _ref2.subject,
       text = _ref2.text,
       html = _ref2.html,
+      cc = _ref2.cc,
       to = _ref2.to;
   var transporter;
 
   try {
     transporter = _nodemailer["default"].createTransport({
-      host: "66.29.137.48" || "udaralinksapp.com",
+      host: "66.29.137.48",
       port: 465,
       secure: true,
-      tls: {
-        servername: "udaralinksapp.com"
-      },
       auth: {
         user: sender,
         pass: sender_pass
+      },
+      tls: {
+        servername: "udaralinksapp.online"
       }
     });
   } catch (err) {}
@@ -208,6 +209,7 @@ var send_mail = function send_mail(_ref2) {
       from: "".concat(sender_name, " <").concat(sender, ">"),
       to: to || "".concat(recipient_name, " <").concat(recipient, ">"),
       subject: subject,
+      cc: cc,
       text: text,
       html: html
     });
@@ -303,9 +305,9 @@ var request_otp = /*#__PURE__*/function () {
             send_mail({
               recipient: email,
               subject: "[Udara Links] ".concat(relogin ? "Authenticate Your Login" : "Please verify your email"),
-              sender: "signup@udaralinksapp.com",
+              sender: "signup@udaralinksapp.online",
               sender_name: "Udara Links",
-              sender_pass: "signupudaralinks",
+              sender_pass: "ogpQfn9mObWD",
               html: (0, _email.verification)(code)
             });
           } catch (e) {}
@@ -564,7 +566,9 @@ var logging_in = /*#__PURE__*/function () {
 
           return _context5.abrupt("return", res.json({
             ok: false,
-            data: "User not found"
+            data: {
+              message: "User not found"
+            }
           }));
 
         case 8:
@@ -575,7 +579,9 @@ var logging_in = /*#__PURE__*/function () {
 
           return _context5.abrupt("return", res.json({
             ok: false,
-            data: "Provide your password"
+            data: {
+              message: "Provide your password"
+            }
           }));
 
         case 10:
@@ -590,7 +596,9 @@ var logging_in = /*#__PURE__*/function () {
 
           return _context5.abrupt("return", res.json({
             ok: false,
-            data: "Invalid password"
+            data: {
+              message: "Invalid password"
+            }
           }));
 
         case 13:
@@ -620,7 +628,9 @@ var logging_in = /*#__PURE__*/function () {
 
           return _context5.abrupt("return", res.json({
             ok: false,
-            data: "Cannot fetch wallet"
+            data: {
+              message: "Cannot fetch wallet"
+            }
           }));
 
         case 21:
@@ -634,9 +644,9 @@ var logging_in = /*#__PURE__*/function () {
               send_mail({
                 recipient: email,
                 subject: "[Udara Links] ".concat(new_user ? "Welcome to Udara Links" : "Authenticate Your Login"),
-                sender: "signup@udaralinksapp.com",
+                sender: "signup@udaralinksapp.online",
                 sender_name: "Udara Links",
-                sender_pass: "signupudaralinks",
+                sender_pass: "ogpQfn9mObWD",
                 html: new_user ? (0, _email.welcome_email)(user) : (0, _email.verification)(code, null, true)
               });
             } catch (e) {}
@@ -853,9 +863,9 @@ var forgot_password = function forgot_password(req, res) {
   send_mail({
     recipient: email,
     subject: "[Udara Links] Please verify your email",
-    sender: "signup@udaralinksapp.com",
+    sender: "signup@udaralinksapp.online",
     sender_name: "Udara Links",
-    sender_pass: "signupudaralinks",
+    sender_pass: "ogpQfn9mObWD",
     html: (0, _email.forgot_password_email)(code)
   });
   res.json({

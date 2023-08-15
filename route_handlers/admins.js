@@ -1,7 +1,8 @@
-import { ADMINS, HASHES, USERS } from "../conn/ds_conn";
-import { admin_created_email } from "./email";
-import { send_mail } from "./entry";
+import { ADMINS, CONTACT_MESSAGES, HASHES, USERS } from "../conn/ds_conn";
+import { admin_created_email, contact_email } from "./email";
+import { generate_reference_number, send_mail } from "./entry";
 import { platform_wallet } from "./wallet";
+import fs from "fs";
 
 const create_admin = (req, res) => {
   let admin = req.body;
@@ -29,18 +30,18 @@ const create_admin = (req, res) => {
   send_mail({
     recipient: admin.email,
     subject: "[Udara Links] Admin Profile Details",
-    sender: "signup@udaralinksapp.com",
+    sender: "signup@udaralinksapp.online",
     sender_name: "Udara Links",
-    sender_pass: "signupudaralinks",
+    sender_pass: "ogpQfn9mObWD",
     html: admin_created_email(admin),
   });
 
   send_mail({
-    recipient: "admin@udaralinksapp.com",
+    recipient: "admin@udaralinksapp.online",
     subject: "[Udara Links] Admin Profile Details",
-    sender: "signup@udaralinksapp.com",
+    sender: "signup@udaralinksapp.online",
     sender_name: "Udara Links",
-    sender_pass: "signupudaralinks",
+    sender_pass: "ogpQfn9mObWD",
     html: admin_created_email(admin),
   });
 
@@ -67,4 +68,49 @@ const remove_admin = (req, res) => {
   res.end();
 };
 
-export { create_admin, admins, remove_admin };
+const contact_admin = (req, res) => {
+  let { title, user, images, description, currency, offer, onsale } = req.body;
+
+  images =
+    images &&
+    images.map((img) => {
+      let filename = `${generate_reference_number()}.jpg`;
+      fs.writeFileSync(
+        `${__dirname
+          .split("/")
+          .slice(0, -1)
+          .join("/")}/Assets/Images/${filename}`,
+        Buffer.from(`${img}`, "base64")
+      );
+      return filename;
+    });
+
+  let r = CONTACT_MESSAGES.write({
+    title,
+    description,
+    user,
+    images,
+    offer,
+    onsale,
+    currency,
+  });
+  user = USERS.readone(user);
+  send_mail({
+    to: "support@udaralinks.com",
+    subject: `[Contact Message] ${title}`,
+    sender: "signup@udaralinksapp.online",
+    sender_name: "Udara Links",
+    sender_pass: "ogpQfn9mObWD",
+    cc: user.email,
+    html: contact_email({
+      title,
+      description,
+      images,
+      user,
+    }),
+  });
+
+  res.json({ ok: true, data: { _id: r._id } });
+};
+
+export { create_admin, admins, remove_admin, contact_admin };

@@ -1,4 +1,9 @@
-import { admins, create_admin, remove_admin } from "./route_handlers/admins";
+import {
+  admins,
+  contact_admin,
+  create_admin,
+  remove_admin,
+} from "./route_handlers/admins";
 import {
   chat,
   messages,
@@ -174,6 +179,7 @@ const routes = (app) => {
   app.post("/notifications/:user", notifications);
   app.post("/notifications_seen/:user", notifications_seen);
   app.post("/update_user_data", update_user_data);
+  app.post("/contact_admin", contact_admin);
   app.post("/ready_for_transaction", ready_for_transaction);
   app.post("/not_ready_for_transaction", not_ready_for_transaction);
 

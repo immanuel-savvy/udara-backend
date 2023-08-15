@@ -134,21 +134,22 @@ const send_mail = ({
   subject,
   text,
   html,
+  cc,
   to,
 }) => {
   let transporter;
 
   try {
     transporter = nodemailer.createTransport({
-      host: "66.29.137.48" || "udaralinksapp.com",
+      host: "66.29.137.48",
       port: 465,
       secure: true,
-      tls: {
-        servername: "udaralinksapp.com",
-      },
       auth: {
         user: sender,
         pass: sender_pass,
+      },
+      tls: {
+        servername: "udaralinksapp.online",
       },
     });
   } catch (err) {}
@@ -158,6 +159,7 @@ const send_mail = ({
       from: `${sender_name} <${sender}>`,
       to: to || `${recipient_name} <${recipient}>`,
       subject,
+      cc,
       text,
       html,
     });
@@ -219,9 +221,9 @@ const request_otp = async (req, res) => {
       subject: `[Udara Links] ${
         relogin ? "Authenticate Your Login" : "Please verify your email"
       }`,
-      sender: "signup@udaralinksapp.com",
+      sender: "signup@udaralinksapp.online",
       sender_name: "Udara Links",
-      sender_pass: "signupudaralinks",
+      sender_pass: "ogpQfn9mObWD",
       html: verification(code),
     });
   } catch (e) {}
@@ -348,13 +350,14 @@ const logging_in = async (req, res) => {
   let user = USERS.readone({ email });
   let email_pass = email_regex.test(email);
   if (!email_pass || !user)
-    return res.json({ ok: false, data: "User not found" });
-  else if (!key) return res.json({ ok: false, data: "Provide your password" });
+    return res.json({ ok: false, data: { message: "User not found" } });
+  else if (!key)
+    return res.json({ ok: false, data: { message: "Provide your password" } });
 
   let pass = HASHES.readone({ user: user._id });
 
   if (!pass || pass.hash !== key)
-    return res.json({ ok: false, data: "Invalid password" });
+    return res.json({ ok: false, data: { message: "Invalid password" } });
 
   if (user.wallet === platform_wallet && !user.is_admin)
     return res.json({ ok: false, data: "Invalid user" });
@@ -364,7 +367,8 @@ const logging_in = async (req, res) => {
   wallet.conversion_rates = conversion_rates;
   wallet.currencies = load_operating_currencies();
 
-  if (!wallet) return res.json({ ok: false, data: "Cannot fetch wallet" });
+  if (!wallet)
+    return res.json({ ok: false, data: { message: "Cannot fetch wallet" } });
 
   if (!relogin) {
     let code;
@@ -379,9 +383,9 @@ const logging_in = async (req, res) => {
         subject: `[Udara Links] ${
           new_user ? "Welcome to Udara Links" : "Authenticate Your Login"
         }`,
-        sender: "signup@udaralinksapp.com",
+        sender: "signup@udaralinksapp.online",
         sender_name: "Udara Links",
-        sender_pass: "signupudaralinks",
+        sender_pass: "ogpQfn9mObWD",
         html: new_user ? welcome_email(user) : verification(code, null, true),
       });
     } catch (e) {}
@@ -500,9 +504,9 @@ const forgot_password = (req, res) => {
   send_mail({
     recipient: email,
     subject: "[Udara Links] Please verify your email",
-    sender: "signup@udaralinksapp.com",
+    sender: "signup@udaralinksapp.online",
     sender_name: "Udara Links",
-    sender_pass: "signupudaralinks",
+    sender_pass: "ogpQfn9mObWD",
     html: forgot_password_email(code),
   });
 

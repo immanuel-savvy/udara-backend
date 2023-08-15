@@ -21,6 +21,7 @@ let USERS,
   OFFER_NEED,
   BRASS_SUBACCOUNTS,
   PENDING_TRANSACTIONS,
+  CONTACT_MESSAGES,
   NOTIFICATIONS,
   gds;
 
@@ -34,7 +35,8 @@ let ds_conn = () => {
   TRANSACTIONS = gds.folder("transactions", "wallet");
   CHATS = gds.folder("chats", "offer");
   LOGS = gds.folder("logs");
-  PENDING_TRANSACTIONS = gds.folder('pending_transactions', null, 'user');
+  CONTACT_MESSAGES = gds.folder("contact_messages");
+  PENDING_TRANSACTIONS = gds.folder("pending_transactions", null, "user");
   MESSAGES = gds.folder("messages", "chat", "attachment");
   HASHES = gds.folder("hashes", "user");
   ONBOARDINGS = gds.folder("onboardings");
@@ -59,6 +61,7 @@ let ds_conn = () => {
 export default ds_conn;
 export {
   USERS,
+  CONTACT_MESSAGES,
   WALLETS,
   TRANSACTIONS,
   HASHES,

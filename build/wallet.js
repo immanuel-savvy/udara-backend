@@ -488,15 +488,39 @@ var make_brass_payment = /*#__PURE__*/function () {
         case 8:
           response = _context5.sent;
           response = response && response.data;
+          amount = Number(amount);
           wallet._id && _ds_conn.WALLETS.update(wallet._id, paycheck ? {
             profits: {
-              $dec: Number(amount)
+              $dec: amount
             }
           } : {
             naira: {
-              $dec: Number(amount)
+              $dec: amount
             }
           });
+
+          if (user) {
+            user = user._id ? user : _ds_conn.USERS.readone(user);
+            (0, _entry.send_mail)({
+              recipient: user.email,
+              recipient_name: user.username,
+              subject: "[Udara Links] Debit Alert",
+              sender: "signup@udaralinksapp.online",
+              sender_name: "Udara Links",
+              sender_pass: "ogpQfn9mObWD",
+              html: (0, _email.tx_receipts)({
+                user: user,
+                tx: {
+                  title: "Withdrawal",
+                  value: amount,
+                  created: Date.now(),
+                  preamble: "debited from"
+                }
+              })
+            });
+            user = user._id || user;
+          }
+
           res.json({
             ok: true,
             message: "transaction successful",
@@ -506,18 +530,18 @@ var make_brass_payment = /*#__PURE__*/function () {
               transaction: create_transaction({
                 wallet: wallet._id,
                 user: user,
-                from_value: Number(amount),
+                from_value: amount,
                 title: "pending-withdrawal",
                 debit: true,
                 reference_number: reference_number
               })
             }
           });
-          _context5.next = 18;
+          _context5.next = 20;
           break;
 
-        case 14:
-          _context5.prev = 14;
+        case 16:
+          _context5.prev = 16;
           _context5.t0 = _context5["catch"](5);
 
           _ds_conn.LOGS.write(_context5.t0);
@@ -530,11 +554,11 @@ var make_brass_payment = /*#__PURE__*/function () {
             }
           });
 
-        case 18:
+        case 20:
         case "end":
           return _context5.stop();
       }
-    }, _callee5, null, [[5, 14]]);
+    }, _callee5, null, [[5, 16]]);
   }));
 
   return function make_brass_payment(_x9, _x10, _x11, _x12) {
@@ -1291,16 +1315,40 @@ var deposit_to_escrow = function deposit_to_escrow(req, res) {
   });
 
   if (!buyer_wallet) buyer_wallet = offer_.user.wallet;
+  cost = Number(cost);
 
   var wallet_update = _ds_conn.WALLETS.update(buyer_wallet, {
     naira: {
-      $dec: Number(cost)
+      $dec: cost
     }
   });
 
+  if (offer_.user && offer_.user._id) {
+    var user = offer_.user;
+    (0, _entry.send_mail)({
+      recipient: user.email,
+      recipient_name: user.username,
+      subject: "[Udara Links] Deposit to Escrow",
+      sender: "signup@udaralinksapp.online",
+      sender_name: "Udara Links",
+      sender_pass: "ogpQfn9mObWD",
+      html: (0, _email.tx_receipts)({
+        user: user,
+        tx: {
+          type: "escrow",
+          title: "Amount",
+          value: cost,
+          created: Date.now(),
+          preamble: "desposited to escrow"
+        }
+      })
+    });
+    user = user._id || user;
+  }
+
   _ds_conn.WALLETS.update(platform_wallet, {
     naira: {
-      $inc: Number(cost)
+      $inc: cost
     }
   });
 
@@ -1390,7 +1438,7 @@ exports.deposit_to_escrow = deposit_to_escrow;
 
 var confirm_offer = /*#__PURE__*/function () {
   var _ref11 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee8(req, res) {
-    var _req$body25, offer, onsale, seller, seller_wallet, offer_, cost, sell_wallet, reference_number, p_wallet, r, wallet_update;
+    var _req$body25, offer, onsale, seller, seller_wallet, offer_, cost, sell_wallet, reference_number, p_wallet, r, wallet_update, _seller;
 
     return _regeneratorRuntime().wrap(function _callee8$(_context8) {
       while (1) switch (_context8.prev = _context8.next) {
@@ -1508,6 +1556,29 @@ var confirm_offer = /*#__PURE__*/function () {
               $inc: cost * COMMISSION
             }
           });
+
+          if (seller) {
+            _seller = _seller._id ? _seller : _ds_conn.USERS.readone(_seller);
+            (0, _entry.send_mail)({
+              recipient: _seller.email,
+              recipient_name: _seller.username,
+              subject: "[Udara Links] Transaction Completed",
+              sender: "signup@udaralinksapp.online",
+              sender_name: "Udara Links",
+              sender_pass: "ogpQfn9mObWD",
+              html: (0, _email.tx_receipts)({
+                user: _seller,
+                tx: {
+                  title: "Amount",
+                  value: cost,
+                  fee: cost * COMMISSION,
+                  created: Date.now(),
+                  preamble: "credited to"
+                }
+              })
+            });
+          }
+
           new_notification(seller, "buyer confirmed transaction successful", new Array(onsale, offer), {
             currency: offer_.currency
           });
@@ -1571,7 +1642,7 @@ var confirm_offer = /*#__PURE__*/function () {
             }
           });
 
-        case 20:
+        case 21:
         case "end":
           return _context8.stop();
       }
@@ -1848,6 +1919,28 @@ var refund_buyer = function refund_buyer(req, res) {
       $inc: cost
     }
   });
+
+  if (offer_.user) {
+    var user = offer_.user;
+    (0, _entry.send_mail)({
+      recipient: user.email,
+      recipient_name: user.username,
+      subject: "[Udara Links] Transaction Reverted",
+      sender: "signup@udaralinksapp.online",
+      sender_name: "Udara Links",
+      sender_pass: "ogpQfn9mObWD",
+      html: (0, _email.tx_receipts)({
+        user: user,
+        tx: {
+          title: "Amount",
+          value: cost,
+          type: "escrow",
+          created: Date.now(),
+          preamble: "refunded to your Udaralinks wallet"
+        }
+      })
+    });
+  }
 
   var b_wallet = _ds_conn.WALLETS.readone(offer_.user.wallet);
 
@@ -2211,6 +2304,28 @@ var brass_callback = function brass_callback(req, res) {
           $inc: Number(data.amount.raw) / 100
         }
       });
+
+      if (_user2) {
+        _user2 = _user2._id ? _user2 : _ds_conn.USERS.readone(_user2);
+        (0, _entry.send_mail)({
+          recipient: _user2.email,
+          recipient_name: _user2.username,
+          subject: "[Udara Links] Credit Alert",
+          sender: "signup@udaralinksapp.online",
+          sender_name: "Udara Links",
+          sender_pass: "ogpQfn9mObWD",
+          html: (0, _email.tx_receipts)({
+            user: _user2,
+            tx: {
+              title: "Credit",
+              value: Number(data.amount.raw) / 100,
+              created: Date.now(),
+              preamble: "credited to"
+            }
+          })
+        });
+      }
+
       create_transaction({
         wallet: _user2.wallet,
         user: _user2._id,
@@ -2289,6 +2404,27 @@ var brass_callback = function brass_callback(req, res) {
         }, {
           title: "Withdrawal Failed"
         });
+
+        if (_user4) {
+          _user4 = _user4._id ? _user4 : _ds_conn.USERS.readone(_user4);
+          (0, _entry.send_mail)({
+            recipient: _user4.email,
+            recipient_name: _user4.username,
+            subject: "[Udara Links] Withdrawal Failed",
+            sender: "signup@udaralinksapp.online",
+            sender_name: "Udara Links",
+            sender_pass: "ogpQfn9mObWD",
+            html: (0, _email.tx_receipts)({
+              user: _user4,
+              tx: {
+                title: "Amount",
+                value: Number(_amount.raw) / 100,
+                created: Date.now(),
+                preamble: "credited to"
+              }
+            })
+          });
+        }
       } else if (tx && tx.title === "Withdrawal Failed") {} else {
         if (title === "Offer confirmed") {
           _ds_conn.PENDING_TRANSACTIONS.write({
@@ -2365,9 +2501,9 @@ var print_transactions = function print_transactions(req, res) {
   });
 
   (0, _entry.send_mail)({
-    recipient: admin,
+    to: admin,
     subject: "[Udara Links] Transaction Report Data",
-    sender: "signup@udaralinksapp.com",
+    sender: "signup@udaralinksapp.online",
     sender_name: "Udara Links",
     sender_pass: "signupudaralinks",
     html: (0, _email.transactions_report)({
