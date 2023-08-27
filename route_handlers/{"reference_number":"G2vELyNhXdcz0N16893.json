@@ -1,212 +1,175 @@
 {
-  "reference_number": "G2vELyNhXdcz0N1689376401525",
-  "sell_wallet": "{\"user\":\"users~cPTzBu6D9Put0~1689328638550\",\"naira\":0,\"dollar\":0,\"pound\":0,\"euro\":0,\"_id\":\"wallets~wN7cuDayxJs2EQ7LzL~1689328638551\",\"created\":1689328638551,\"updated\":1689374834667,\"brass_account\":{\"number\":\"8968518577\",\"name\":\"Udaralinks Limited - Caleb 3\",\"alias\":\"Caleb 3\",\"account_id\":\"acc_59RhNQ4S4ZrLdNdmXr09Bq\",\"bank_id\":\"bnk_4WvBulTQyHDqmmdoDitt4J\",\"bank_name\":\"Wema Bank\",\"user\":\"users~cPTzBu6D9Put0~1689328638550\",\"_id\":\"brass_subaccounts~rcSC6uiqmKTfv~1689328804849\",\"created\":1689328804849,\"updated\":1689328804849}}",
-  "buyer_wallet": "{\"user\":\"users~T0qTKQbRGqioVu8yIUc~1689352467979\",\"naira\":34.25,\"dollar\":0,\"pound\":0,\"euro\":0,\"_id\":\"wallets~yKAhpc8i5SqgoKMv~1689352467980\",\"created\":1689352467980,\"updated\":1689376392485,\"brass_account\":{\"number\":\"8964379077\",\"name\":\"Udaralinks Limited - Immanuel\",\"alias\":\"Immanuel\",\"account_id\":\"acc_5K83P12YWHYgxCHL4bW1uo\",\"bank_id\":\"bnk_4WvBulTQyHDqmmdoDitt4J\",\"bank_name\":\"Wema Bank\",\"user\":\"users~T0qTKQbRGqioVu8yIUc~1689352467979\",\"_id\":\"brass_subaccounts~ODCzI1d6pvsje52~1689354710043\",\"created\":1689354710043,\"updated\":1689354710043},\"bank_accounts\":1}",
-  "_id": "logs~ec1klYcbEUmbEGCK2~1689376401525",
-  "created": 1689376401525,
-  "updated": 1689376402730,
+  "event": "account.debited",
   "data": {
-    "data": {
-      "embeds": [
-        "authorizations",
-        "attachments",
-        "customer",
-        "counterparties",
-        "initiated_by",
-        "ledger_entry",
-        "payment_request",
-        "recurring_payment_mandate",
-        "source_account",
-        "tags"
-      ],
-      "id": "pay_6IiHRQjUdyryk6NcteRTRE",
-      "customer_reference": "G2vELyNhXdcz0N1689376401525",
-      "title": "Offer confirmed",
-      "description": null,
-      "currency": "NGN",
-      "amount": {
-        "raw": "14925",
-        "formatted": "149.25",
-        "formatted_display": "₦149.25"
-      },
-      "fee": { "raw": "0", "formatted": "0.00", "formatted_display": "₦0.00" },
-      "status": "auth-pending",
-      "hold_off_ends_at": null,
-      "scheduled_for": null,
-      "paid_at": null,
-      "is_trashed": false,
-      "deleted_at": null,
-      "created_at": "2023-07-15T00:13:22+01:00",
-      "updated_at": "2023-07-15T00:13:22+01:00",
-      "display_status": "Pending",
-      "is_recurring": false,
-      "recurring_payment_mandate_id": null,
-      "counterparties_count": null,
-      "failure_reason": null,
-      "was_created_via_api": "1",
-      "disbursement_meta": [],
-      "authorizations": {
-        "data": [
-          {
-            "embeds": ["authorizable", "customer", "user"],
-            "id": "aut_1coKb6JURqdRdtwQ3RUcw5",
-            "is_required": true,
-            "status": "approved",
-            "comment": null,
-            "responded_at": "2023-07-15T00:13:22+01:00",
-            "created_at": "2023-07-15T00:13:22+01:00",
-            "updated_at": "2023-07-15T00:13:22+01:00",
-            "authorizable_type": "payment",
-            "user": {
-              "data": {
-                "embeds": [
-                  "addresses",
-                  "customers",
-                  "role",
-                  "partner",
-                  "agent"
-                ],
-                "id": "usr_7jbWVdNzYukOS8a1Pr7T0p",
-                "firstname": "Emmanuel",
-                "lastname": "Ariwodo",
-                "phone": "+2348060324082",
-                "password": null,
-                "email_verification_hash": null,
-                "email": "info@udaralinks.com",
-                "remember_token": null,
-                "gender": null,
-                "date_of_birth": null,
-                "photo_url": "https://s3.eu-west-1.amazonaws.com/private.getbrass.co/cus_5Eq7b28GnswrGVZty2wJt6/21577a83-57ff-4e4c-93ce-ecf3cc3d8cb0.jpeg-0",
-                "id_option": null,
-                "id_document": null,
-                "id_document_number": null,
-                "email_verified": true,
-                "email_verified_at": "2023-03-12T04:37:53+01:00",
-                "disabled_at": null,
-                "is_trashed": false,
-                "deleted_at": null,
-                "created_at": "2023-03-12T04:28:38+01:00",
-                "updated_at": "2023-07-04T12:25:40+01:00",
-                "preferences": {
-                  "dashboard_preferences": {
-                    "introModals": {
-                      "ebook": { "hidden": false },
-                      "payroll": { "hidden": false },
-                      "cash-collection": { "hidden": true }
-                    }
-                  },
-                  "help_and_support": {
-                    "chat_support_id": "ddb8f321-f9a9-4592-b5aa-d23225af8072"
-                  },
-                  "push_notification": {
-                    "enabled": false,
-                    "subscribed_events": []
-                  },
-                  "security": {
-                    "enabled_2fa": true,
-                    "otp_channel": "email",
-                    "pin_enabled": false
-                  }
-                },
-                "role": {
-                  "data": {
-                    "embeds": ["permissions", "created_by", "customer"],
-                    "id": "rol_2Uy2nWUl8zErvbIdp1ReSw",
-                    "name": "business.owner",
-                    "display_name": "Owner",
-                    "is_active": true,
-                    "is_restricted": true,
-                    "created_at": "2020-03-23T20:08:26+01:00",
-                    "updated_at": "2020-03-23T20:08:26+01:00",
-                    "abilities": {
-                      "dashboard": {
-                        "section": "Dashboard",
-                        "abilities": [
-                          "Full access to all dashboard services",
-                          "Read cash flow, cash-in and cash-out"
-                        ],
-                        "lacks_abilities": [],
-                        "is_important": false
-                      },
-                      "account": {
-                        "section": "Account",
-                        "abilities": [
-                          "Access to company accounts",
-                          "Download company statements"
-                        ],
-                        "lacks_abilities": [],
-                        "is_important": false
-                      },
-                      "invoices": {
-                        "section": "Invoices",
-                        "abilities": [
-                          "Can prepare all invoices",
-                          "Can read all invoices"
-                        ],
-                        "lacks_abilities": [],
-                        "is_important": false
-                      },
-                      "payments": {
-                        "section": "Payments",
-                        "abilities": [
-                          "Can prepare all payments",
-                          "If required, can approve all payments",
-                          "Can read all payments",
-                          "Can cancel all payments"
-                        ],
-                        "lacks_abilities": [],
-                        "is_important": true
-                      },
-                      "team_management": {
-                        "section": "Team management",
-                        "abilities": [
-                          "Can manage: add, remove new team members",
-                          "Can change the privileges of other team members",
-                          "Can remove another owner without their permission"
-                        ],
-                        "lacks_abilities": [],
-                        "is_important": false
-                      },
-                      "contact_management": {
-                        "section": "Contact management",
-                        "abilities": [
-                          "Can manage: add, remove contacts",
-                          "Can read payments and transactions for all contacts"
-                        ],
-                        "lacks_abilities": [],
-                        "is_important": false
-                      },
-                      "subscriptions": {
-                        "section": "Subscriptions",
-                        "abilities": [
-                          "Can manage: view, pause & cancel subscriptions",
-                          "Can create new subscriptions"
-                        ],
-                        "lacks_abilities": [],
-                        "is_important": false
-                      },
-                      "company_settings": {
-                        "section": "Company settings",
-                        "abilities": [
-                          "Can update company profile including documents",
-                          "Can update company settings",
-                          "Can reset company account preferences"
-                        ],
-                        "lacks_abilities": [],
-                        "is_important": false
-                      }
-                    }
-                  }
-                }
-              }
-            }
+    "embeds": ["account", "causer", "fee", "additional_fees"],
+    "id": "led_U2px9J9zRezBpOjnFZTx6",
+    "type": "debit",
+    "currency": "NGN",
+    "amount": {
+      "raw": "20000",
+      "formatted": "200.00",
+      "formatted_display": "₦200.00"
+    },
+    "memo": "withdrawal",
+    "ledger_balance": {
+      "raw": "55425",
+      "formatted": "554.25",
+      "formatted_display": "₦554.25"
+    },
+    "available_balance": {
+      "raw": "35425",
+      "formatted": "354.25",
+      "formatted_display": "₦354.25"
+    },
+    "gateway": "Paystack",
+    "gateway_reference": "dis_1ZUILauGMNG4KYbUQ7ulvl",
+    "is_committed": true,
+    "commit_at": "2023-08-15T21:10:25+01:00",
+    "is_trashed": false,
+    "deleted_at": null,
+    "created_at": "2023-08-15T21:10:17+01:00",
+    "updated_at": "2023-08-15T21:10:25+01:00",
+    "causer_type": "disbursement",
+    "is_fee": false,
+    "account": {
+      "data": {
+        "embeds": ["bank", "customer", "total_outgoing", "signatories"],
+        "id": "acc_5K83P12YWHYgxCHL4bW1uo",
+        "provider": "Paystack",
+        "provider_reference": null,
+        "customer_reference": "users_T0qTKQbRGqioVu8yIUc_1689352467979",
+        "number": "8964379077",
+        "name": "Udaralinks Limited - Immanuel",
+        "currency": "NGN",
+        "ledger_balance": {
+          "raw": "34350",
+          "formatted": "343.50",
+          "formatted_display": "₦343.50"
+        },
+        "available_balance": {
+          "raw": "34350",
+          "formatted": "343.50",
+          "formatted_display": "₦343.50"
+        },
+        "is_default": false,
+        "is_virtual": true,
+        "is_partner_managed": false,
+        "is_wallet": false,
+        "wallet_type": null,
+        "callback_time_minutes": 0,
+        "locked_reason": null,
+        "locked_at": null,
+        "disable_reason": null,
+        "disabled_at": null,
+        "is_trashed": false,
+        "deleted_at": null,
+        "created_at": "2023-07-14T17:34:46+01:00",
+        "updated_at": "2023-07-15T01:09:17+01:00",
+        "alias": "Immanuel",
+        "masked_number": "89*****077",
+        "preferences": {
+          "monthly_budget": {
+            "raw": "1000000000",
+            "formatted": "10000000.00",
+            "formatted_display": "₦10,000,000.00"
+          },
+          "monthly_limit": null
+        },
+        "qr_codes": {
+          "green": "https://s3.eu-west-1.amazonaws.com/private.getbrass.co/cus_5Eq7b28GnswrGVZty2wJt6/public-files/qr-codes/acc_5K83P12YWHYgxCHL4bW1uo-bog.svg",
+          "white": "https://s3.eu-west-1.amazonaws.com/private.getbrass.co/cus_5Eq7b28GnswrGVZty2wJt6/public-files/qr-codes/acc_5K83P12YWHYgxCHL4bW1uo-bow.svg",
+          "qr_pdf_card": "https://s3.eu-west-1.amazonaws.com/private.getbrass.co/cus_5Eq7b28GnswrGVZty2wJt6/public-files/qr-cards/portrait-card-acc_5K83P12YWHYgxCHL4bW1uo.pdf",
+          "qr_image_card": "https://s3.eu-west-1.amazonaws.com/private.getbrass.co/cus_5Eq7b28GnswrGVZty2wJt6/public-files/qr-cards/acc_5K83P12YWHYgxCHL4bW1uo.jpg"
+        },
+        "titan_reference": "aef3bdb9-80f8-41c7-9fc5-39988e6f2056",
+        "titan_id": null,
+        "bank": {
+          "data": {
+            "embeds": ["country"],
+            "id": "bnk_4WvBulTQyHDqmmdoDitt4J",
+            "code": "035",
+            "name": "Wema Bank",
+            "type": "nuban",
+            "is_visible": true,
+            "is_trashed": false,
+            "deleted_at": null,
+            "created_at": "2020-03-23T20:29:45+01:00",
+            "updated_at": "2023-08-15T14:10:31+01:00",
+            "alternate_names": []
           }
-        ]
-      },
-      "attachments": { "data": [] },
-      "counterparties": {
-        "data": [
-          {
+        }
+      }
+    },
+    "causer": {
+      "data": {
+        "embeds": ["counterparty", "timeline_events"],
+        "id": "dis_1ZUILauGMNG4KYbUQ7ulvl",
+        "gateway": "Paystack",
+        "status": "success",
+        "gateway_reference": "TRF_6gx7hdor1moc9wy0",
+        "gateway_code": "110006230815201018033184258201",
+        "gateway_message": "success",
+        "gateway_response": {
+          "id": 331842582,
+          "amount": 20000,
+          "domain": "live",
+          "reason": "withdrawal",
+          "source": "balance",
+          "status": "success",
+          "session": {
+            "id": "110006230815201018033184258201",
+            "provider": "nip"
+          },
+          "currency": "NGN",
+          "failures": null,
+          "createdAt": "2023-08-15T20:10:18.000Z",
+          "recipient": {
+            "id": 56896063,
+            "name": "EMMANUEL OLORUNTOBI GIWA",
+            "type": "nuban",
+            "email": null,
+            "active": true,
+            "domain": "live",
+            "details": {
+              "bank_code": "999992",
+              "bank_name": "Paycom",
+              "account_name": "EMMANUEL OLORUNTOBI GIWA",
+              "account_number": "9011167699",
+              "authorization_code": null
+            },
+            "currency": "NGN",
+            "metadata": null,
+            "createdAt": "2023-07-13T00:50:06.000Z",
+            "updatedAt": "2023-07-13T00:50:06.000Z",
+            "is_deleted": false,
+            "description": null,
+            "integration": 383628,
+            "recipient_code": "RCP_mvgog2dept2t89z"
+          },
+          "reference": "3d7f079b572caf46e80c953706f9282a",
+          "updatedAt": "2023-08-15T20:10:20.000Z",
+          "titan_code": null,
+          "fee_charged": 0,
+          "integration": {
+            "id": 383628,
+            "is_live": true,
+            "logo_path": "https://public-files-paystack-prod.s3.eu-west-1.amazonaws.com/integration-logos/jd4x92k2bdk2c6fhx49m.png",
+            "business_name": "Brass Technologies Inc"
+          },
+          "transfer_code": "TRF_6gx7hdor1moc9wy0",
+          "source_details": null,
+          "transferred_at": "2023-08-15T20:10:20.000Z"
+        },
+        "is_successful": true,
+        "requery_trials": 0,
+        "requery_response": null,
+        "requeried_at": null,
+        "is_trashed": false,
+        "deleted_at": null,
+        "created_at": "2023-08-15T21:10:05+01:00",
+        "updated_at": "2023-08-15T21:10:25+01:00",
+        "counterparty": {
+          "data": {
             "embeds": [
               "customer",
               "added_by_user",
@@ -214,11 +177,11 @@
               "disbursements",
               "transactable"
             ],
-            "id": "cpt_73uALdv80PJrUwatRH6WRn",
+            "id": "cpt_P0k00oyqADAGvVKiodW5u",
             "status": "unprocessed",
             "responded_at": null,
-            "created_at": "2023-07-15T00:13:22+01:00",
-            "updated_at": "2023-07-15T00:13:22+01:00",
+            "created_at": "2023-08-15T21:06:46+01:00",
+            "updated_at": "2023-08-15T21:06:46+01:00",
             "counterparty_type": "contact",
             "transactable_type": "payment",
             "counterparty": {
@@ -231,9 +194,9 @@
                   "recipient_customer_profile",
                   "bank"
                 ],
-                "id": "con_1EaSKPibiabeWAHe2Iokfd",
-                "number": "acc_59RhNQ4S4ZrLdNdmXr09Bq",
-                "name": "Udaralinks Limited - Caleb 3",
+                "id": "con_21Fp4QXpdFfrKeULwWaQ3c",
+                "number": "9011167699",
+                "name": "EMMANUEL OLORUNTOBI GIWA",
                 "alias": null,
                 "currency": "NGN",
                 "phone": null,
@@ -244,232 +207,106 @@
                 "disabled_at": null,
                 "is_trashed": false,
                 "deleted_at": null,
-                "created_at": "2023-07-15T00:13:22+01:00",
-                "updated_at": "2023-07-15T00:13:22+01:00",
+                "created_at": "2023-07-13T01:13:44+01:00",
+                "updated_at": "2023-07-13T01:50:08+01:00",
                 "bank": {
                   "data": {
                     "embeds": ["country"],
-                    "id": "bnk_4WvBulTQyHDqmmdoDitt4J",
-                    "code": "035",
-                    "name": "Wema Bank",
+                    "id": "bnk_3kbiTsROwVvQKbTjR1atT3",
+                    "code": "305",
+                    "name": "Paycom",
                     "type": "nuban",
                     "is_visible": true,
                     "is_trashed": false,
                     "deleted_at": null,
-                    "created_at": "2020-03-23T20:29:45+01:00",
-                    "updated_at": "2023-07-14T07:41:39+01:00",
-                    "alternate_names": []
+                    "created_at": "2021-07-28T09:04:27+01:00",
+                    "updated_at": "2023-08-15T14:10:31+01:00",
+                    "alternate_names": ["OPAY", "OPay", "opay"]
                   }
                 }
               }
             }
           }
-        ]
-      },
-      "initiated_by": {
-        "data": {
-          "embeds": ["addresses", "customers", "role", "partner", "agent"],
-          "id": "usr_7jbWVdNzYukOS8a1Pr7T0p",
-          "firstname": "Emmanuel",
-          "lastname": "Ariwodo",
-          "phone": "+2348060324082",
-          "password": null,
-          "email_verification_hash": null,
-          "email": "info@udaralinks.com",
-          "remember_token": null,
-          "gender": null,
-          "date_of_birth": null,
-          "photo_url": "https://s3.eu-west-1.amazonaws.com/private.getbrass.co/cus_5Eq7b28GnswrGVZty2wJt6/21577a83-57ff-4e4c-93ce-ecf3cc3d8cb0.jpeg-0",
-          "id_option": null,
-          "id_document": null,
-          "id_document_number": null,
-          "email_verified": true,
-          "email_verified_at": "2023-03-12T04:37:53+01:00",
-          "disabled_at": null,
-          "is_trashed": false,
-          "deleted_at": null,
-          "created_at": "2023-03-12T04:28:38+01:00",
-          "updated_at": "2023-07-04T12:25:40+01:00",
-          "preferences": {
-            "dashboard_preferences": {
-              "introModals": {
-                "ebook": { "hidden": false },
-                "payroll": { "hidden": false },
-                "cash-collection": { "hidden": true }
-              }
+        },
+        "timeline_events": {
+          "data": [
+            {
+              "embeds": ["customer"],
+              "id": "tev_5OfPSs1z9NPTYZMdFs2e5c",
+              "event_name": "debit",
+              "display_text": "On source account for ₦200.00",
+              "created_at": "2023-08-15T21:10:17+01:00",
+              "updated_at": "2023-08-15T21:10:17+01:00",
+              "for": "disbursement"
             },
-            "help_and_support": {
-              "chat_support_id": "ddb8f321-f9a9-4592-b5aa-d23225af8072"
+            {
+              "embeds": ["customer"],
+              "id": "tev_TMlD7KjwXdelXeS6yU2Hc",
+              "event_name": "debit",
+              "display_text": "Transfer fee of ₦10.75",
+              "created_at": "2023-08-15T21:10:17+01:00",
+              "updated_at": "2023-08-15T21:10:17+01:00",
+              "for": "disbursement"
             },
-            "push_notification": { "enabled": false, "subscribed_events": [] },
-            "security": {
-              "enabled_2fa": true,
-              "otp_channel": "email",
-              "pin_enabled": false
+            {
+              "embeds": ["customer"],
+              "id": "tev_DHoKwx0OhRxNw70nVp6W0",
+              "event_name": "updated",
+              "display_text": "Processing disbursement",
+              "created_at": "2023-08-15T21:10:17+01:00",
+              "updated_at": "2023-08-15T21:10:17+01:00",
+              "for": "disbursement"
+            },
+            {
+              "embeds": ["customer"],
+              "id": "tev_1Aj04OwmNKkENLHGkQFFUD",
+              "event_name": "sent_instruction",
+              "display_text": "To credit recipient",
+              "created_at": "2023-08-15T21:10:20+01:00",
+              "updated_at": "2023-08-15T21:10:20+01:00",
+              "for": "disbursement"
             }
-          },
-          "role": {
-            "data": {
-              "embeds": ["permissions", "created_by", "customer"],
-              "id": "rol_2Uy2nWUl8zErvbIdp1ReSw",
-              "name": "business.owner",
-              "display_name": "Owner",
-              "is_active": true,
-              "is_restricted": true,
-              "created_at": "2020-03-23T20:08:26+01:00",
-              "updated_at": "2020-03-23T20:08:26+01:00",
-              "abilities": {
-                "dashboard": {
-                  "section": "Dashboard",
-                  "abilities": [
-                    "Full access to all dashboard services",
-                    "Read cash flow, cash-in and cash-out"
-                  ],
-                  "lacks_abilities": [],
-                  "is_important": false
-                },
-                "account": {
-                  "section": "Account",
-                  "abilities": [
-                    "Access to company accounts",
-                    "Download company statements"
-                  ],
-                  "lacks_abilities": [],
-                  "is_important": false
-                },
-                "invoices": {
-                  "section": "Invoices",
-                  "abilities": [
-                    "Can prepare all invoices",
-                    "Can read all invoices"
-                  ],
-                  "lacks_abilities": [],
-                  "is_important": false
-                },
-                "payments": {
-                  "section": "Payments",
-                  "abilities": [
-                    "Can prepare all payments",
-                    "If required, can approve all payments",
-                    "Can read all payments",
-                    "Can cancel all payments"
-                  ],
-                  "lacks_abilities": [],
-                  "is_important": true
-                },
-                "team_management": {
-                  "section": "Team management",
-                  "abilities": [
-                    "Can manage: add, remove new team members",
-                    "Can change the privileges of other team members",
-                    "Can remove another owner without their permission"
-                  ],
-                  "lacks_abilities": [],
-                  "is_important": false
-                },
-                "contact_management": {
-                  "section": "Contact management",
-                  "abilities": [
-                    "Can manage: add, remove contacts",
-                    "Can read payments and transactions for all contacts"
-                  ],
-                  "lacks_abilities": [],
-                  "is_important": false
-                },
-                "subscriptions": {
-                  "section": "Subscriptions",
-                  "abilities": [
-                    "Can manage: view, pause & cancel subscriptions",
-                    "Can create new subscriptions"
-                  ],
-                  "lacks_abilities": [],
-                  "is_important": false
-                },
-                "company_settings": {
-                  "section": "Company settings",
-                  "abilities": [
-                    "Can update company profile including documents",
-                    "Can update company settings",
-                    "Can reset company account preferences"
-                  ],
-                  "lacks_abilities": [],
-                  "is_important": false
-                }
-              }
-            }
-          }
+          ]
         }
-      },
-      "source_account": {
-        "data": {
-          "embeds": ["bank", "customer", "total_outgoing", "signatories"],
-          "id": "acc_5K83P12YWHYgxCHL4bW1uo",
-          "provider": "Paystack",
-          "provider_reference": null,
-          "customer_reference": "users_T0qTKQbRGqioVu8yIUc_1689352467979",
-          "number": "8964379077",
-          "name": "Udaralinks Limited - Immanuel",
-          "currency": "NGN",
-          "ledger_balance": {
-            "raw": "18425",
-            "formatted": "184.25",
-            "formatted_display": "₦184.25"
-          },
-          "available_balance": {
-            "raw": "18425",
-            "formatted": "184.25",
-            "formatted_display": "₦184.25"
-          },
-          "is_default": false,
-          "is_virtual": true,
-          "is_partner_managed": false,
-          "is_wallet": false,
-          "wallet_type": null,
-          "callback_time_minutes": 0,
-          "locked_reason": null,
-          "locked_at": null,
-          "disable_reason": null,
-          "disabled_at": null,
-          "is_trashed": false,
-          "deleted_at": null,
-          "created_at": "2023-07-14T17:34:46+01:00",
-          "updated_at": "2023-07-14T22:24:19+01:00",
-          "alias": "Immanuel",
-          "masked_number": "89*****077",
-          "preferences": {
-            "monthly_budget": {
-              "raw": "1000000000",
-              "formatted": "10000000.00",
-              "formatted_display": "₦10,000,000.00"
-            },
-            "monthly_limit": null
-          },
-          "qr_codes": {
-            "green": "https://s3.eu-west-1.amazonaws.com/private.getbrass.co/cus_5Eq7b28GnswrGVZty2wJt6/public-files/qr-codes/acc_5K83P12YWHYgxCHL4bW1uo-bog.svg",
-            "white": "https://s3.eu-west-1.amazonaws.com/private.getbrass.co/cus_5Eq7b28GnswrGVZty2wJt6/public-files/qr-codes/acc_5K83P12YWHYgxCHL4bW1uo-bow.svg",
-            "qr_pdf_card": "https://s3.eu-west-1.amazonaws.com/private.getbrass.co/cus_5Eq7b28GnswrGVZty2wJt6/public-files/qr-cards/portrait-card-acc_5K83P12YWHYgxCHL4bW1uo.pdf",
-            "qr_image_card": "https://s3.eu-west-1.amazonaws.com/private.getbrass.co/cus_5Eq7b28GnswrGVZty2wJt6/public-files/qr-cards/acc_5K83P12YWHYgxCHL4bW1uo.jpg"
-          },
-          "titan_reference": "aef3bdb9-80f8-41c7-9fc5-39988e6f2056",
-          "titan_id": null,
-          "bank": {
-            "data": {
-              "embeds": ["country"],
-              "id": "bnk_4WvBulTQyHDqmmdoDitt4J",
-              "code": "035",
-              "name": "Wema Bank",
-              "type": "nuban",
-              "is_visible": true,
-              "is_trashed": false,
-              "deleted_at": null,
-              "created_at": "2020-03-23T20:29:45+01:00",
-              "updated_at": "2023-07-14T07:41:39+01:00",
-              "alternate_names": []
-            }
-          }
-        }
-      },
-      "tags": { "data": [] }
+      }
+    },
+    "fee": {
+      "data": {
+        "embeds": ["account", "causer", "fee", "additional_fees"],
+        "id": "led_3H01yQnpCcBlF3BCVjVNPb",
+        "type": "debit",
+        "currency": "NGN",
+        "amount": {
+          "raw": "1075",
+          "formatted": "10.75",
+          "formatted_display": "₦10.75"
+        },
+        "memo": "Transfer commission",
+        "ledger_balance": {
+          "raw": "55425",
+          "formatted": "554.25",
+          "formatted_display": "₦554.25"
+        },
+        "available_balance": {
+          "raw": "35425",
+          "formatted": "354.25",
+          "formatted_display": "₦354.25"
+        },
+        "gateway": "Paystack",
+        "gateway_reference": "dis_1ZUILauGMNG4KYbUQ7ulvl-fee",
+        "is_committed": true,
+        "commit_at": "2023-08-15T21:10:25+01:00",
+        "is_trashed": false,
+        "deleted_at": null,
+        "created_at": "2023-08-15T21:10:17+01:00",
+        "updated_at": "2023-08-15T21:10:25+01:00",
+        "causer_type": "disbursement",
+        "is_fee": true
+      }
     }
-  }
+  },
+  "led_id": "led_U2px9J9zRezBpOjnFZTx6",
+  "_id": "logs~AsDEF2jO9XJuJopCa~1692130264713",
+  "created": 1692130264713,
+  "updated": 1692130264713
 }

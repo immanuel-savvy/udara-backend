@@ -372,6 +372,38 @@ const tx_receipts = ({tx, user})=>{
                                         Here are the details of your transaction
                                       </td>
                                     </tr>
+                                    ${tx.to?`<tr>
+                                    <td>
+                                      <table
+                                        class="invoice-items"
+                                        cellpadding="0"
+                                        cellspacing="0"
+                                      >
+                                        <tbody>
+                                          <tr>
+                                            <td><b>Destination</b></td>
+                                          </tr>
+                                          <tr>
+                                            <td>Bank Name</td>
+                                            <td class="alignright">${tx.to.bank_name}</td>
+                                          </tr>
+                                          <tr>
+                                            <td>Account Number</td>
+                                            <td class="alignright">
+                                            ${tx.to.account_number}
+                                            </td>
+                                          </tr>
+                                          <tr>
+                                            <td>Account Name</td>
+                                            <td class="alignright">
+                                            ${tx.to.account_name}
+                                            </td>
+                                          </tr>
+                                          <tr></tr>
+                                        </tbody>
+                                      </table>
+                                    </td>
+                                  </tr>`:''}
                                     <tr>
                                       <td>
                                         <table
@@ -380,6 +412,11 @@ const tx_receipts = ({tx, user})=>{
                                           cellspacing="0"
                                         >
                                           <tbody>
+                                          ${
+                                            tx.to?` <tr>
+                                            <td><b>Amount</b></td>
+                                          </tr>`:''
+                                          }
                                             <tr>
                                               <td>${tx.title}</td>
                                               <td class="alignright">

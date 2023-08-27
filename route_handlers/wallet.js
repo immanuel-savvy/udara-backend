@@ -277,7 +277,7 @@ const make_brass_payment = async (
   source_account,
   { res, wallet, user, paycheck }
 ) => {
-  let { account_name, bank_id, account_number } = bank_account;
+  let { account_name, bank_id, bank_name, account_number } = bank_account;
   LOGS.write({ account_name, bank_id, account_number, amount, source_account });
 
   let reference_number = generate_reference_number();
@@ -336,6 +336,11 @@ const make_brass_payment = async (
           tx: {
             title: "Withdrawal",
             value: amount,
+            to: {
+              account_name,
+              account_number,
+              bank_name,
+            },
             created: Date.now(),
             preamble: "debited from",
           },
@@ -366,25 +371,46 @@ const make_brass_payment = async (
     res.json({
       ok: false,
       message: "withdrawal failed",
-      data: { ok: false },
+      data: { ok: false, message: "Withdrawal failed" },
     });
   }
 };
 
 const withdraw = async (req, res) => {
   let { user, amount, bank_account, paycheck, wallet } = req.body;
+  amount = Number(amount);
 
-  if (!Number(amount))
-    return res.json({ ok: false, message: "invalid transaction amount" });
+  if (!amount)
+    return res.json({
+      ok: false,
+      data: { message: "invalid transaction amount" },
+    });
 
   wallet = WALLETS.readone(wallet);
 
   let user_obj = USERS.readone(user);
   if (!user_obj || !wallet) return res.end();
 
+  await fetch_wallet_brass_account(wallet, !!paycheck);
   if (paycheck) {
-    if (wallet.profits < Number(amount)) return res.end();
-  } else if (wallet.available_balance < Number(amount)) return res.end();
+    if (wallet.profits < amount)
+      return res.json({
+        ok: false,
+        data: {
+          message: "Insufficient available balance, Please try again.",
+          wallet,
+          perhaps: true,
+        },
+      });
+  } else if (wallet.available_balance < amount)
+    return res.json({
+      ok: false,
+      data: {
+        message: "Insufficient available balance, Please try again.",
+        wallet,
+        perhaps: true,
+      },
+    });
 
   await make_brass_payment(
     typeof bank_account === "object"
@@ -1543,7 +1569,11 @@ const brass_callback = (req, res) => {
         WALLETS.update(wallet._id, {
           naira: { $dec: Number(amount.raw) / 100 },
         });
-    }
+    } else if (memo === "withdrawal")
+      TRANSACTIONS.update(
+        { wallet: wallet._id, title: "pending-withdrawal" },
+        { title: "Withdraw Successful" }
+      );
   } else if (event === "payable.completed") {
     let {
       amount,

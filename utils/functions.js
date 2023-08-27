@@ -25,6 +25,31 @@ const generate_random_string = (len = 6, combination = "num") => {
   return string;
 };
 
+const month_index = new Object({
+  0: "jan",
+  1: "feb",
+  2: "mar",
+  3: "apr",
+  4: "may",
+  5: "jun",
+  6: "jul",
+  7: "aug",
+  8: "sep",
+  9: "oct",
+  10: "nov",
+  11: "dec",
+});
+
+const to_title = (string) => {
+  if (!string) return string;
+
+  let str = "";
+  string.split(" ").map((s) => {
+    if (s) str += " " + s[0].toUpperCase() + s.slice(1);
+  });
+  return str.trim();
+};
+
 const date_string = (timestamp) => {
   let date = new Date(timestamp);
   return `${date.getDate().toString().padStart(2, "0")} ${to_title(

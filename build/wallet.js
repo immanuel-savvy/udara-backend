@@ -437,12 +437,12 @@ var make_payment = /*#__PURE__*/function () {
 
 var make_brass_payment = /*#__PURE__*/function () {
   var _ref8 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee5(bank_account, amount, source_account, _ref7) {
-    var res, wallet, user, paycheck, account_name, bank_id, account_number, reference_number, response;
+    var res, wallet, user, paycheck, account_name, bank_id, bank_name, account_number, reference_number, response;
     return _regeneratorRuntime().wrap(function _callee5$(_context5) {
       while (1) switch (_context5.prev = _context5.next) {
         case 0:
           res = _ref7.res, wallet = _ref7.wallet, user = _ref7.user, paycheck = _ref7.paycheck;
-          account_name = bank_account.account_name, bank_id = bank_account.bank_id, account_number = bank_account.account_number;
+          account_name = bank_account.account_name, bank_id = bank_account.bank_id, bank_name = bank_account.bank_name, account_number = bank_account.account_number;
 
           _ds_conn.LOGS.write({
             account_name: account_name,
@@ -513,6 +513,11 @@ var make_brass_payment = /*#__PURE__*/function () {
                 tx: {
                   title: "Withdrawal",
                   value: amount,
+                  to: {
+                    account_name: account_name,
+                    account_number: account_number,
+                    bank_name: bank_name
+                  },
                   created: Date.now(),
                   preamble: "debited from"
                 }
@@ -550,7 +555,8 @@ var make_brass_payment = /*#__PURE__*/function () {
             ok: false,
             message: "withdrawal failed",
             data: {
-              ok: false
+              ok: false,
+              message: "Withdrawal failed"
             }
           });
 
@@ -574,55 +580,76 @@ var withdraw = /*#__PURE__*/function () {
       while (1) switch (_context6.prev = _context6.next) {
         case 0:
           _req$body8 = req.body, user = _req$body8.user, amount = _req$body8.amount, bank_account = _req$body8.bank_account, paycheck = _req$body8.paycheck, wallet = _req$body8.wallet;
+          amount = Number(amount);
 
-          if (Number(amount)) {
-            _context6.next = 3;
+          if (amount) {
+            _context6.next = 4;
             break;
           }
 
           return _context6.abrupt("return", res.json({
             ok: false,
-            message: "invalid transaction amount"
+            data: {
+              message: "invalid transaction amount"
+            }
           }));
 
-        case 3:
+        case 4:
           wallet = _ds_conn.WALLETS.readone(wallet);
           user_obj = _ds_conn.USERS.readone(user);
 
           if (!(!user_obj || !wallet)) {
-            _context6.next = 7;
+            _context6.next = 8;
             break;
           }
 
           return _context6.abrupt("return", res.end());
 
-        case 7:
-          if (!paycheck) {
-            _context6.next = 12;
-            break;
-          }
-
-          if (!(wallet.profits < Number(amount))) {
-            _context6.next = 10;
-            break;
-          }
-
-          return _context6.abrupt("return", res.end());
+        case 8:
+          _context6.next = 10;
+          return (0, _entry.fetch_wallet_brass_account)(wallet, !!paycheck);
 
         case 10:
-          _context6.next = 14;
-          break;
-
-        case 12:
-          if (!(wallet.available_balance < Number(amount))) {
-            _context6.next = 14;
+          if (!paycheck) {
+            _context6.next = 15;
             break;
           }
 
-          return _context6.abrupt("return", res.end());
+          if (!(wallet.profits < amount)) {
+            _context6.next = 13;
+            break;
+          }
 
-        case 14:
-          _context6.next = 16;
+          return _context6.abrupt("return", res.json({
+            ok: false,
+            data: {
+              message: "Insufficient available balance, Please try again.",
+              wallet: wallet,
+              perhaps: true
+            }
+          }));
+
+        case 13:
+          _context6.next = 17;
+          break;
+
+        case 15:
+          if (!(wallet.available_balance < amount)) {
+            _context6.next = 17;
+            break;
+          }
+
+          return _context6.abrupt("return", res.json({
+            ok: false,
+            data: {
+              message: "Insufficient available balance, Please try again.",
+              wallet: wallet,
+              perhaps: true
+            }
+          }));
+
+        case 17:
+          _context6.next = 19;
           return make_brass_payment(_typeof(bank_account) === "object" ? bank_account : _ds_conn.BANK_ACCOUNTS.readone(paycheck ? {
             user: platform_user,
             _id: platform_bank_account
@@ -637,7 +664,7 @@ var withdraw = /*#__PURE__*/function () {
             paycheck: paycheck
           });
 
-        case 16:
+        case 19:
         case "end":
           return _context6.stop();
       }
@@ -2357,7 +2384,12 @@ var brass_callback = function brass_callback(req, res) {
           $dec: Number(amount.raw) / 100
         }
       });
-    }
+    } else if (memo === "withdrawal") _ds_conn.TRANSACTIONS.update({
+      wallet: _wallet._id,
+      title: "pending-withdrawal"
+    }, {
+      title: "Withdraw Successful"
+    });
   } else if (event === "payable.completed") {
     var _amount = data.amount,
         status = data.status,
