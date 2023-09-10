@@ -19,7 +19,7 @@ import {
   WALLETS,
 } from "../conn/ds_conn";
 import fs from "fs";
-import { api_key, client_id, paga_collection_client, password } from "../Udara";
+import { Payables } from "../Udara";
 import {
   fetch_wallet_brass_account,
   generate_reference_number,
@@ -27,8 +27,6 @@ import {
   operating_currencies,
   send_mail,
 } from "./entry";
-import sha512 from "js-sha512";
-import { generate_random_string } from "../utils/functions";
 import { transactions_report, tx_receipts } from "./email";
 
 const COMMISSION = 0.99;
@@ -37,57 +35,7 @@ const platform_wallet = `wallets~platform_wallet~3000`;
 const platform_user = `users~platform_user~3000`;
 const platform_bank_account = `bank_account~platform_user~3000`;
 
-let acceptable_payment_method = "BANK_TRANSFER";
 let user_notifications = new Object();
-
-const request_account_details = async (req, res) => {
-  let { user, amount } = req.body;
-
-  user = USERS.readone(user);
-  let { email, _id } = user;
-
-  let response = await paga_collection_client.paymentRequest({
-    referenceNumber: generate_reference_number(),
-    amount,
-    callBackUrl: `https://mobile.udaralinksapp.com/paga_deposit/${_id}`,
-    currency: "NGN",
-    isAllowPartialPayments: false,
-    isSuppressMessages: true,
-    payee: { name: "Admin" },
-    payer: {
-      name: `${_id}`,
-      email: email.trim().toLowerCase(),
-    },
-    payerCollectionFeeShare: 1.0,
-    recipientCollectionFeeShare: 0.0,
-    paymentMethods: [acceptable_payment_method],
-  });
-
-  let account_details;
-
-  if (!response.error) {
-    response = response.response;
-    account_details = response.paymentMethods.find(
-      (method) => method.name === acceptable_payment_method
-    );
-    account_details = {
-      account_number: account_details.properties.AccountNumber,
-      bank: "paga",
-    };
-    res.json({
-      ok: true,
-      message: "account details generated",
-      data: account_details,
-    });
-  } else
-    res.json({
-      ok: false,
-      data: {
-        message: "could not generate account details at this time",
-        reason: response.response.statusMessage,
-      },
-    });
-};
 
 const new_notification = (user, title, data, metadata) => {
   let res = NOTIFICATIONS.write({
@@ -181,26 +129,6 @@ const onsale = (req, res) => {
   res.json({ ok: true, data: onsale });
 };
 
-const paga_deposit = async (req, res) => {
-  let { user } = req.params;
-  let { paymentAmount, collectionFee, event, statusCode } = req.body;
-
-  LOGS.write({ data: req.body, user, route: "paga deposit" });
-
-  if (statusCode === "0" && event === "PAYMENT_COMPLETE") {
-    let amount = paymentAmount - collectionFee;
-    user = USERS.readone(user);
-
-    user &&
-      topup(
-        { body: { value: amount, user: user._id, wallet: user.wallet } },
-        { json: () => {} }
-      );
-  }
-
-  res.end();
-};
-
 const topup = async (req, res) => {
   let { value, user, wallet } = req.body;
   if (!Number(value))
@@ -229,46 +157,6 @@ const add_fiat_account = (req, res) => {
 
   FIAT_ACCOUNTS.write({ user, account_number, bank_uuid, bank_name });
   res.json({ ok: true, message: "bank account appended", data: user });
-};
-
-const make_payment = async ({ bank, account_number }, amount) => {
-  let referenceNumber = `${generate_random_string(14, "alnum")}${Date.now()}`,
-    destinationBankUUID = bank,
-    destinationBankAccountNumber = account_number,
-    hash = api_key;
-
-  let response;
-  try {
-    response = await axios({
-      url: "https://beta.mypaga.com/paga-webservices/business-rest/secured/depositToBank",
-      method: "post",
-      headers: {
-        "Content-Type": "application/json",
-        principal: client_id,
-        credentials: password,
-        hash: sha512(
-          referenceNumber +
-            Number(amount).toFixed(2) +
-            destinationBankUUID +
-            destinationBankAccountNumber +
-            hash
-        ),
-      },
-      data: {
-        referenceNumber,
-        amount: Number(amount).toFixed(2),
-        currency: "NGN",
-        destinationBankUUID,
-        destinationBankAccountNumber,
-        remarks: `Udara wallet withdrawal ${amount}`,
-      },
-    });
-    response = response.data;
-  } catch (e) {
-    console.log(e);
-  }
-
-  return { response, reference_number: referenceNumber };
 };
 
 const make_brass_payment = async (
@@ -943,14 +831,8 @@ const confirm_offer = async (req, res) => {
     });
 
     try {
-      axios({
-        url: "https://api.getbrass.co/banking/payments",
-        method: "post",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${brass_personal_access_token}`,
-        },
-        data: {
+      let bal = await fetch_wallet_brass_account(p_wallet),
+        data = {
           title: "Offer confirmed",
           amount: String(cost * COMMISSION * 100),
           to: {
@@ -960,16 +842,26 @@ const confirm_offer = async (req, res) => {
           },
           source_account: p_wallet.brass_account.account_id,
           customer_reference: reference_number,
-        },
-      })
-        .then((reslt) => {
-          LOGS.update(r._id, { data: reslt.data });
-        })
-        .catch((e) => {
-          LOGS.update(r._id, { e: JSON.stringify(e), err: true });
-        });
+        };
 
-      // response = response && response.data;
+      if (Number(bal.data.ledger_balance.raw) / 100 < cost * COMMISSION)
+        Payables.unshift({ r, data });
+      else
+        axios({
+          url: "https://api.getbrass.co/banking/payments",
+          method: "post",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${brass_personal_access_token}`,
+          },
+          data,
+        })
+          .then((reslt) => {
+            LOGS.update(r._id, { data: reslt.data });
+          })
+          .catch((e) => {
+            LOGS.update(r._id, { e: JSON.stringify(e), err: true });
+          });
     } catch (e) {
       LOGS.update(r._id, { e: JSON.stringify(e), err: "meme" });
     }
@@ -997,25 +889,25 @@ const confirm_offer = async (req, res) => {
     profits: { $inc: cost * 0.01 },
   });
 
-  let wallet_update = WALLETS.update(seller_wallet, {
+  WALLETS.update(seller_wallet, {
     naira: { $inc: cost * COMMISSION },
   });
 
   if (seller) {
-    let seller = seller._id ? seller : USERS.readone(seller);
+    let selle = seller._id ? seller : USERS.readone(seller);
     send_mail({
-      recipient: seller.email,
-      recipient_name: seller.username,
+      recipient: selle.email,
+      recipient_name: selle.username,
       subject: "[Udara Links] Transaction Completed",
       sender: "signup@udaralinksapp.online",
       sender_name: "Udara Links",
       sender_pass: "ogpQfn9mObWD",
       html: tx_receipts({
-        user: seller,
+        user: selle,
         tx: {
           title: "Amount",
           value: cost,
-          fee: cost * COMMISSION,
+          fee: cost * 0.01,
           created: Date.now(),
           preamble: "credited to",
         },
@@ -1049,8 +941,8 @@ const confirm_offer = async (req, res) => {
   });
   create_transaction({
     title: "offer confirmed",
-    wallet: wallet_update && wallet_update._id,
-    user: wallet_update.user,
+    wallet: sell_wallet._id,
+    user: sell_wallet.user,
     from_value: cost,
     reference_number,
     data: { offer, onsale, party: new Array(seller, offer_.user._id) },
@@ -1065,8 +957,8 @@ const confirm_offer = async (req, res) => {
       seller,
       transaction: create_transaction({
         title: "transaction fee",
-        wallet: wallet_update && wallet_update._id,
-        user: wallet_update.user,
+        wallet: sell_wallet._id,
+        user: sell_wallet.user,
         from_value: cost * 0.01,
         debit: true,
         data: { offer, onsale, party: new Array(seller, offer_.user._id) },
@@ -1780,11 +1672,9 @@ export {
   disputes,
   refund_buyer,
   buyer_offers,
-  paga_deposit,
   add_fiat_account,
   new_notification,
   platform_bank_account,
-  request_account_details,
   previous_sales,
   resolve_bank_account_name,
 };

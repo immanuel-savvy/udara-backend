@@ -77,9 +77,7 @@ import {
   dispute,
   disputes,
   refund_buyer,
-  paga_deposit,
   add_fiat_account,
-  request_account_details,
   add_bank_account,
   remove_bank_account,
   bank_accounts,
@@ -182,10 +180,6 @@ const routes = (app) => {
   app.post("/contact_admin", contact_admin);
   app.post("/ready_for_transaction", ready_for_transaction);
   app.post("/not_ready_for_transaction", not_ready_for_transaction);
-
-  // Paga Web hook
-  app.post("/paga_deposit/:user", paga_deposit);
-  app.post("/request_account_details", request_account_details);
 
   // Socket webpoints
   app.post("/on_chat", on_chat);
