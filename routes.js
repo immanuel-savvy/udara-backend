@@ -23,6 +23,7 @@ import {
   update_phone,
   update_user_data,
   user_by_email,
+  user_emails,
   user_refresh,
   verify_account,
   verify_email,
@@ -112,6 +113,7 @@ const routes = (app) => {
   app.get("/conversion_rates", get_conversion_rates);
   app.get("/get_banks", get_banks);
   app.get("/admins", admins);
+  app.get("/user_emails", user_emails);
   app.get("/wallet/:wallet_id", wallet);
   app.get("/user_by_email/:email", user_by_email);
   app.get("/paycheck_bank_account", paycheck_bank_account);

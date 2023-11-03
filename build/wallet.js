@@ -326,7 +326,7 @@ var make_brass_payment = /*#__PURE__*/function () {
             (0, _entry.send_mail)({
               recipient: user.email,
               recipient_name: user.username,
-              subject: "[Udara Links] Debit Alert",
+              subject: "Debit Alert",
               sender: "signup@udaralinksapp.online",
               sender_name: "Udara Links",
               sender_pass: "ogpQfn9mObWD",
@@ -728,6 +728,8 @@ var dislike_sale = function dislike_sale(req, res) {
 exports.dislike_sale = dislike_sale;
 
 var make_offer = function make_offer(req, res) {
+  var _onsale_res$seller, _USERS$readone;
+
   var _req$body12 = req.body,
       amount = _req$body12.amount,
       offer_rate = _req$body12.offer_rate,
@@ -770,7 +772,29 @@ var make_offer = function make_offer(req, res) {
     not_ready_for_transaction: true
   });
 
-  new_notification(onsale_res.seller, "new offer from ".concat(_ds_conn.USERS.readone(user).username), new Array(onsale, offer._id), {
+  var seller_ = _ds_conn.USERS.readone((onsale_res === null || onsale_res === void 0 ? void 0 : (_onsale_res$seller = onsale_res.seller) === null || _onsale_res$seller === void 0 ? void 0 : _onsale_res$seller._id) || (onsale_res === null || onsale_res === void 0 ? void 0 : onsale_res.seller));
+
+  (0, _entry.send_mail)({
+    recipient: seller_.email,
+    recipient_name: seller_.username,
+    subject: "New Offer",
+    sender: "signup@udaralinksapp.online",
+    sender_name: "Udara Links",
+    sender_pass: "ogpQfn9mObWD",
+    html: (0, _email.offer_state_email)({
+      user: seller_,
+      offer: _ds_conn.OFFERS.readone({
+        onsale: onsale,
+        _id: offer._id
+      }),
+      misc: {
+        preamble: "New Offer on your currency with details below.",
+        created: Date.now(),
+        state_definition: "Offer is awaiting acceptance from seller before transfering funds to escrow"
+      }
+    })
+  });
+  new_notification(onsale_res.seller, "new offer from ".concat((_USERS$readone = _ds_conn.USERS.readone(user)) === null || _USERS$readone === void 0 ? void 0 : _USERS$readone.username), new Array(onsale, offer._id), {
     currency: currency
   });
   res.json({
@@ -962,6 +986,25 @@ var accept_offer = function accept_offer(req, res) {
     }
   });
 
+  var user_ = _ds_conn.USERS.readone(result.user);
+
+  (0, _entry.send_mail)({
+    recipient: user_.email,
+    recipient_name: user_.username,
+    subject: "Offer Accepted",
+    sender: "signup@udaralinksapp.online",
+    sender_name: "Udara Links",
+    sender_pass: "ogpQfn9mObWD",
+    html: (0, _email.offer_state_email)({
+      user: user_,
+      offer: result,
+      misc: {
+        preamble: "Your offer with details below has been <b>Accepted</b> by Seller. ",
+        created: Date.now(),
+        state_definition: "Offer accepted by seller, awaiting buyer to transfer funds to escrow account"
+      }
+    })
+  });
   new_notification(result.user, "offer accepted by ".concat(_ds_conn.USERS.readone(onsale_res.seller).username), new Array(onsale, offer), {
     currency: result.currency
   });
@@ -1005,6 +1048,25 @@ var decline_offer = function decline_offer(req, res) {
     }
   });
 
+  var user_ = _ds_conn.USERS.readone(result.user);
+
+  (0, _entry.send_mail)({
+    recipient: user_.email,
+    recipient_name: user_.username,
+    subject: "Offer Declined",
+    sender: "signup@udaralinksapp.online",
+    sender_name: "Udara Links",
+    sender_pass: "ogpQfn9mObWD",
+    html: (0, _email.offer_state_email)({
+      user: user_,
+      offer: result,
+      misc: {
+        preamble: "Your offer with details below has been <b>Declined</b> by Seller. ",
+        created: Date.now(),
+        state_definition: "Offer placed by buyer was rejected by seller"
+      }
+    })
+  });
   new_notification(result.user, "offer declined by ".concat(_ds_conn.USERS.readone(onsale_res.seller).username), new Array(onsale, offer), {
     currency: result.currency
   });
@@ -1052,6 +1114,8 @@ var remove_offer = function remove_offer(req, res) {
 exports.remove_offer = remove_offer;
 
 var fulfil_offer = function fulfil_offer(req, res) {
+  var _offer_$user;
+
   var _req$body21 = req.body,
       offer = _req$body21.offer,
       buyer = _req$body21.buyer,
@@ -1086,6 +1150,27 @@ var fulfil_offer = function fulfil_offer(req, res) {
 
   forward_message(seller, buyer, offer, {
     status: "awaiting confirmation"
+  });
+
+  var user_ = _ds_conn.USERS.readone(((_offer_$user = offer_.user) === null || _offer_$user === void 0 ? void 0 : _offer_$user._id) || offer_.user);
+
+  (0, _entry.send_mail)({
+    recipient: user_.email,
+    recipient_name: user_.username,
+    subject: "Offer Awaiting-Confirmation",
+    sender: "signup@udaralinksapp.online",
+    sender_name: "Udara Links",
+    sender_pass: "ogpQfn9mObWD",
+    html: (0, _email.offer_state_email)({
+      user: user_,
+      offer: offer_,
+      misc: {
+        preamble: "Your offer with details below has been said to be<b>Fulfilled</b> by Seller. ",
+        created: Date.now(),
+        state_definition: "Seller has claimed to fulfil transaction outside the app, and is now awaiting buyer to confirm the transaction",
+        filename: filename
+      }
+    })
   });
   new_notification(buyer, "Fulfilled offer by ".concat(_ds_conn.USERS.readone(onsale_res.seller).username), new Array(onsale, offer), {
     currency: offer_.currency
@@ -1177,7 +1262,7 @@ var deposit_to_escrow = function deposit_to_escrow(req, res) {
     (0, _entry.send_mail)({
       recipient: user.email,
       recipient_name: user.username,
-      subject: "[Udara Links] Deposit to Escrow",
+      subject: "Deposit to Escrow",
       sender: "signup@udaralinksapp.online",
       sender_name: "Udara Links",
       sender_pass: "ogpQfn9mObWD",
@@ -1194,6 +1279,26 @@ var deposit_to_escrow = function deposit_to_escrow(req, res) {
     });
     user = user._id || user;
   }
+
+  var user_ = _ds_conn.USERS.readone(seller);
+
+  (0, _entry.send_mail)({
+    recipient: user_.email,
+    recipient_name: user_.username,
+    subject: "Offer In-Escrow",
+    sender: "signup@udaralinksapp.online",
+    sender_name: "Udara Links",
+    sender_pass: "ogpQfn9mObWD",
+    html: (0, _email.offer_state_email)({
+      user: user_,
+      offer: offer_,
+      misc: {
+        preamble: "Value for your currency in the market has been deposited into Escrow by Buyer. ",
+        created: Date.now(),
+        state_definition: "Buyer already sent his funds to escrow wallet, awaiting seller to fulfil the transaction stated by the offer"
+      }
+    })
+  });
 
   _ds_conn.WALLETS.update(platform_wallet, {
     naira: {
@@ -1287,7 +1392,7 @@ exports.deposit_to_escrow = deposit_to_escrow;
 
 var confirm_offer = /*#__PURE__*/function () {
   var _ref7 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee5(req, res) {
-    var _req$body23, offer, onsale, seller, seller_wallet, offer_, cost, sell_wallet, reference_number, p_wallet, r, bal, data, selle;
+    var _req$body23, offer, onsale, seller, seller_wallet, offer_, cost, sell_wallet, reference_number, p_wallet, r, bal, data, seller_;
 
     return _regeneratorRuntime().wrap(function _callee5$(_context5) {
       while (1) switch (_context5.prev = _context5.next) {
@@ -1429,16 +1534,16 @@ var confirm_offer = /*#__PURE__*/function () {
           });
 
           if (seller) {
-            selle = seller._id ? seller : _ds_conn.USERS.readone(seller);
+            seller_ = seller._id ? seller : _ds_conn.USERS.readone(seller);
             (0, _entry.send_mail)({
-              recipient: selle.email,
-              recipient_name: selle.username,
-              subject: "[Udara Links] Transaction Completed",
+              recipient: seller_.email,
+              recipient_name: seller_.username,
+              subject: "Transaction Completed",
               sender: "signup@udaralinksapp.online",
               sender_name: "Udara Links",
               sender_pass: "ogpQfn9mObWD",
               html: (0, _email.tx_receipts)({
-                user: selle,
+                user: seller_,
                 tx: {
                   title: "Amount",
                   value: cost,
@@ -1574,7 +1679,7 @@ var request_time_extension = function request_time_extension(req, res) {
 exports.request_time_extension = request_time_extension;
 
 var offer_in_dispute = function offer_in_dispute(req, res) {
-  var _ONSALE$update;
+  var _ONSALE$update, _USERS$readone2, _USERS$readone3;
 
   var _req$body26 = req.body,
       offer = _req$body26.offer,
@@ -1623,6 +1728,24 @@ var offer_in_dispute = function offer_in_dispute(req, res) {
     $inc: 1
   }), _ONSALE$update));
 
+  var b_email = (_USERS$readone2 = _ds_conn.USERS.readone(offer_.user._id || offer_.user)) === null || _USERS$readone2 === void 0 ? void 0 : _USERS$readone2.email;
+  var s_email = (_USERS$readone3 = _ds_conn.USERS.readone(offer_.seller)) === null || _USERS$readone3 === void 0 ? void 0 : _USERS$readone3.email;
+  (0, _entry.send_mail)({
+    to: "".concat(b_email, ",").concat(s_email),
+    subject: "Offer In-Dispute",
+    sender: "signup@udaralinksapp.online",
+    sender_name: "Udara Links",
+    sender_pass: "ogpQfn9mObWD",
+    html: (0, _email.offer_state_email)({
+      user: {},
+      offer: offer_,
+      misc: {
+        preamble: "Offer has been flagged as <b>Disputed</b> by ".concat(initiator === seller ? "Seller" : "Buyer", "."),
+        created: Date.now(),
+        state_definition: "A disagreement was reached on the app based on the transactions."
+      }
+    })
+  });
   if (result) res.json({
     ok: true,
     message: "dispute raised",
@@ -1796,7 +1919,7 @@ var refund_buyer = function refund_buyer(req, res) {
     (0, _entry.send_mail)({
       recipient: user.email,
       recipient_name: user.username,
-      subject: "[Udara Links] Transaction Reverted",
+      subject: "Transaction Reverted",
       sender: "signup@udaralinksapp.online",
       sender_name: "Udara Links",
       sender_pass: "ogpQfn9mObWD",
@@ -2181,7 +2304,7 @@ var brass_callback = function brass_callback(req, res) {
         (0, _entry.send_mail)({
           recipient: _user.email,
           recipient_name: _user.username,
-          subject: "[Udara Links] Credit Alert",
+          subject: "Credit Alert",
           sender: "signup@udaralinksapp.online",
           sender_name: "Udara Links",
           sender_pass: "ogpQfn9mObWD",
@@ -2286,7 +2409,7 @@ var brass_callback = function brass_callback(req, res) {
           (0, _entry.send_mail)({
             recipient: _user3.email,
             recipient_name: _user3.username,
-            subject: "[Udara Links] Withdrawal Failed",
+            subject: "Withdrawal Failed",
             sender: "signup@udaralinksapp.online",
             sender_name: "Udara Links",
             sender_pass: "ogpQfn9mObWD",
@@ -2378,7 +2501,7 @@ var print_transactions = function print_transactions(req, res) {
 
   (0, _entry.send_mail)({
     to: admin,
-    subject: "[Udara Links] Transaction Report Data",
+    subject: "Transaction Report Data",
     sender: "signup@udaralinksapp.online",
     sender_name: "Udara Links",
     sender_pass: "signupudaralinks",

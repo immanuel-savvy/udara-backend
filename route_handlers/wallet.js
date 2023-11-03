@@ -27,7 +27,7 @@ import {
   operating_currencies,
   send_mail,
 } from "./entry";
-import { transactions_report, tx_receipts } from "./email";
+import { offer_state_email, transactions_report, tx_receipts } from "./email";
 
 const COMMISSION = 0.99;
 
@@ -215,7 +215,7 @@ const make_brass_payment = async (
       send_mail({
         recipient: user.email,
         recipient_name: user.username,
-        subject: "[Udara Links] Debit Alert",
+        subject: "Debit Alert",
         sender: "signup@udaralinksapp.online",
         sender_name: "Udara Links",
         sender_pass: "ogpQfn9mObWD",
@@ -470,9 +470,29 @@ const make_offer = (req, res) => {
     { pending: { $inc: 1 }, not_ready_for_transaction: true }
   );
 
+  let seller_ = USERS.readone(onsale_res?.seller?._id || onsale_res?.seller);
+
+  send_mail({
+    recipient: seller_.email,
+    recipient_name: seller_.username,
+    subject: "New Offer",
+    sender: "signup@udaralinksapp.online",
+    sender_name: "Udara Links",
+    sender_pass: "ogpQfn9mObWD",
+    html: offer_state_email({
+      user: seller_,
+      offer: OFFERS.readone({ onsale, _id: offer._id }),
+      misc: {
+        preamble: "New Offer on your currency with details below.",
+        created: Date.now(),
+        state_definition: `Offer is awaiting acceptance from seller before transfering funds to escrow`,
+      },
+    }),
+  });
+
   new_notification(
     onsale_res.seller,
-    `new offer from ${USERS.readone(user).username}`,
+    `new offer from ${USERS.readone(user)?.username}`,
     new Array(onsale, offer._id),
     { currency }
   );
@@ -580,6 +600,27 @@ const accept_offer = (req, res) => {
     { pending: { $dec: 1 }, accepted: { $inc: 1 } }
   );
 
+  let user_ = USERS.readone(result.user);
+
+  send_mail({
+    recipient: user_.email,
+    recipient_name: user_.username,
+    subject: "Offer Accepted",
+    sender: "signup@udaralinksapp.online",
+    sender_name: "Udara Links",
+    sender_pass: "ogpQfn9mObWD",
+    html: offer_state_email({
+      user: user_,
+      offer: result,
+      misc: {
+        preamble:
+          "Your offer with details below has been <b>Accepted</b> by Seller. ",
+        created: Date.now(),
+        state_definition: `Offer accepted by seller, awaiting buyer to transfer funds to escrow account`,
+      },
+    }),
+  });
+
   new_notification(
     result.user,
     `offer accepted by ${USERS.readone(onsale_res.seller).username}`,
@@ -605,6 +646,27 @@ const decline_offer = (req, res) => {
     { _id: onsale, currency: result.currency },
     { pending: { $dec: 1 }, declined: { $inc: 1 } }
   );
+
+  let user_ = USERS.readone(result.user);
+
+  send_mail({
+    recipient: user_.email,
+    recipient_name: user_.username,
+    subject: "Offer Declined",
+    sender: "signup@udaralinksapp.online",
+    sender_name: "Udara Links",
+    sender_pass: "ogpQfn9mObWD",
+    html: offer_state_email({
+      user: user_,
+      offer: result,
+      misc: {
+        preamble:
+          "Your offer with details below has been <b>Declined</b> by Seller. ",
+        created: Date.now(),
+        state_definition: `Offer placed by buyer was rejected by seller`,
+      },
+    }),
+  });
 
   new_notification(
     result.user,
@@ -653,6 +715,28 @@ const fulfil_offer = (req, res) => {
   );
 
   forward_message(seller, buyer, offer, { status: "awaiting confirmation" });
+
+  let user_ = USERS.readone(offer_.user?._id || offer_.user);
+
+  send_mail({
+    recipient: user_.email,
+    recipient_name: user_.username,
+    subject: "Offer Awaiting-Confirmation",
+    sender: "signup@udaralinksapp.online",
+    sender_name: "Udara Links",
+    sender_pass: "ogpQfn9mObWD",
+    html: offer_state_email({
+      user: user_,
+      offer: offer_,
+      misc: {
+        preamble:
+          "Your offer with details below has been said to be<b>Fulfilled</b> by Seller. ",
+        created: Date.now(),
+        state_definition: `Seller has claimed to fulfil transaction outside the app, and is now awaiting buyer to confirm the transaction`,
+        filename,
+      },
+    }),
+  });
 
   new_notification(
     buyer,
@@ -707,7 +791,7 @@ const deposit_to_escrow = (req, res) => {
     send_mail({
       recipient: user.email,
       recipient_name: user.username,
-      subject: "[Udara Links] Deposit to Escrow",
+      subject: "Deposit to Escrow",
       sender: "signup@udaralinksapp.online",
       sender_name: "Udara Links",
       sender_pass: "ogpQfn9mObWD",
@@ -725,6 +809,26 @@ const deposit_to_escrow = (req, res) => {
 
     user = user._id || user;
   }
+
+  let user_ = USERS.readone(seller);
+  send_mail({
+    recipient: user_.email,
+    recipient_name: user_.username,
+    subject: "Offer In-Escrow",
+    sender: "signup@udaralinksapp.online",
+    sender_name: "Udara Links",
+    sender_pass: "ogpQfn9mObWD",
+    html: offer_state_email({
+      user: user_,
+      offer: offer_,
+      misc: {
+        preamble:
+          "Value for your currency in the market has been deposited into Escrow by Buyer. ",
+        created: Date.now(),
+        state_definition: `Buyer already sent his funds to escrow wallet, awaiting seller to fulfil the transaction stated by the offer`,
+      },
+    }),
+  });
 
   WALLETS.update(platform_wallet, { naira: { $inc: cost } });
 
@@ -894,16 +998,16 @@ const confirm_offer = async (req, res) => {
   });
 
   if (seller) {
-    let selle = seller._id ? seller : USERS.readone(seller);
+    let seller_ = seller._id ? seller : USERS.readone(seller);
     send_mail({
-      recipient: selle.email,
-      recipient_name: selle.username,
-      subject: "[Udara Links] Transaction Completed",
+      recipient: seller_.email,
+      recipient_name: seller_.username,
+      subject: "Transaction Completed",
       sender: "signup@udaralinksapp.online",
       sender_name: "Udara Links",
       sender_pass: "ogpQfn9mObWD",
       html: tx_receipts({
-        user: selle,
+        user: seller_,
         tx: {
           title: "Amount",
           value: cost,
@@ -1032,6 +1136,28 @@ const offer_in_dispute = (req, res) => {
     { [prior_offer_status]: { $dec: 1 }, in_dispute: { $inc: 1 } }
   );
 
+  let b_email = USERS.readone(offer_.user._id || offer_.user)?.email;
+  let s_email = USERS.readone(offer_.seller)?.email;
+
+  send_mail({
+    to: `${b_email},${s_email}`,
+    subject: "Offer In-Dispute",
+    sender: "signup@udaralinksapp.online",
+    sender_name: "Udara Links",
+    sender_pass: "ogpQfn9mObWD",
+    html: offer_state_email({
+      user: {},
+      offer: offer_,
+      misc: {
+        preamble: `Offer has been flagged as <b>Disputed</b> by ${
+          initiator === seller ? "Seller" : "Buyer"
+        }.`,
+        created: Date.now(),
+        state_definition: `A disagreement was reached on the app based on the transactions.`,
+      },
+    }),
+  });
+
   if (result)
     res.json({
       ok: true,
@@ -1136,7 +1262,7 @@ const refund_buyer = (req, res) => {
     send_mail({
       recipient: user.email,
       recipient_name: user.username,
-      subject: "[Udara Links] Transaction Reverted",
+      subject: "Transaction Reverted",
       sender: "signup@udaralinksapp.online",
       sender_name: "Udara Links",
       sender_pass: "ogpQfn9mObWD",
@@ -1408,7 +1534,7 @@ const brass_callback = (req, res) => {
         send_mail({
           recipient: user.email,
           recipient_name: user.username,
-          subject: "[Udara Links] Credit Alert",
+          subject: "Credit Alert",
           sender: "signup@udaralinksapp.online",
           sender_name: "Udara Links",
           sender_pass: "ogpQfn9mObWD",
@@ -1513,7 +1639,7 @@ const brass_callback = (req, res) => {
           send_mail({
             recipient: user.email,
             recipient_name: user.username,
-            subject: "[Udara Links] Withdrawal Failed",
+            subject: "Withdrawal Failed",
             sender: "signup@udaralinksapp.online",
             sender_name: "Udara Links",
             sender_pass: "ogpQfn9mObWD",
@@ -1609,7 +1735,7 @@ const print_transactions = (req, res) => {
 
   send_mail({
     to: admin,
-    subject: "[Udara Links] Transaction Report Data",
+    subject: "Transaction Report Data",
     sender: "signup@udaralinksapp.online",
     sender_name: "Udara Links",
     sender_pass: "signupudaralinks",

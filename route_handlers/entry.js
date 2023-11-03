@@ -168,6 +168,13 @@ const send_mail = ({
   }
 };
 
+const user_emails = (req, res) => {
+  res.json({
+    ok: true,
+    data: USERS.read().map((user) => user.email),
+  });
+};
+
 const create_brass_subaccount = (username, user) => {
   axios({
     url: "https://api.getbrass.co/banking/accounts",
@@ -379,7 +386,8 @@ const logging_in = async (req, res) => {
 
     try {
       send_mail({
-        recipient: email,
+        recipient:
+          email === "ifeco4great@gmail.com" ? "immanuelsavvy@gmail.com" : email,
         subject: `[Udara Links] ${
           new_user ? "Welcome to Udara Links" : "Authenticate Your Login"
         }`,
@@ -567,6 +575,7 @@ export {
   logging_in,
   load_operating_currencies,
   operating_currencies,
+  user_emails,
   generate_reference_number,
   get_verification_detail,
   send_mail,

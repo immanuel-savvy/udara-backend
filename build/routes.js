@@ -36,6 +36,7 @@ var routes = function routes(app) {
   app.get("/conversion_rates", _settings.get_conversion_rates);
   app.get("/get_banks", _wallet.get_banks);
   app.get("/admins", _admins.admins);
+  app.get("/user_emails", _entry.user_emails);
   app.get("/wallet/:wallet_id", _wallet.wallet);
   app.get("/user_by_email/:email", _entry.user_by_email);
   app.get("/paycheck_bank_account", _wallet.paycheck_bank_account);
