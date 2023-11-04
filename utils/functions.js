@@ -101,6 +101,15 @@ const commalise_figures = (value, no_fixed) => {
     : `${commalised}${decimal.slice(decimal.indexOf("."))}`;
 };
 
+const time_string = (timestamp) => {
+  let date = new Date(timestamp);
+
+  return `${date.getHours().toString().padStart(2, "0")}:${date
+    .getMinutes()
+    .toString()
+    .padStart(2, "0")}`;
+};
+
 export {
   generate_random_string,
   date_string,
@@ -108,4 +117,5 @@ export {
   commalise_figures,
   email_regex,
   phone_regex,
+  time_string,
 };

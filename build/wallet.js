@@ -511,8 +511,7 @@ var place_sale = function place_sale(req, res) {
       seller = _req$body7.seller,
       flag = _req$body7.flag,
       minimum_sell_value = _req$body7.minimum_sell_value;
-
-  var result = _ds_conn.ONSALE.write({
+  var onsale = {
     currency: currency,
     offer_terms: offer_terms,
     rate: rate,
@@ -522,8 +521,32 @@ var place_sale = function place_sale(req, res) {
     alphabetic_name: alphabetic_name,
     flag: flag,
     minimum_sell_value: minimum_sell_value
-  });
+  };
 
+  var result = _ds_conn.ONSALE.write(onsale);
+
+  seller = _ds_conn.USERS.readone(seller);
+  (0, _entry.send_mail)({
+    recipient: "info@udaralinks.com",
+    recipient_name: "Admin",
+    subject: "New Offer",
+    sender: "signup@udaralinksapp.online",
+    sender_name: "Udara Links",
+    sender_pass: "ogpQfn9mObWD",
+    html: (0, _email.offer_state_email)({
+      user: {
+        username: "Admin"
+      },
+      offer: _objectSpread(_objectSpread({}, onsale), {}, {
+        state: ""
+      }),
+      misc: {
+        preamble: "New Offer has been placed in the market by ".concat(seller.username, " [").concat(seller.email, "]"),
+        created: Date.now(),
+        state_definition: ""
+      }
+    })
+  });
   res.json({
     ok: true,
     message: "placed sale",

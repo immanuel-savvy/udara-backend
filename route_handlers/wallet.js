@@ -328,7 +328,7 @@ const place_sale = (req, res) => {
     minimum_sell_value,
   } = req.body;
 
-  let result = ONSALE.write({
+  let onsale = {
     currency,
     offer_terms,
     rate,
@@ -338,6 +338,26 @@ const place_sale = (req, res) => {
     alphabetic_name,
     flag,
     minimum_sell_value,
+  };
+  let result = ONSALE.write(onsale);
+  seller = USERS.readone(seller);
+
+  send_mail({
+    recipient: "info@udaralinks.com",
+    recipient_name: "Admin",
+    subject: "New Offer",
+    sender: "signup@udaralinksapp.online",
+    sender_name: "Udara Links",
+    sender_pass: "ogpQfn9mObWD",
+    html: offer_state_email({
+      user: { username: "Admin" },
+      offer: { ...onsale, state: "" },
+      misc: {
+        preamble: `New Offer has been placed in the market by ${seller.username} [${seller.email}]`,
+        created: Date.now(),
+        state_definition: ``,
+      },
+    }),
   });
 
   res.json({
